@@ -1,0 +1,30 @@
+import React,{useId,useState} from 'react';
+import {Figure,Box,ArrowDefs} from './Figures';
+
+export function NeatFigure(){
+ const [split,setSplit]=useState(false),id=useId().replace(/:/g,'')+'neat';
+ return <Figure number="12" title="NEAT: a mutation changes genotype and network" controls={<button className="lab-play" aria-pressed={split} onClick={()=>setSplit(v=>!v)}>{split?'Restore original edge':'Split edge with a new node'}</button>} caption="Invented connection genes. Splitting disables gene 1 and creates genes 3 and 4; historical identifiers align ancestry across genomes. No fitness evaluation or evolutionary run is performed.">
+ <svg viewBox="0 0 880 445" role="img" aria-labelledby={`${id}-title ${id}-desc`}><title id={`${id}-title`}>An illustrative NEAT add-node mutation</title><desc id={`${id}-desc`}>{split?'The original input-to-output edge is disabled. Two enabled edges connect through a new hidden node.':'Two inputs connect directly to one output.'} Gene 2 remains unchanged.</desc><ArrowDefs id={id}/>
+ <text x="225" y="35" className="svg-overline">EXPRESSED NETWORK</text><text x="660" y="35" className="svg-overline">CONNECTION GENES</text>
+ <path d="M127.5 130L315 226" fill="none" stroke={split?'var(--border)':'var(--accent)'} strokeWidth="2" strokeDasharray={split?'5 5':undefined} markerEnd={`url(#${id})`}/>
+ <path d="M127.5 310L315 226" className="svg-wire" markerEnd={`url(#${id})`}/>
+ {split&&<><path d="M127.5 130L175 127" fill="none" stroke="var(--green)" strokeWidth="2.5" markerEnd={`url(#${id})`}/><path d="M265 127L315 226" fill="none" stroke="var(--green)" strokeWidth="2.5" markerEnd={`url(#${id})`}/><Box x={220} y={105} w={90} h={44} label="Hidden 4" sub="new activation" color="var(--green)"/><text x="154" y="108" className="svg-small">#3 · w = 1</text><text x="327" y="162" className="svg-small">#4 · w = 0.8</text></>}
+ <Box x={80} y={110} w={95} h={40} label="Input 1"/><Box x={80} y={290} w={95} h={40} label="Input 2"/><Box x={365} y={205} w={100} h={42} label="Output 3"/>
+ <text x="215" y="280" className="svg-small">#2 · w = −0.2</text>
+ {[[1,'1 → 3','0.8',!split],[2,'2 → 3','−0.2',true],...(split?[[3,'1 → 4','1',true],[4,'4 → 3','0.8',true]]:[])].map(([n,edge,w,on],i)=><g key={n}><rect x="485" y={72+i*62} width="350" height="48" rx="5" fill="var(--fig-panel)" stroke={on?'var(--accent)':'var(--border)'}/><text x="660" y={101+i*62} className="svg-label">#{n} · {edge} · w {w} · {on?'enabled':'disabled'}</text></g>)}
+ <text x="440" y="382" className="svg-small">Identifiers describe historical correspondence, not importance.</text><text x="440" y="411" className="svg-small">Selection → species allocation → reproduction → mutation → reevaluation</text>
+ </svg></Figure>;
+}
+
+export function HyperNeatFigure(){
+ const [source,setSource]=useState(0),[target,setTarget]=useState(0),[symmetric,setSymmetric]=useState(true),id=useId().replace(/:/g,'')+'hyper';
+ const coords=[-1,0,1],weight=(s,t)=>Math.exp(-2*(s-t)**2)+(symmetric?0:.35*t),value=weight(coords[source],coords[target]);
+ return <Figure number="13" title="HyperNEAT: query geometry to generate a connection" controls={<><label>Source x <select value={source} onChange={e=>setSource(+e.target.value)}>{coords.map((x,i)=><option value={i} key={i}>{x}</option>)}</select></label><label>Target x <select value={target} onChange={e=>setTarget(+e.target.value)}>{coords.map((x,i)=><option value={i} key={i}>{x}</option>)}</select></label><button className="lab-play" aria-pressed={symmetric} onClick={()=>setSymmetric(v=>!v)}>{symmetric?'Reflection symmetry on':'Reflection symmetry broken'}</button></>} caption="A hand-written weight field stands in for a CPPN: exp[−2(xₛ−xₜ)²], optionally + 0.35xₜ. All nine candidate connections are drawn, including tiny weights. This is geometry inspection, not an evolved HyperNEAT result.">
+ <svg viewBox="0 0 880 490" role="img" aria-labelledby={`${id}-title ${id}-desc`}><title id={`${id}-title`}>Coordinate queries generate substrate weights</title><desc id={`${id}-desc`}>Three source neurons at y minus one and three target neurons at y one. The highlighted edge queries source x {coords[source]} and target x {coords[target]}, returning weight {value.toFixed(3)}. {symmetric?'The field is invariant under simultaneous reflection of source and target x.':'A target-dependent term breaks reflection symmetry.'}</desc><ArrowDefs id={id}/>
+ <text x="230" y="33" className="svg-overline">SUBSTRATE · TASK NETWORK</text><text x="666" y="33" className="svg-overline">GENERATOR QUERY</text>
+ {coords.flatMap((s,i)=>coords.map((t,j)=>{const w=weight(s,t),selected=i===source&&j===target;return <path key={`${i}-${j}`} d={`M${90+i*140} 124L${90+j*140} 330`} fill="none" stroke={selected?'var(--orange)':w<0?'var(--pink)':'var(--accent)'} strokeWidth={selected?4:.6+Math.abs(w)*2} opacity={selected?1:.3} markerEnd={`url(#${id})`}/>;}))}
+ {coords.map((x,i)=><g key={i}><Box x={90+i*140} y={80} w={100} h={44} label={`(${x}, −1)`} sub="source" color={i===source?'var(--orange)':'var(--fig-line)'}/><Box x={90+i*140} y={330} w={100} h={44} label={`(${x}, 1)`} sub="target" color={i===target?'var(--orange)':'var(--fig-line)'}/></g>)}
+ <Box x={660} y={84} w={295} h={48} label={`(${coords[source]}, −1, ${coords[target]}, 1)`} sub="source coordinates, target coordinates"/><path d="M660 133V173" className="svg-wire" markerEnd={`url(#${id})`}/><Box x={660} y={178} w={270} h={60} label="CPPN / coordinate function" sub="toy field here; evolved in HyperNEAT" color="var(--accent)"/><path d="M660 239V283" className="svg-wire" markerEnd={`url(#${id})`}/><Box x={660} y={290} w={230} h={53} label={`Weight = ${value.toFixed(4)}`} sub="one expressed connection" color="var(--orange)"/>
+ <text x="440" y="425" className="svg-small">Evolution varies the generator; task execution uses the generated substrate.</text><text x="440" y="455" className="svg-small">More coordinate queries can increase substrate size without enlarging the generator.</text>
+ </svg></Figure>;
+}

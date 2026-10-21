@@ -8,6 +8,8 @@ Browse a group, inspect a concise topic preview and its live visual, open the de
 
 New coverage includes **JEPA/I-JEPA/V-JEPA, video world models and latent planning, NEAT and HyperNEAT**. Every deep dive has a visual; most use detailed, interactive native SVG. The cache calculator and historical timeline are computational/reference visuals. All 33 original article URLs remain valid.
 
+![JEPA topic preview with an interactive vector diagram](docs/assets/topic-preview.jpg)
+
 ## Run locally
 
 Use Node.js 20.19+ or a compatible newer release:

@@ -1,0 +1,34 @@
+{
+  "name": "neural-atlas",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "An interactive, source-grounded research atlas of Transformers, learning algorithms and embodied intelligence.",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 4173",
+    "build": "node scripts/validate-content.mjs && vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "check": "node scripts/validate-content.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "manuscript": "node scripts/export-manuscript.mjs",
+    "check:visuals": "node scripts/validate-visuals.mjs"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "rehype-katex": "^7.0.1",
+    "rehype-highlight": "^7.0.2",
+    "katex": "^0.16.22",
+    "lucide-react": "^0.468.0"
+  },
+  "devDependencies": {
+    "vite": "^6.3.0",
+    "@vitejs/plugin-react": "^4.4.0"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}

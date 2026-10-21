@@ -1,0 +1,132 @@
+[
+  {
+    "id": "architecture",
+    "title": "Transformer mechanics",
+    "description": "Token states, attention, normalization and the training\u2013generation interface.",
+    "icon": "Layers",
+    "color": "blue",
+    "question": "What happens inside a Transformer block?",
+    "related": [
+      "sequence",
+      "systems",
+      "history"
+    ]
+  },
+  {
+    "id": "sequence",
+    "title": "Sequence architectures",
+    "description": "Routing, residual connectivity, recurrent depth and state-space alternatives.",
+    "icon": "Network",
+    "color": "green",
+    "question": "Where can a sequence model spend its computation?",
+    "related": [
+      "architecture",
+      "systems",
+      "generation"
+    ]
+  },
+  {
+    "id": "systems",
+    "title": "Efficient execution",
+    "description": "Cache state, attention kernels, sparsity, compression and decoding throughput.",
+    "icon": "Cpu",
+    "color": "green",
+    "question": "What makes a model cheaper to run?",
+    "related": [
+      "architecture",
+      "sequence",
+      "continual"
+    ]
+  },
+  {
+    "id": "multimodal",
+    "title": "Multimodal & predictive representations",
+    "description": "Modality interfaces, alignment, JEPA and predictive video representations.",
+    "icon": "ScanEye",
+    "color": "purple",
+    "question": "What should a representation preserve or predict?",
+    "related": [
+      "generation",
+      "learning",
+      "robotics"
+    ]
+  },
+  {
+    "id": "generation",
+    "title": "Generation & latent computation",
+    "description": "Diffusion, flow matching, soft prompts and computation in continuous spaces.",
+    "icon": "Orbit",
+    "color": "orange",
+    "question": "What changes when generation leaves the token-by-token loop?",
+    "related": [
+      "multimodal",
+      "sequence",
+      "robotics"
+    ]
+  },
+  {
+    "id": "learning",
+    "title": "Learning dynamics & credit assignment",
+    "description": "Backpropagation, local inference, predictive coding, biological constraints and continuous dynamics.",
+    "icon": "Activity",
+    "color": "pink",
+    "question": "How does a learning system assign credit?",
+    "related": [
+      "architecture",
+      "evolution",
+      "continual"
+    ]
+  },
+  {
+    "id": "evolution",
+    "title": "Neuroevolution & architecture search",
+    "description": "NEAT, historical markings, speciation and geometric encodings with HyperNEAT.",
+    "icon": "GitBranch",
+    "color": "orange",
+    "question": "Can we evolve the network and its connectivity?",
+    "related": [
+      "learning",
+      "robotics",
+      "history"
+    ]
+  },
+  {
+    "id": "continual",
+    "title": "Memory & adaptation",
+    "description": "Continual learning, external memory, test-time updates and verified self-improvement.",
+    "icon": "RefreshCw",
+    "color": "green",
+    "question": "What changes between interactions, and what persists?",
+    "related": [
+      "learning",
+      "systems",
+      "robotics"
+    ]
+  },
+  {
+    "id": "robotics",
+    "title": "Embodied intelligence",
+    "description": "Vision\u2013language\u2013action interfaces, action distributions and closed-loop evaluation.",
+    "icon": "Bot",
+    "color": "purple",
+    "question": "How do representations become actions in a changing world?",
+    "related": [
+      "multimodal",
+      "generation",
+      "continual"
+    ]
+  },
+  {
+    "id": "history",
+    "title": "Intellectual lineage",
+    "description": "Distributed representations, recurrence, attention, residual learning and language-model scaling.",
+    "icon": "History",
+    "color": "amber",
+    "question": "Which earlier ideas made these mechanisms possible?",
+    "related": [
+      "architecture",
+      "sequence",
+      "evolution"
+    ]
+  }
+]

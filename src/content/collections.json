@@ -1,0 +1,54 @@
+[
+  {
+    "id": "compute",
+    "title": "Where does the computation go?",
+    "description": "Compare attention, routed parameters, recurrent depth and the systems that execute them.",
+    "articles": [
+      "attention",
+      "mixture-of-experts",
+      "recurrent-depth",
+      "kv-cache",
+      "efficient-attention",
+      "state-space"
+    ]
+  },
+  {
+    "id": "prediction",
+    "title": "What is the model predicting?",
+    "description": "Contrast tokens, sensory observations, learned representations and future actions.",
+    "articles": [
+      "training-decoding",
+      "jepa",
+      "video-world-models",
+      "diffusion-flow",
+      "predictive-coding",
+      "action-models"
+    ]
+  },
+  {
+    "id": "change",
+    "title": "What can change in a learning system?",
+    "description": "Explore gradients, local activities, evolved topology and persistent memory.",
+    "articles": [
+      "backprop-biology",
+      "pc-alm",
+      "neat",
+      "hyperneat",
+      "continual-learning",
+      "memory-adaptation"
+    ]
+  },
+  {
+    "id": "control",
+    "title": "How does prediction become action?",
+    "description": "Connect representation learning to beliefs, planning, policies and external evaluation.",
+    "articles": [
+      "multimodal-fusion",
+      "video-world-models",
+      "active-inference",
+      "vla-foundations",
+      "action-models",
+      "robot-evaluation"
+    ]
+  }
+]

@@ -1,0 +1,1542 @@
+[
+  {
+    "slug": "residual-streams",
+    "category": "architecture",
+    "title": "The residual stream",
+    "subtitle": "One token. One evolving state.",
+    "abstract": "A precise account of the hidden vectors that persist through a decoder, and the operations that read and write them.",
+    "references": [
+      "transformer",
+      "resnet",
+      "layernorm",
+      "llama"
+    ],
+    "diagram": "residual",
+    "year": 2017,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "One width-d state per token",
+      "Attention mixes tokens; MLPs act by position",
+      "Residual lanes and attention heads are different axes"
+    ],
+    "tags": [
+      "Residual paths",
+      "Token states",
+      "Pre-LN",
+      "Post-LN"
+    ],
+    "related": [
+      {
+        "slug": "attention",
+        "reason": "Cross-token communication"
+      },
+      {
+        "slug": "normalization-position",
+        "reason": "Normalization inside the block"
+      },
+      {
+        "slug": "hyper-connections",
+        "reason": "Extend the residual topology"
+      },
+      {
+        "slug": "resnet-lineage",
+        "reason": "Trace the architectural influence"
+      }
+    ]
+  },
+  {
+    "slug": "attention",
+    "category": "architecture",
+    "title": "Attention as content-addressed computation",
+    "subtitle": "Queries, keys, values\u2014and the mask.",
+    "abstract": "Derive one attention head, inspect exactly which token can read which other token, and distinguish weights from explanations.",
+    "references": [
+      "transformer",
+      "bahdanau"
+    ],
+    "diagram": "attention",
+    "year": 2017,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Queries select from keys; values carry content",
+      "A mask specifies permitted reads",
+      "Attention weights are input-dependent"
+    ],
+    "tags": [
+      "Self-attention",
+      "Cross-attention",
+      "Causal masks",
+      "QKV"
+    ],
+    "related": [
+      {
+        "slug": "residual-streams",
+        "reason": "Place attention inside the block"
+      },
+      {
+        "slug": "efficient-attention",
+        "reason": "Compute the same or a sparser graph"
+      },
+      {
+        "slug": "multimodal-fusion",
+        "reason": "Attend across modality boundaries"
+      }
+    ]
+  },
+  {
+    "slug": "normalization-position",
+    "category": "architecture",
+    "title": "Normalization, position & gated MLPs",
+    "subtitle": "Three distinct jobs inside a block.",
+    "abstract": "Separate state conditioning, positional geometry, and feature transformation in a contemporary decoder.",
+    "references": [
+      "layernorm",
+      "rmsnorm",
+      "rope",
+      "swiglu",
+      "llama"
+    ],
+    "diagram": "normalization-position",
+    "year": 2023,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "LN and RMSNorm normalize features per token",
+      "Position enters through distinct encodings",
+      "Gated MLPs change the feature transformation"
+    ],
+    "tags": [
+      "LayerNorm",
+      "RMSNorm",
+      "RoPE",
+      "SwiGLU",
+      "Position encoding"
+    ],
+    "related": [
+      {
+        "slug": "residual-streams",
+        "reason": "Compare pre-norm and post-norm paths"
+      },
+      {
+        "slug": "attention",
+        "reason": "Inspect position-sensitive interactions"
+      },
+      {
+        "slug": "gpt-scaling",
+        "reason": "See how design choices combine"
+      }
+    ]
+  },
+  {
+    "slug": "training-decoding",
+    "category": "architecture",
+    "title": "Training, prefill & decoding",
+    "subtitle": "The same weights, different computation schedules.",
+    "abstract": "Understand teacher forcing, shifted targets and why inference becomes sequential even when training is parallel.",
+    "references": [
+      "transformer",
+      "gpt",
+      "instruct",
+      "dpo"
+    ],
+    "diagram": "training-decoding",
+    "year": 2018,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Teacher forcing scores many causal targets in parallel",
+      "Prefill creates state; decoding extends it",
+      "SFT, RLHF and DPO change training procedures"
+    ],
+    "tags": [
+      "Next-token prediction",
+      "Teacher forcing",
+      "Prefill",
+      "SFT",
+      "RLHF",
+      "DPO"
+    ],
+    "related": [
+      {
+        "slug": "kv-cache",
+        "reason": "Reuse inference state"
+      },
+      {
+        "slug": "multimodal-objectives",
+        "reason": "Compare training objectives"
+      },
+      {
+        "slug": "gpt-scaling",
+        "reason": "Connect objectives to scaling"
+      }
+    ]
+  },
+  {
+    "slug": "distributed-representations",
+    "category": "history",
+    "title": "From symbols to distributed representations",
+    "subtitle": "Hinton\u2019s family relations, then neural language models.",
+    "abstract": "Trace the move from discrete identifiers to learned continuous features without claiming that vector geometry is symbolic logic.",
+    "references": [
+      "hinton",
+      "backprop",
+      "bengio"
+    ],
+    "diagram": "distributed-representations",
+    "year": 1986,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Learned vectors replace isolated symbol identities",
+      "Distributed codes share statistical structure",
+      "Embedding geometry depends on the objective"
+    ],
+    "tags": [
+      "Embeddings",
+      "Distributed representation",
+      "Neural language models"
+    ],
+    "related": [
+      {
+        "slug": "residual-streams",
+        "reason": "Follow embeddings into token states"
+      },
+      {
+        "slug": "jepa",
+        "reason": "Predict learned representations"
+      },
+      {
+        "slug": "hyperneat",
+        "reason": "Compare an encoding of connectivity"
+      }
+    ]
+  },
+  {
+    "slug": "sequence-attention-history",
+    "category": "history",
+    "title": "Sequence models discover attention",
+    "subtitle": "From a fixed bottleneck to a learned read operation.",
+    "abstract": "Place recurrent sequence modeling and learned alignment in the lineage of self-attention.",
+    "references": [
+      "bahdanau",
+      "transformer",
+      "gpt"
+    ],
+    "diagram": "sequence-attention-history",
+    "year": 2014,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Recurrence carries state through time",
+      "Encoder\u2013decoder models expose a bottleneck",
+      "Attention gives a decoder access to source states"
+    ],
+    "tags": [
+      "RNN",
+      "LSTM",
+      "Seq2seq",
+      "Bahdanau attention"
+    ],
+    "related": [
+      {
+        "slug": "attention",
+        "reason": "Inspect the attention mechanism"
+      },
+      {
+        "slug": "state-space",
+        "reason": "Revisit recurrent state"
+      },
+      {
+        "slug": "recurrent-depth",
+        "reason": "Move recurrence into model depth"
+      }
+    ]
+  },
+  {
+    "slug": "resnet-lineage",
+    "category": "history",
+    "title": "ResNet belongs in the main lineage",
+    "subtitle": "The identity path that made depth trainable.",
+    "abstract": "Understand why residual learning is one of the direct architectural foundations of the Transformer.",
+    "references": [
+      "resnet",
+      "transformer",
+      "hc",
+      "mhc"
+    ],
+    "diagram": "resnet-lineage",
+    "year": 2015,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Identity paths separate transport from transformation",
+      "Residual learning preceded the Transformer",
+      "Skip connections and Highway Networks also matter"
+    ],
+    "tags": [
+      "ResNet",
+      "Highway Networks",
+      "Identity paths"
+    ],
+    "related": [
+      {
+        "slug": "residual-streams",
+        "reason": "See residual learning in a decoder"
+      },
+      {
+        "slug": "hyper-connections",
+        "reason": "Expand residual connectivity"
+      },
+      {
+        "slug": "backprop-biology",
+        "reason": "Consider credit through deep graphs"
+      }
+    ]
+  },
+  {
+    "slug": "gpt-scaling",
+    "category": "history",
+    "title": "From Transformer to language-model scaling",
+    "subtitle": "Architecture meets data, compute and adaptation.",
+    "abstract": "Connect GPT, empirical scaling laws, compute-optimal training and instruction tuning without treating them as one breakthrough.",
+    "references": [
+      "gpt",
+      "scaling",
+      "chinchilla",
+      "llama",
+      "instruct"
+    ],
+    "diagram": "timeline",
+    "year": 2022,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Generative pretraining supports transfer",
+      "Scaling relationships are empirical fits",
+      "Architecture, data and post-training are distinct axes"
+    ],
+    "tags": [
+      "GPT",
+      "Scaling laws",
+      "Chinchilla",
+      "LLaMA"
+    ],
+    "related": [
+      {
+        "slug": "training-decoding",
+        "reason": "Inspect the objectives and execution phases"
+      },
+      {
+        "slug": "normalization-position",
+        "reason": "Unpack the decoder recipe"
+      },
+      {
+        "slug": "compression-decoding",
+        "reason": "Consider serving cost"
+      }
+    ]
+  },
+  {
+    "slug": "kv-cache",
+    "category": "systems",
+    "title": "KV-cache memory & grouped heads",
+    "subtitle": "The persistent cost of an expanding context.",
+    "abstract": "Calculate the cache footprint and understand MHA, MQA, GQA, paged storage and latent compression.",
+    "references": [
+      "mqa",
+      "gqa",
+      "paged",
+      "deepseek"
+    ],
+    "diagram": "kv",
+    "year": 2023,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Keys and values persist across decoding steps",
+      "KV-head count changes memory scaling",
+      "Cache state differs from parameters and external memory"
+    ],
+    "tags": [
+      "KV cache",
+      "GQA",
+      "MQA",
+      "MLA",
+      "PagedAttention"
+    ],
+    "related": [
+      {
+        "slug": "training-decoding",
+        "reason": "Separate prefill from decode"
+      },
+      {
+        "slug": "efficient-attention",
+        "reason": "Distinguish state from kernel efficiency"
+      },
+      {
+        "slug": "memory-adaptation",
+        "reason": "Compare different kinds of memory"
+      }
+    ]
+  },
+  {
+    "slug": "efficient-attention",
+    "category": "systems",
+    "title": "Exact kernels, sparse patterns",
+    "subtitle": "Two different routes to efficient attention.",
+    "abstract": "Distinguish changing the implementation of dense attention from changing the set of permitted token interactions.",
+    "references": [
+      "flash",
+      "longformer",
+      "transformer"
+    ],
+    "diagram": "attention",
+    "year": 2022,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "FlashAttention changes IO while preserving exact attention",
+      "Sparse masks change the connectivity graph",
+      "Edge counts alone do not predict wall-clock speed"
+    ],
+    "tags": [
+      "FlashAttention",
+      "Sparse attention",
+      "Sliding windows",
+      "Long context"
+    ],
+    "related": [
+      {
+        "slug": "attention",
+        "reason": "Inspect the underlying operation"
+      },
+      {
+        "slug": "kv-cache",
+        "reason": "Account for cached state"
+      },
+      {
+        "slug": "state-space",
+        "reason": "Compare compressed recurrent state"
+      }
+    ]
+  },
+  {
+    "slug": "mixture-of-experts",
+    "category": "sequence",
+    "title": "Mixture of experts",
+    "subtitle": "Sparse activation is a routing problem.",
+    "abstract": "Understand per-token expert selection, capacity, balancing and why total parameters differ from active compute.",
+    "references": [
+      "switch",
+      "deepseek"
+    ],
+    "diagram": "moe",
+    "year": 2021,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "A router activates a subset of experts",
+      "Active compute differs from total parameter count",
+      "Load balance and communication affect execution"
+    ],
+    "tags": [
+      "MoE",
+      "Top-k routing",
+      "Load balancing",
+      "Sparse activation"
+    ],
+    "related": [
+      {
+        "slug": "hyper-connections",
+        "reason": "Compare two architectural axes"
+      },
+      {
+        "slug": "efficient-attention",
+        "reason": "Contrast parameter and attention sparsity"
+      },
+      {
+        "slug": "gpt-scaling",
+        "reason": "Relate active compute to scaling"
+      }
+    ]
+  },
+  {
+    "slug": "hyper-connections",
+    "category": "sequence",
+    "title": "Hyper-connections & mHC",
+    "subtitle": "Multiple residual lanes, inside each token.",
+    "abstract": "Explore learned residual mixing and the doubly stochastic constraint used by manifold-constrained hyper-connections.",
+    "references": [
+      "resnet",
+      "hc",
+      "mhc"
+    ],
+    "diagram": "mhc",
+    "year": 2025,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Multiple residual lanes remain inside each token",
+      "Learned mixing changes residual connectivity",
+      "mHC constrains residual mixing toward doubly stochastic matrices"
+    ],
+    "tags": [
+      "Hyper-connections",
+      "mHC",
+      "Sinkhorn",
+      "Residual mixing"
+    ],
+    "related": [
+      {
+        "slug": "residual-streams",
+        "reason": "Contrast a conventional residual stream"
+      },
+      {
+        "slug": "mixture-of-experts",
+        "reason": "Keep routing and residual mixing distinct"
+      },
+      {
+        "slug": "backprop-biology",
+        "reason": "Consider stable credit transmission"
+      }
+    ]
+  },
+  {
+    "slug": "compression-decoding",
+    "category": "systems",
+    "title": "Compression & speculative decoding",
+    "subtitle": "Spend fewer bytes\u2014or verify more tokens at once.",
+    "abstract": "Two complementary inference techniques, with different effects on numerical behavior and sampling correctness.",
+    "references": [
+      "gptq",
+      "speculative",
+      "gqa"
+    ],
+    "diagram": "compression-decoding",
+    "year": 2022,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Quantization changes numeric representation",
+      "Speculative decoding uses a verified proposal",
+      "Latency depends on hardware, batches and acceptance"
+    ],
+    "tags": [
+      "Quantization",
+      "Speculative decoding",
+      "Distillation"
+    ],
+    "related": [
+      {
+        "slug": "kv-cache",
+        "reason": "Account for state precision"
+      },
+      {
+        "slug": "training-decoding",
+        "reason": "Locate proposal verification in decoding"
+      },
+      {
+        "slug": "self-improvement",
+        "reason": "Compare distinct uses of verification"
+      }
+    ]
+  },
+  {
+    "slug": "multimodal-fusion",
+    "category": "multimodal",
+    "title": "How modalities enter a Transformer",
+    "subtitle": "Tokenization is an interface; fusion is a design choice.",
+    "abstract": "Compare patch projection, learned resampling, prefix concatenation and cross-attention without conflating their objectives.",
+    "references": [
+      "vit",
+      "flamingo",
+      "blip",
+      "llava"
+    ],
+    "diagram": "multimodal",
+    "year": 2023,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "An encoder maps each modality into representations",
+      "Prefix, query and cross-attention are different interfaces",
+      "Resolution and token count change the compute budget"
+    ],
+    "tags": [
+      "Vision encoders",
+      "Cross-attention",
+      "Query resampling",
+      "Modality tokens"
+    ],
+    "related": [
+      {
+        "slug": "multimodal-objectives",
+        "reason": "Separate interface from objective"
+      },
+      {
+        "slug": "temporal-modalities",
+        "reason": "Add time and synchronization"
+      },
+      {
+        "slug": "vla-foundations",
+        "reason": "Turn perception into action conditioning"
+      }
+    ]
+  },
+  {
+    "slug": "multimodal-objectives",
+    "category": "multimodal",
+    "title": "Alignment, generation & instruction",
+    "subtitle": "The loss decides what the representation must preserve.",
+    "abstract": "Separate contrastive pairing, conditional generation and visual instruction tuning.",
+    "references": [
+      "clip",
+      "blip",
+      "llava"
+    ],
+    "diagram": "multimodal-objectives",
+    "year": 2021,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Contrastive training aligns paired representations",
+      "Generative training predicts an output distribution",
+      "Instruction tuning specifies interaction behavior"
+    ],
+    "tags": [
+      "CLIP",
+      "Contrastive learning",
+      "Generative objectives",
+      "Instruction tuning"
+    ],
+    "related": [
+      {
+        "slug": "jepa",
+        "reason": "Compare prediction in representation space"
+      },
+      {
+        "slug": "multimodal-fusion",
+        "reason": "Inspect the architectural interface"
+      },
+      {
+        "slug": "diffusion-flow",
+        "reason": "Change the generative objective"
+      }
+    ]
+  },
+  {
+    "slug": "temporal-modalities",
+    "category": "multimodal",
+    "title": "Audio, video & temporal grounding",
+    "subtitle": "Sampling is part of the model.",
+    "abstract": "Understand why ordering, synchronization and missing information matter as much as modality adapters.",
+    "references": [
+      "whisper",
+      "flamingo",
+      "vit"
+    ],
+    "diagram": "temporal-modalities",
+    "year": 2022,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Audio and video add temporal structure",
+      "Frame sampling trades detail for sequence length",
+      "Temporal grounding needs evaluation beyond recognition"
+    ],
+    "tags": [
+      "Audio",
+      "Video",
+      "Temporal grounding",
+      "Synchronization"
+    ],
+    "related": [
+      {
+        "slug": "video-world-models",
+        "reason": "Predict video representations"
+      },
+      {
+        "slug": "multimodal-fusion",
+        "reason": "Inspect modality interfaces"
+      },
+      {
+        "slug": "robot-evaluation",
+        "reason": "Connect time to closed-loop control"
+      }
+    ]
+  },
+  {
+    "slug": "diffusion-flow",
+    "category": "generation",
+    "title": "Diffusion & flow-based generation",
+    "subtitle": "Change the generative process, keep the architecture question open.",
+    "abstract": "Contrast Gaussian denoising, masked language diffusion and continuous transport models.",
+    "references": [
+      "ddpm",
+      "llada",
+      "flow"
+    ],
+    "diagram": "diffusion",
+    "year": 2025,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Generation iteratively transforms noise or masked states",
+      "Diffusion and flow matching define different training constructions",
+      "A parallel reveal schedule is not a trained sampler"
+    ],
+    "tags": [
+      "Diffusion",
+      "Flow matching",
+      "Denoising",
+      "Discrete diffusion"
+    ],
+    "related": [
+      {
+        "slug": "action-models",
+        "reason": "Generate action trajectories"
+      },
+      {
+        "slug": "soft-latent-reasoning",
+        "reason": "Distinguish generation from latent computation"
+      },
+      {
+        "slug": "jepa",
+        "reason": "Contrast output prediction spaces"
+      }
+    ]
+  },
+  {
+    "slug": "soft-latent-reasoning",
+    "category": "generation",
+    "title": "Soft prompts & continuous thought",
+    "subtitle": "Three constructions that should not share one vague name.",
+    "abstract": "Distinguish optimized input vectors, distributions over vocabulary embeddings and feedback of hidden reasoning states.",
+    "references": [
+      "prompt",
+      "coconut",
+      "lora"
+    ],
+    "diagram": "soft-latent-reasoning",
+    "year": 2024,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Soft prompts are trainable continuous input vectors",
+      "Latent reasoning adds hidden-state computation",
+      "A soft-token mixture is a separate construction"
+    ],
+    "tags": [
+      "Soft prompts",
+      "Latent reasoning",
+      "Continuous thought",
+      "Soft tokens"
+    ],
+    "related": [
+      {
+        "slug": "recurrent-depth",
+        "reason": "Reuse depth for extra computation"
+      },
+      {
+        "slug": "diffusion-flow",
+        "reason": "Compare continuous computation and generation"
+      },
+      {
+        "slug": "memory-adaptation",
+        "reason": "Separate prompts from persistent adaptation"
+      }
+    ]
+  },
+  {
+    "slug": "recurrent-depth",
+    "category": "sequence",
+    "title": "Recurrent depth & looped Transformers",
+    "subtitle": "Spend additional compute without adding new weights.",
+    "abstract": "Separate recurrence over sequence positions from recurrence over a shared block in depth.",
+    "references": [
+      "universal",
+      "recurrent",
+      "coconut"
+    ],
+    "diagram": "recurrent",
+    "year": 2025,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "A shared block can be applied repeatedly",
+      "Depth recurrence differs from sequence recurrence",
+      "More iterations need a stopping and stability argument"
+    ],
+    "tags": [
+      "Looped Transformers",
+      "Recurrent depth",
+      "Adaptive compute"
+    ],
+    "related": [
+      {
+        "slug": "state-space",
+        "reason": "Compare recurrence over time"
+      },
+      {
+        "slug": "soft-latent-reasoning",
+        "reason": "Connect recurrence to hidden computation"
+      },
+      {
+        "slug": "hyper-connections",
+        "reason": "Compare residual topology"
+      }
+    ]
+  },
+  {
+    "slug": "state-space",
+    "category": "sequence",
+    "title": "Selective state spaces & hybrids",
+    "subtitle": "Compress history into a state\u2014or retain explicit token memory.",
+    "abstract": "Understand the recurrence underlying selective state-space models and the trade-off with attention.",
+    "references": [
+      "mamba",
+      "transformer",
+      "recurrent"
+    ],
+    "diagram": "state-space",
+    "year": 2023,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "A recurrent state compresses the past",
+      "Selective dynamics depend on the input",
+      "Hybrids combine recurrence and attention"
+    ],
+    "tags": [
+      "SSM",
+      "Mamba",
+      "Selective scan",
+      "Hybrids"
+    ],
+    "related": [
+      {
+        "slug": "efficient-attention",
+        "reason": "Compare memory and connectivity tradeoffs"
+      },
+      {
+        "slug": "liquid-networks",
+        "reason": "Contrast continuous-time dynamics"
+      },
+      {
+        "slug": "sequence-attention-history",
+        "reason": "Trace recurrent ancestry"
+      }
+    ]
+  },
+  {
+    "slug": "predictive-coding",
+    "category": "learning",
+    "title": "Predictive coding as local inference",
+    "subtitle": "States become optimization variables.",
+    "abstract": "Reformulate a feed-forward computation as consistency constraints and inspect the distinction between inference and learning.",
+    "references": [
+      "pc",
+      "pcalm",
+      "pcalm-project"
+    ],
+    "diagram": "credit",
+    "year": 2017,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Activities infer latent causes through prediction errors",
+      "Local updates depend on the inference dynamics",
+      "Equivalence to backpropagation requires assumptions"
+    ],
+    "tags": [
+      "Predictive coding",
+      "Prediction errors",
+      "Local inference"
+    ],
+    "related": [
+      {
+        "slug": "pc-alm",
+        "reason": "Change the constraint dynamics"
+      },
+      {
+        "slug": "backprop-biology",
+        "reason": "Compare credit-assignment assumptions"
+      },
+      {
+        "slug": "jepa",
+        "reason": "Contrast two meanings of prediction"
+      }
+    ]
+  },
+  {
+    "slug": "pc-alm",
+    "category": "learning",
+    "title": "Augmented Lagrangian predictive coding",
+    "subtitle": "Credit assignment as a primal\u2013dual dynamical system.",
+    "abstract": "A paper-style walkthrough of PC-ALM: constraint residuals, multipliers, batched inference, theoretical scope and computational cost.",
+    "references": [
+      "pcalm",
+      "pcalm-project",
+      "pc"
+    ],
+    "diagram": "credit",
+    "year": 2026,
+    "minutes": 4,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Multipliers accumulate constraint violations",
+      "Activities follow augmented-Lagrangian dynamics",
+      "Linear results and nonlinear experiments have different scope"
+    ],
+    "tags": [
+      "PC-ALM",
+      "Augmented Lagrangian",
+      "Primal\u2013dual dynamics"
+    ],
+    "related": [
+      {
+        "slug": "predictive-coding",
+        "reason": "Inspect the baseline inference scheme"
+      },
+      {
+        "slug": "local-learning",
+        "reason": "Compare other local update rules"
+      },
+      {
+        "slug": "backprop-biology",
+        "reason": "Use backpropagation as a credit reference"
+      }
+    ]
+  },
+  {
+    "slug": "active-inference",
+    "category": "learning",
+    "title": "Active inference",
+    "subtitle": "Belief updating and action under a generative model.",
+    "abstract": "Place variational free energy and policy selection in a probabilistic control framework, and distinguish them from supervised PC training.",
+    "references": [
+      "active",
+      "active-process",
+      "pcalm"
+    ],
+    "diagram": "active-inference",
+    "year": 2022,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Perception updates beliefs about hidden states",
+      "Policies can trade preference fulfilment and information gain",
+      "A generative control framework is not one neural architecture"
+    ],
+    "tags": [
+      "Active inference",
+      "Free energy",
+      "Belief updates",
+      "Control"
+    ],
+    "related": [
+      {
+        "slug": "predictive-coding",
+        "reason": "Compare inference dynamics"
+      },
+      {
+        "slug": "video-world-models",
+        "reason": "Connect predictive state to planning"
+      },
+      {
+        "slug": "vla-foundations",
+        "reason": "Contrast routes to robot control"
+      }
+    ]
+  },
+  {
+    "slug": "spiking-networks",
+    "category": "learning",
+    "title": "Spiking neural networks",
+    "subtitle": "Events, membrane dynamics and surrogate derivatives.",
+    "abstract": "Separate the representation of neural activity from the algorithm used to train it.",
+    "references": [
+      "spikes",
+      "feedback"
+    ],
+    "diagram": "spiking-networks",
+    "year": 2019,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Membrane dynamics integrate events over time",
+      "A threshold emits discrete spikes",
+      "Surrogate gradients approximate the threshold derivative"
+    ],
+    "tags": [
+      "Spiking networks",
+      "LIF",
+      "Surrogate gradients",
+      "Neuromorphic"
+    ],
+    "related": [
+      {
+        "slug": "backprop-biology",
+        "reason": "Inspect biological plausibility criteria"
+      },
+      {
+        "slug": "liquid-networks",
+        "reason": "Compare continuous dynamics"
+      },
+      {
+        "slug": "local-learning",
+        "reason": "Consider locality of the learning rule"
+      }
+    ]
+  },
+  {
+    "slug": "liquid-networks",
+    "category": "learning",
+    "title": "Liquid time-constant networks",
+    "subtitle": "Input-dependent dynamics in continuous time.",
+    "abstract": "Understand liquid neural ODEs and the distinction between an adaptive time constant and online weight learning.",
+    "references": [
+      "liquid",
+      "mamba",
+      "spikes"
+    ],
+    "diagram": "liquid-networks",
+    "year": 2020,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Hidden dynamics depend on inputs and learned parameters",
+      "Time constants describe response dynamics",
+      "Continuous-time models still require numerical or analytic execution"
+    ],
+    "tags": [
+      "LTC",
+      "Liquid networks",
+      "Continuous time",
+      "CfC"
+    ],
+    "related": [
+      {
+        "slug": "state-space",
+        "reason": "Compare state evolution"
+      },
+      {
+        "slug": "spiking-networks",
+        "reason": "Contrast continuous state and events"
+      },
+      {
+        "slug": "active-inference",
+        "reason": "Keep dynamics separate from control objectives"
+      }
+    ]
+  },
+  {
+    "slug": "backprop-biology",
+    "category": "learning",
+    "title": "Backpropagation & biological plausibility",
+    "subtitle": "One exact derivative; several implementation questions.",
+    "abstract": "Explain reverse-mode credit assignment while treating biological plausibility as a set of testable constraints.",
+    "references": [
+      "backprop",
+      "feedback",
+      "pc",
+      "spikes"
+    ],
+    "diagram": "backprop-biology",
+    "year": 1986,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Reverse-mode differentiation assigns parameter credit",
+      "Weight transport, locality and timing are separate constraints",
+      "Task performance does not establish biological plausibility"
+    ],
+    "tags": [
+      "Backpropagation",
+      "Biological plausibility",
+      "Credit assignment",
+      "Weight transport"
+    ],
+    "related": [
+      {
+        "slug": "local-learning",
+        "reason": "Inspect alternative feedback rules"
+      },
+      {
+        "slug": "pc-alm",
+        "reason": "Compare inference-based credit"
+      },
+      {
+        "slug": "neat",
+        "reason": "Contrast derivatives with evolutionary search"
+      }
+    ]
+  },
+  {
+    "slug": "local-learning",
+    "category": "learning",
+    "title": "Feedback alignment & local objectives",
+    "subtitle": "What must a layer know to learn?",
+    "abstract": "Compare alternative error transport, independent objectives and iterative constraint enforcement.",
+    "references": [
+      "feedback",
+      "pc",
+      "pcalm"
+    ],
+    "diagram": "local-learning",
+    "year": 2016,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Feedback alignment changes the backward signal",
+      "Local objectives change where errors originate",
+      "Equivalence claims depend on specific assumptions"
+    ],
+    "tags": [
+      "Feedback alignment",
+      "Local losses",
+      "Equilibrium propagation"
+    ],
+    "related": [
+      {
+        "slug": "backprop-biology",
+        "reason": "Define the reference and biological constraints"
+      },
+      {
+        "slug": "predictive-coding",
+        "reason": "Compare local inference updates"
+      },
+      {
+        "slug": "continual-learning",
+        "reason": "Consider learning under a changing stream"
+      }
+    ]
+  },
+  {
+    "slug": "continual-learning",
+    "category": "continual",
+    "title": "Remembering while learning",
+    "subtitle": "Replay, consolidation and the stability\u2013plasticity tension.",
+    "abstract": "Define forgetting operationally and compare mechanisms that protect old behavior during new learning.",
+    "references": [
+      "ewc",
+      "replay",
+      "lora"
+    ],
+    "diagram": "continual-learning",
+    "year": 2017,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "A changing task stream can cause forgetting",
+      "Replay, regularization and isolation address different constraints",
+      "Memory and compute budgets belong in the protocol"
+    ],
+    "tags": [
+      "Continual learning",
+      "Replay",
+      "EWC",
+      "Forgetting"
+    ],
+    "related": [
+      {
+        "slug": "memory-adaptation",
+        "reason": "Separate state, retrieval and parameter updates"
+      },
+      {
+        "slug": "self-improvement",
+        "reason": "Require independent evidence of improvement"
+      },
+      {
+        "slug": "neat",
+        "reason": "Distinguish adaptation from population search"
+      }
+    ]
+  },
+  {
+    "slug": "memory-adaptation",
+    "category": "continual",
+    "title": "Memory, context & test-time adaptation",
+    "subtitle": "Identify exactly what persists.",
+    "abstract": "Separate external retrieval, in-context state, parameter-efficient adaptation and gradient updates at test time.",
+    "references": [
+      "rag",
+      "ttt",
+      "lora",
+      "replay"
+    ],
+    "diagram": "memory-adaptation",
+    "year": 2020,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Context, cache, retrieval and weights store different state",
+      "Test-time training changes parameters under a reset policy",
+      "Persistent updates require contamination and drift checks"
+    ],
+    "tags": [
+      "RAG",
+      "External memory",
+      "Test-time training",
+      "LoRA",
+      "Adaptation"
+    ],
+    "related": [
+      {
+        "slug": "kv-cache",
+        "reason": "Inspect transient inference state"
+      },
+      {
+        "slug": "continual-learning",
+        "reason": "Measure persistence and forgetting"
+      },
+      {
+        "slug": "self-improvement",
+        "reason": "Evaluate a sustained update loop"
+      }
+    ]
+  },
+  {
+    "slug": "self-improvement",
+    "category": "continual",
+    "title": "Self-improvement needs a verifier",
+    "subtitle": "A feedback loop is only as good as its selection signal.",
+    "abstract": "Distinguish output refinement, synthetic-data training and measurable improvements on held-out tasks.",
+    "references": [
+      "star",
+      "selfrefine",
+      "instruct"
+    ],
+    "diagram": "self-improvement",
+    "year": 2022,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "An improvement loop needs an external criterion",
+      "Self-generated data can amplify existing errors",
+      "Held-out evaluation must survive repeated selection"
+    ],
+    "tags": [
+      "Self-training",
+      "Verifiers",
+      "Self-improvement",
+      "Evaluation"
+    ],
+    "related": [
+      {
+        "slug": "continual-learning",
+        "reason": "Check retained capabilities"
+      },
+      {
+        "slug": "compression-decoding",
+        "reason": "Contrast verification during inference"
+      },
+      {
+        "slug": "robot-evaluation",
+        "reason": "Evaluate changes in an external loop"
+      }
+    ]
+  },
+  {
+    "slug": "vla-foundations",
+    "category": "robotics",
+    "title": "Vision\u2013language\u2013action models",
+    "subtitle": "A language interface reaches the control loop.",
+    "abstract": "Trace RT-2 and OpenVLA, then locate the boundary between semantic transfer and physical competence.",
+    "references": [
+      "rt2",
+      "openvla",
+      "pi0"
+    ],
+    "diagram": "vla",
+    "year": 2024,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Visual and language inputs condition an action policy",
+      "Action representation is an architectural choice",
+      "A policy acts inside an observation\u2013action feedback loop"
+    ],
+    "tags": [
+      "VLA",
+      "RT-2",
+      "OpenVLA",
+      "Robot policies"
+    ],
+    "related": [
+      {
+        "slug": "multimodal-fusion",
+        "reason": "Inspect the perceptual interface"
+      },
+      {
+        "slug": "action-models",
+        "reason": "Choose an action distribution"
+      },
+      {
+        "slug": "video-world-models",
+        "reason": "Compare prediction and planning"
+      }
+    ]
+  },
+  {
+    "slug": "action-models",
+    "category": "robotics",
+    "title": "Tokens, diffusion & flow for action",
+    "subtitle": "A multimodal action distribution deserves a structured output.",
+    "abstract": "Compare discrete autoregressive actions with continuous action-chunk models and receding-horizon execution.",
+    "references": [
+      "rt2",
+      "diffusion-policy",
+      "pi0",
+      "flow"
+    ],
+    "diagram": "vla",
+    "year": 2024,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Discrete tokens and continuous heads model actions differently",
+      "Diffusion and flow can produce action chunks",
+      "A controller may execute a prefix before observing again"
+    ],
+    "tags": [
+      "Action tokens",
+      "Action chunks",
+      "Diffusion policy",
+      "Flow policy"
+    ],
+    "related": [
+      {
+        "slug": "diffusion-flow",
+        "reason": "Inspect the generative construction"
+      },
+      {
+        "slug": "vla-foundations",
+        "reason": "Place actions in a VLA policy"
+      },
+      {
+        "slug": "robot-evaluation",
+        "reason": "Measure the complete control loop"
+      }
+    ]
+  },
+  {
+    "slug": "robot-evaluation",
+    "category": "robotics",
+    "title": "Evaluate the closed loop",
+    "subtitle": "Generalization, latency and intervention are separate axes.",
+    "abstract": "Translate a model result into a reproducible robotics experiment with stated timing, action semantics and failure modes.",
+    "references": [
+      "openvla",
+      "diffusion-policy",
+      "pi0"
+    ],
+    "diagram": "robot-evaluation",
+    "year": 2024,
+    "minutes": 3,
+    "updated": "2026-10-21",
+    "keyPoints": [
+      "Success rate depends on the task and execution protocol",
+      "Latency and observation freshness affect the loop",
+      "Generalization requires explicit distribution shifts"
+    ],
+    "tags": [
+      "Robotics evaluation",
+      "Closed-loop control",
+      "Distribution shift"
+    ],
+    "related": [
+      {
+        "slug": "action-models",
+        "reason": "Connect chunking to execution latency"
+      },
+      {
+        "slug": "video-world-models",
+        "reason": "Test predictions against control outcomes"
+      },
+      {
+        "slug": "self-improvement",
+        "reason": "Preserve an independent evaluation signal"
+      }
+    ]
+  },
+  {
+    "category": "multimodal",
+    "minutes": 5,
+    "updated": "2026-10-21",
+    "slug": "jepa",
+    "title": "JEPA: predicting representations",
+    "subtitle": "Learn what is missing without reconstructing every pixel.",
+    "abstract": "Compare the context encoder, target encoder and predictor in I-JEPA and V-JEPA, with explicit masks, feature dimensions and collapse prevention.",
+    "references": [
+      "ijepa",
+      "vjepa",
+      "vjepa2",
+      "ijepa-code"
+    ],
+    "diagram": "jepa",
+    "year": 2023,
+    "related": [
+      {
+        "slug": "video-world-models",
+        "reason": "Extend feature prediction to action-conditioned planning"
+      },
+      {
+        "slug": "multimodal-objectives",
+        "reason": "Contrast alignment and predictive objectives"
+      },
+      {
+        "slug": "multimodal-fusion",
+        "reason": "Separate the objective from the encoder interface"
+      },
+      {
+        "slug": "predictive-coding",
+        "reason": "Compare different prediction-based learning schemes"
+      }
+    ],
+    "keyPoints": [
+      "Predict target features, not necessarily pixels.",
+      "Separate gradient training from moving-average targets.",
+      "JEPA is a learning arrangement, not a replacement for attention."
+    ],
+    "tags": [
+      "JEPA",
+      "I-JEPA",
+      "V-JEPA",
+      "Self-supervised learning",
+      "Stop-gradient"
+    ]
+  },
+  {
+    "category": "multimodal",
+    "minutes": 5,
+    "updated": "2026-10-21",
+    "slug": "video-world-models",
+    "title": "Video world models & latent planning",
+    "subtitle": "Predicting observations and choosing actions are different interfaces.",
+    "abstract": "Trace action-free video representations to action-conditioned prediction, candidate rollouts and closed-loop planning, using V-JEPA 2 as a concrete example.",
+    "references": [
+      "vjepa",
+      "vjepa2",
+      "vjepa2-code"
+    ],
+    "diagram": "world-models",
+    "year": 2025,
+    "related": [
+      {
+        "slug": "jepa",
+        "reason": "Inspect masked representation prediction"
+      },
+      {
+        "slug": "temporal-modalities",
+        "reason": "Connect video features to temporal structure"
+      },
+      {
+        "slug": "active-inference",
+        "reason": "Compare predictive control formulations"
+      },
+      {
+        "slug": "action-models",
+        "reason": "Contrast latent planning with action generation"
+      },
+      {
+        "slug": "robot-evaluation",
+        "reason": "Evaluate the executed control loop"
+      }
+    ],
+    "keyPoints": [
+      "Video pretraining does not yet specify control actions.",
+      "Action-conditioned post-training needs interaction signals.",
+      "Evaluate latent prediction and closed-loop success separately."
+    ],
+    "tags": [
+      "World models",
+      "V-JEPA 2",
+      "Latent planning",
+      "Model predictive control"
+    ]
+  },
+  {
+    "category": "evolution",
+    "minutes": 6,
+    "updated": "2026-10-21",
+    "slug": "neat",
+    "title": "NEAT: evolve weights and topology",
+    "subtitle": "Historical alignment, speciation and complexification.",
+    "abstract": "Inspect the direct genetic encoding and structural mutations that let an evolutionary population search networks of different shapes.",
+    "references": [
+      "neat",
+      "neat-followup"
+    ],
+    "diagram": "neat",
+    "year": 2002,
+    "related": [
+      {
+        "slug": "hyperneat",
+        "reason": "Move from direct to indirect encoding"
+      },
+      {
+        "slug": "backprop-biology",
+        "reason": "Contrast evolutionary and gradient credit assignment"
+      },
+      {
+        "slug": "continual-learning",
+        "reason": "Distinguish population search from adaptation"
+      }
+    ],
+    "keyPoints": [
+      "Innovation identifiers align genes by ancestry.",
+      "Speciation gives new structures time to optimize.",
+      "Evolution and lifetime plasticity use different time axes."
+    ],
+    "tags": [
+      "NEAT",
+      "Neuroevolution",
+      "Speciation",
+      "Topology mutation"
+    ]
+  },
+  {
+    "category": "evolution",
+    "minutes": 6,
+    "updated": "2026-10-21",
+    "slug": "hyperneat",
+    "title": "HyperNEAT: geometry generates connectivity",
+    "subtitle": "A compact generator can describe a large substrate.",
+    "abstract": "Follow coordinate queries through a CPPN to understand indirect encoding, geometric regularities and the limits of resolution transfer.",
+    "references": [
+      "hyperneat",
+      "cppn",
+      "neat"
+    ],
+    "diagram": "hyperneat",
+    "year": 2009,
+    "related": [
+      {
+        "slug": "neat",
+        "reason": "Evolve the pattern-producing generator"
+      },
+      {
+        "slug": "distributed-representations",
+        "reason": "Compare what a representation encodes"
+      },
+      {
+        "slug": "vla-foundations",
+        "reason": "Connect generated policies to embodied control"
+      }
+    ],
+    "keyPoints": [
+      "The CPPN generates a distinct task network.",
+      "Coordinate functions can express repeated geometric motifs.",
+      "Compact encoding does not remove substrate execution cost."
+    ],
+    "tags": [
+      "HyperNEAT",
+      "CPPN",
+      "Indirect encoding",
+      "Geometric bias"
+    ]
+  }
+]
