@@ -79,3 +79,22 @@ Verified on 22 October 2026.
 - The production build and its content/hierarchy validation pass for all 42 topics.
 - Browser checks verified direct navigation and quick previews (including focus return), bright/dark themes, and the phone-width layout. Four links occupy approximately 334 CSS px on desktop and 346 CSS px on mobile.
 - At 375 usable CSS px, no document-level horizontal overflow is present. Mobile icon buttons retain explicit accessible names. The temporary QA harness was removed.
+
+## Complete page-review implementation
+
+Implemented from the independent page audit on 22 October 2026; integrated verification on 23 October 2026.
+
+- All 42 deep dives remain at the same URLs; all 25 domain/family pages, 10 legacy categories and seven utility routes remain available (84 routes). Every article has an explicitly registered worked visual.
+- Expanded explanations and calculated diagrams address the page-specific findings listed in [REVIEW-IMPLEMENTATION.md](REVIEW-IMPLEMENTATION.md). The state-space feedback path now carries the state rather than its readout. Original useful topology views and calculators are retained as companion panels.
+- Six additional primary references bring the registry to 84. Author serialization is shared by in-browser and generated BibTeX exports, with explicit author separators and the `others` sentinel.
+- Numerical suite: 65 tests pass. Checks include finite-difference BP, dense/online attention equality, masked softmax, RoPE identities, quantizer storage and clipping, all speculative acceptance/rejection branches, recurrence and solver convergence, state memory, probability/EFE identities, reset semantics, JEPA loss/EMA and evolutionary task execution.
+- Content validation resolves all numbered citations, local links, topic roles and 1,168 authored TeX expressions. All 42 actual registry-selected visuals and 84 initial routes render. Production build succeeds.
+- Six implementation reviewers independently browser-checked all 42 article pages with fresh DOM and screenshots, meaningful computed control changes, expanded views and theme samples. The inactive-resampler label, liquid feedback endpoint and verifier return-path label were corrected and rechecked. The world-model table now renders six previously lost absolute-value expressions; the validator uses the same GFM grammar as the site and rejects inconsistent table widths.
+- Shared browser checks verified full-text manuscript filtering, direct topic jumps, matching/all expand and collapse, 42 expanded article bodies with 1,168 rendered KaTeX nodes, no KaTeX error nodes or duplicate IDs.
+- Manuscript bodies are memoized, bulk expansion uses a responsive transition, and their open state is controlled directly, so collapsing does not first reparse all equations. Expanding the entire manuscript remains a large initial render; filtering and opening individual topics avoids that cost.
+- Glossary LN/QKV aliases, selected-question role explanations, legacy-to-current bridges and active hierarchy context, timeline contribution text and singular reference counts work in browser.
+- At 375 usable phone CSS pixels, manuscript controls and expanded topic text, legacy navigation and the revised normalization figure have no document-level horizontal overflow. Dense SVGs pan inside their viewport. Zoom now scales the mobile minimum canvas width (570 to 712.5 pixels at 125%).
+- Expanded figures are labeled modal dialogs. Tab and Shift+Tab stay among their controls, Escape closes them, background scrolling is suppressed, and focus returns to the expansion button.
+- Social preview assets and initial Open Graph/large-image metadata are preserved.
+
+No pretrained neural model, GPU training, benchmark reproduction or physical robot evaluation was run. The calculations demonstrate declared mechanisms; the paper claims retain their own experimental conditions. Chrome desktop and a phone-width iframe were checked, not physical mobile hardware or every browser engine.

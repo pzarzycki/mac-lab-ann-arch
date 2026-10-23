@@ -4,11 +4,11 @@
 
 An interactive research guide for individual exploration of neural architectures, learning algorithms and embodied intelligence.
 
-**42 deep dives · 6 domains with nested families · 78 primary references.** Source snapshot: 21 October 2026.
+**42 deep dives · 6 domains with nested families · 84 primary references.** Worked-mechanism revision: 22 October 2026.
 
 Browse a group, inspect a concise topic preview and its live visual, open the detailed article, then follow explained connections to related ideas. Question collections offer alternative views of the same content. The interface has no lessons, required order, grades or completion tracking.
 
-New coverage includes **JEPA/I-JEPA/V-JEPA, video world models and latent planning, NEAT and HyperNEAT**. Every deep dive has a visual; most use detailed, interactive native SVG. The cache calculator and historical timeline are computational/reference visuals. All 33 original article URLs remain valid.
+New coverage includes **JEPA/I-JEPA/V-JEPA, video world models and latent planning, NEAT and HyperNEAT**. Every deep dive has a computed interactive SVG or numerical lab. Worked examples expose inputs, intermediate values, outputs and assumptions; the historical timeline explains each contribution. All 33 original article URLs remain valid.
 
 ![JEPA topic preview with an interactive vector diagram](docs/assets/topic-preview.jpg)
 
@@ -26,7 +26,7 @@ Open the URL Vite prints (normally port 4173). All interactions execute locally 
 ```bash
 npm run check       # citations, links, previews, visuals, relationships, strict TeX
 npm run check:visuals # render every actual visual; validate concept graph geometry
-npm test            # numerical invariants and linear PC-ALM/BP comparison
+npm test            # numerical invariants, finite differences and mechanism checks
 npm run manuscript  # export the synchronized manuscript and bibliography
 npm run build       # validated static production output in dist/
 npm run preview     # serve production output locally
@@ -44,7 +44,8 @@ npm run preview     # serve production output locally
 - `src/content/collections.json`: unordered question-based exploration collections.
 - `src/content/sources.json`: primary bibliography and review provenance.
 - `src/components/Explore.jsx`: topic cards, quick views, directory and related-topic navigation.
-- `src/components/*Figures.jsx`: semantic SVG diagrams and interactive calculations.
+- `src/components/*Figures.jsx` and `*Mechanisms.jsx`: semantic SVG diagrams and interactive calculations.
+- `docs/REVIEW-IMPLEMENTATION.md`: page-by-page record of the audit recommendations implemented.
 - `src/content/visuals.json`: registry connecting article visual IDs to renderer families.
 - `src/math.js`: numerical calculations; see `tests/math.test.mjs`.
 
@@ -56,7 +57,7 @@ The conspect distinguishes existing treatment from topics awaiting further resea
 
 React/Vite; Markdown through react-markdown, GFM and math plugins; KaTeX HTML/MathML; rehype-highlight for code. SVG figures support inspection, zoom, expansion and vector export. Diagrams preserve separate token streams and distinguish heads, residual lanes, experts and time. Bright/dark/system themes and bookmarks use browser-local storage.
 
-Search covers titles, technique tags and article text. The directory can filter by topic group and cross-field question. Related-topic links explain their relationship instead of imposing a global previous/next order. Old article URLs remain stable; old category URLs and `#/paths` have compatible aliases.
+Search covers titles, technique tags and article text. The directory can filter by topic group and cross-field question; question cards explain each topic’s role. The manuscript has full-text filtering and direct topic jumps. Glossary search resolves common aliases such as LN, QKV and GQA. Related-topic links explain their relationship instead of imposing a global previous/next order. Old article URLs remain stable; old category URLs and `#/paths` have compatible aliases.
 
 Illustrative masks, mutations, coordinate fields and latent rollouts are labeled as such. These interactions are not trained models, reproduced benchmark runs or robot controllers. Numerical calculations and paper evidence retain their separate assumptions.
 

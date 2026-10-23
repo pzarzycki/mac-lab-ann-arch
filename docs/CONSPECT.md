@@ -2,7 +2,7 @@
 
 An interactive research guide to artificial neural architectures, learning rules and embodied systems. Readers enter through a topic, inspect its essential distinctions, open a detailed account and follow connections in any direction. Topic order does not imply prerequisites, importance or a required reading sequence.
 
-Source snapshot: **21 October 2026**. This edition contains **42 deep dives in 6 domains with nested topic families**, with **78 primary references**. All 33 original articles remain available at their original article URLs. JEPA, video world models, NEAT and HyperNEAT added four articles. Token embeddings and four interpretability deep dives add five more. New primary sources for these additions were reviewed on 22 October 2026.
+Source snapshot: **21–22 October 2026**. This edition contains **42 deep dives in 6 domains with nested topic families**, with **84 primary references**. All 33 original articles remain available at their original article URLs. JEPA, video world models, NEAT and HyperNEAT added four articles. Token embeddings and four interpretability deep dives add five more. New primary sources for these additions were reviewed on 22 October 2026.
 
 ## The exploration model
 

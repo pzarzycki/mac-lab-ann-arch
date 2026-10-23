@@ -18,8 +18,15 @@ optimizer.step()
 
 Ignore padded positions in a real loss. An optimizer step usually aggregates a batch; gradient accumulation may aggregate several microbatches before that step.
 
+## Align one short sequence
+Let $B$ be batch size, $T$ the number of scored input positions, and $V$ vocabulary size. Integer inputs and targets each have shape $B\times T$; logits have shape $B\times T\times V$. Softmax over the last axis supplies a probability distribution for each position's next target. Flattening in the code preserves that input/target alignment.
+
+For the illustrative sequence `[BOS, The, model, learns, EOS]`, use inputs `[BOS, The, model, learns]` and targets `[The, model, learns, EOS]`, so $B=1,T=4$. At output position 3, the causal model reads `[BOS, The, model]` and scores `learns`; it cannot read the fourth input. A toy target probability $0.60$ contributes $-\ln(0.60)\approx0.511$ **nats**. With stipulated target probabilities $[0.70,0.50,0.60,0.80]$, the unmasked mean loss is about $0.446$ nats. Logarithms here are natural; perplexity is $\exp(\text{mean NLL})$. These numbers illustrate loss arithmetic and are not measurements of a language model.
+
 ## Prefill versus decode
 **Prefill** processes the prompt and constructs cached keys/values. **Decode** adds generated positions, usually one per target-model step. Earlier tokens are available, but the next sampled token is unknown until its distribution has been evaluated. Caching reuses causal computations; it does not remove dependence on previous generated tokens. See [KV cache](#/article/kv-cache).
+
+The inference side starts with the three-token prompt `[BOS, The, model]`. Prefill produces three cached K/V positions per layer and prompt logits of shape $1\times3\times V$. The **last** prompt-position distribution predicts the first new token. Suppose sampling returns `learns`: the emitted token is not yet in the cache. The following decode call consumes `learns`, projects its K/V at every layer and appends position 4. Its new query reads positions 1–4, and logits of shape $1\times1\times V$ predict the following token, such as `EOS`. Move the phase control to distinguish prefill, sampling and consumption; sampling itself does not append cache entries.
 
 ## Instruction tuning and preferences
 Supervised fine-tuning changes the data and loss mask, often scoring assistant completions rather than every input token. RLHF adds preference learning and policy optimization. DPO derives a preference objective relative to a reference policy; these are training procedures, not new kinds of attention. [3](#ref-instruct) [4](#ref-dpo)

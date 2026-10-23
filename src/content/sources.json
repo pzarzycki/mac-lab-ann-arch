@@ -8,7 +8,8 @@
     "kind": "Author bibliography",
     "checked": "2026-10-21",
     "evidence": "turn11view8",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Geoffrey E. Hinton"
   },
   {
     "id": "backprop",
@@ -19,7 +20,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn2view7",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Rumelhart and Hinton and Williams"
   },
   {
     "id": "bengio",
@@ -30,7 +32,8 @@
     "kind": "JMLR",
     "checked": "2026-10-21",
     "evidence": "turn2view6",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Bengio and Ducharme and Vincent and Jauvin"
   },
   {
     "id": "bahdanau",
@@ -41,7 +44,8 @@
     "kind": "Paper · ICLR 2015",
     "checked": "2026-10-21",
     "evidence": "turn2view5",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Bahdanau and Cho and Bengio"
   },
   {
     "id": "resnet",
@@ -52,7 +56,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn2view0",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "He and Zhang and Ren and Sun"
   },
   {
     "id": "layernorm",
@@ -63,7 +68,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn2view1",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Ba and Kiros and Hinton"
   },
   {
     "id": "transformer",
@@ -74,7 +80,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn1view3",
-    "review": "full-text sections"
+    "review": "full-text sections",
+    "bibtexAuthors": "Vaswani and others"
   },
   {
     "id": "gpt",
@@ -85,7 +92,8 @@
     "kind": "Technical report",
     "checked": "2026-10-21",
     "evidence": "turn2view8",
-    "review": "full-text sections"
+    "review": "full-text sections",
+    "bibtexAuthors": "Radford and Narasimhan and Salimans and Sutskever"
   },
   {
     "id": "rmsnorm",
@@ -96,7 +104,8 @@
     "kind": "Paper · NeurIPS 2019",
     "checked": "2026-10-21",
     "evidence": "turn2view2",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Zhang and Sennrich"
   },
   {
     "id": "rope",
@@ -107,7 +116,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn2view3",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Su and others"
   },
   {
     "id": "swiglu",
@@ -118,7 +128,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn2view4",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Noam Shazeer"
   },
   {
     "id": "mqa",
@@ -129,7 +140,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn3view0",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Noam Shazeer"
   },
   {
     "id": "gqa",
@@ -140,7 +152,8 @@
     "kind": "Paper · EMNLP 2023",
     "checked": "2026-10-21",
     "evidence": "turn3view1",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Ainslie and others"
   },
   {
     "id": "paged",
@@ -151,7 +164,8 @@
     "kind": "Paper · SOSP 2023",
     "checked": "2026-10-21",
     "evidence": "turn3view2",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Kwon and others"
   },
   {
     "id": "flash",
@@ -162,7 +176,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn3view3",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Dao and others"
   },
   {
     "id": "longformer",
@@ -173,7 +188,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn3view4",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Beltagy and Peters and Cohan"
   },
   {
     "id": "switch",
@@ -184,7 +200,8 @@
     "kind": "Paper · JMLR",
     "checked": "2026-10-21",
     "evidence": "turn3view5",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Fedus and Zoph and Shazeer"
   },
   {
     "id": "deepseek",
@@ -195,7 +212,8 @@
     "kind": "Technical report",
     "checked": "2026-10-21",
     "evidence": "turn3view6",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "{DeepSeek-AI} and others"
   },
   {
     "id": "hc",
@@ -206,7 +224,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn3view7",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Zhu and others"
   },
   {
     "id": "mhc",
@@ -217,7 +236,8 @@
     "kind": "Research paper · v2 Jan 2026",
     "checked": "2026-10-21",
     "evidence": "turn7view1",
-    "review": "full-text sections"
+    "review": "full-text sections",
+    "bibtexAuthors": "Xie and others"
   },
   {
     "id": "clip",
@@ -228,7 +248,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn4view0",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Radford and others"
   },
   {
     "id": "vit",
@@ -239,7 +260,8 @@
     "kind": "Paper · ICLR 2021",
     "checked": "2026-10-21",
     "evidence": "turn4view1",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Dosovitskiy and others"
   },
   {
     "id": "flamingo",
@@ -250,7 +272,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn4view2",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Alayrac and others"
   },
   {
     "id": "blip",
@@ -261,7 +284,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn4view3",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Li and others"
   },
   {
     "id": "llava",
@@ -272,7 +296,8 @@
     "kind": "Paper · NeurIPS 2023",
     "checked": "2026-10-21",
     "evidence": "turn4view4",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Liu and Li and Wu and Lee"
   },
   {
     "id": "whisper",
@@ -283,7 +308,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn4view5",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Radford and others"
   },
   {
     "id": "llada",
@@ -294,7 +320,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn5view0",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Nie and others"
   },
   {
     "id": "coconut",
@@ -305,7 +332,8 @@
     "kind": "Paper · COLM 2025",
     "checked": "2026-10-21",
     "evidence": "turn5view1",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Hao and others"
   },
   {
     "id": "flow",
@@ -316,7 +344,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn5view2",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Liu and Gong and Liu"
   },
   {
     "id": "mamba",
@@ -327,7 +356,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn5view4",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Gu and Dao"
   },
   {
     "id": "lora",
@@ -338,7 +368,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn5view5",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Hu and others"
   },
   {
     "id": "prompt",
@@ -349,7 +380,8 @@
     "kind": "Paper · EMNLP 2021",
     "checked": "2026-10-21",
     "evidence": "turn5view6",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Lester and Al-Rfou and Constant"
   },
   {
     "id": "recurrent",
@@ -360,7 +392,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn5view7",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Geiping and others"
   },
   {
     "id": "universal",
@@ -371,7 +404,8 @@
     "kind": "Paper · ICLR 2019",
     "checked": "2026-10-21",
     "evidence": "turn7view2",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Dehghani and others"
   },
   {
     "id": "pc",
@@ -382,7 +416,8 @@
     "kind": "Neural Computation",
     "checked": "2026-10-21",
     "evidence": "turn7search4",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Whittington and Bogacz"
   },
   {
     "id": "pcalm",
@@ -393,7 +428,8 @@
     "kind": "Preprint · May 2026",
     "checked": "2026-10-21",
     "evidence": "turn7view0",
-    "review": "full-text sections"
+    "review": "full-text sections",
+    "bibtexAuthors": "Jeffrey Seely and Julian Gould"
   },
   {
     "id": "pcalm-project",
@@ -404,7 +440,8 @@
     "kind": "Author project page · Sep 2026",
     "checked": "2026-10-21",
     "evidence": "turn1view0",
-    "review": "full-text sections"
+    "review": "full-text sections",
+    "bibtexAuthors": "Seely and Gould"
   },
   {
     "id": "active",
@@ -415,7 +452,8 @@
     "kind": "MIT Press book",
     "checked": "2026-10-21",
     "evidence": "turn6search1",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Parr and Pezzulo and Friston"
   },
   {
     "id": "active-process",
@@ -426,7 +464,8 @@
     "kind": "Neural Computation",
     "checked": "2026-10-21",
     "evidence": "turn7search3",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Friston and others"
   },
   {
     "id": "feedback",
@@ -437,7 +476,8 @@
     "kind": "Nature Communications",
     "checked": "2026-10-21",
     "evidence": "turn7search1",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Lillicrap and others"
   },
   {
     "id": "spikes",
@@ -448,7 +488,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn10view7",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Neftci and Mostafa and Zenke"
   },
   {
     "id": "liquid",
@@ -459,7 +500,8 @@
     "kind": "Paper · AAAI 2021",
     "checked": "2026-10-21",
     "evidence": "turn1view4",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Hasani and Lechner and Amini and Rus and Grosu"
   },
   {
     "id": "ewc",
@@ -470,7 +512,8 @@
     "kind": "Paper · PNAS 2017",
     "checked": "2026-10-21",
     "evidence": "turn6view6",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Kirkpatrick and others"
   },
   {
     "id": "replay",
@@ -481,7 +524,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn6view7",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Rolnick and others"
   },
   {
     "id": "rt2",
@@ -492,7 +536,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn9view0",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Brohan and others"
   },
   {
     "id": "openvla",
@@ -503,7 +548,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn9view1",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Kim and others"
   },
   {
     "id": "pi0",
@@ -514,7 +560,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn9view2",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Black and others"
   },
   {
     "id": "diffusion-policy",
@@ -525,7 +572,8 @@
     "kind": "Paper · RSS 2023, extended 2024",
     "checked": "2026-10-21",
     "evidence": "turn9view3",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Chi and others"
   },
   {
     "id": "speculative",
@@ -536,7 +584,8 @@
     "kind": "Paper · ICML 2023",
     "checked": "2026-10-21",
     "evidence": "turn9view4",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Leviathan and Kalman and Matias"
   },
   {
     "id": "gptq",
@@ -547,7 +596,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn9view5",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Frantar and others"
   },
   {
     "id": "dpo",
@@ -558,7 +608,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn9view6",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Rafailov and others"
   },
   {
     "id": "instruct",
@@ -569,7 +620,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn9view7",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Ouyang and others"
   },
   {
     "id": "scaling",
@@ -580,7 +632,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn9view8",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Kaplan and others"
   },
   {
     "id": "chinchilla",
@@ -591,7 +644,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn10view4",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Hoffmann and others"
   },
   {
     "id": "ddpm",
@@ -602,7 +656,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn11view0",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Ho and Jain and Abbeel"
   },
   {
     "id": "star",
@@ -613,7 +668,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn11view1",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Zelikman and Wu and Mu and Goodman"
   },
   {
     "id": "selfrefine",
@@ -624,7 +680,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn11view2",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Madaan and others"
   },
   {
     "id": "rag",
@@ -635,7 +692,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn11view3",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Lewis and others"
   },
   {
     "id": "ttt",
@@ -646,7 +704,8 @@
     "kind": "Paper · ICML 2020",
     "checked": "2026-10-21",
     "evidence": "turn11view4",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Sun and others"
   },
   {
     "id": "llama",
@@ -657,7 +716,8 @@
     "kind": "Research paper",
     "checked": "2026-10-21",
     "evidence": "turn11view5",
-    "review": "primary abstract, bibliographic record or author page"
+    "review": "primary abstract, bibliographic record or author page",
+    "bibtexAuthors": "Touvron and others"
   },
   {
     "id": "ijepa",
@@ -668,7 +728,8 @@
     "kind": "Paper · CVPR 2023",
     "evidence": "turn19view0",
     "review": "primary abstract and official implementation overview",
-    "checked": "2026-10-21"
+    "checked": "2026-10-21",
+    "bibtexAuthors": "Assran and Duval and Misra and Bojanowski and Vincent and Rabbat and LeCun and Ballas"
   },
   {
     "id": "vjepa",
@@ -679,7 +740,8 @@
     "kind": "Research paper",
     "evidence": "turn18view1",
     "review": "primary paper: methodology, loss and evaluation",
-    "checked": "2026-10-21"
+    "checked": "2026-10-21",
+    "bibtexAuthors": "Bardes and Garrido and Ponce and Chen and Rabbat and LeCun and Assran and Ballas"
   },
   {
     "id": "vjepa2",
@@ -690,7 +752,8 @@
     "kind": "Research paper",
     "evidence": "turn18view0",
     "review": "primary paper: pretraining, action-conditioned post-training and limitations",
-    "checked": "2026-10-21"
+    "checked": "2026-10-21",
+    "bibtexAuthors": "Assran and others"
   },
   {
     "id": "ijepa-code",
@@ -701,7 +764,8 @@
     "kind": "Official code",
     "evidence": "turn19view1",
     "review": "official README: feature prediction and visualization decoder",
-    "checked": "2026-10-21"
+    "checked": "2026-10-21",
+    "bibtexAuthors": "{Meta FAIR}"
   },
   {
     "id": "vjepa2-code",
@@ -712,7 +776,8 @@
     "kind": "Official code",
     "evidence": "turn19view2",
     "review": "official repository and model/evaluation interface overview",
-    "checked": "2026-10-21"
+    "checked": "2026-10-21",
+    "bibtexAuthors": "{Meta FAIR}"
   },
   {
     "id": "neat",
@@ -723,7 +788,8 @@
     "kind": "Evolutionary Computation 10(2): 99–127",
     "checked": "2026-10-21",
     "evidence": "turn21view0",
-    "review": "Primary paper or university bibliographic record; mechanism checked against original NEAT text and primary HyperNEAT/CPPN abstracts."
+    "review": "Primary paper or university bibliographic record; mechanism checked against original NEAT text and primary HyperNEAT/CPPN abstracts.",
+    "bibtexAuthors": "Kenneth O. Stanley and Risto Miikkulainen"
   },
   {
     "id": "neat-followup",
@@ -734,7 +800,8 @@
     "kind": "JAIR 21: 63–100 · section 3",
     "checked": "2026-10-21",
     "evidence": "turn23view0",
-    "review": "Primary paper or university bibliographic record; mechanism checked against original NEAT text and primary HyperNEAT/CPPN abstracts."
+    "review": "Primary paper or university bibliographic record; mechanism checked against original NEAT text and primary HyperNEAT/CPPN abstracts.",
+    "bibtexAuthors": "Kenneth O. Stanley and Risto Miikkulainen"
   },
   {
     "id": "hyperneat",
@@ -745,7 +812,8 @@
     "kind": "Artificial Life 15(2): 185–212",
     "checked": "2026-10-21",
     "evidence": "turn21view1",
-    "review": "Primary paper or university bibliographic record; mechanism checked against original NEAT text and primary HyperNEAT/CPPN abstracts."
+    "review": "Primary paper or university bibliographic record; mechanism checked against original NEAT text and primary HyperNEAT/CPPN abstracts.",
+    "bibtexAuthors": "Kenneth O. Stanley and David B. D’Ambrosio and Jason Gauci"
   },
   {
     "id": "cppn",
@@ -756,7 +824,8 @@
     "kind": "Genetic Programming and Evolvable Machines 8: 131–162",
     "checked": "2026-10-21",
     "evidence": "turn23view1",
-    "review": "Primary paper or university bibliographic record; mechanism checked against original NEAT text and primary HyperNEAT/CPPN abstracts."
+    "review": "Primary paper or university bibliographic record; mechanism checked against original NEAT text and primary HyperNEAT/CPPN abstracts.",
+    "bibtexAuthors": "Kenneth O. Stanley"
   },
   {
     "id": "weight-tying",
@@ -767,7 +836,8 @@
     "kind": "EACL 2017; preprint 2016",
     "evidence": "turn10view3",
     "review": "primary abstract and bibliographic record",
-    "checked": "2026-10-22"
+    "checked": "2026-10-22",
+    "bibtexAuthors": "Ofir Press and Lior Wolf"
   },
   {
     "id": "tuned-lens",
@@ -778,7 +848,8 @@
     "kind": "Research paper; updated 2025",
     "evidence": "turn9view0",
     "review": "primary paper, lens definitions and fitting objective",
-    "checked": "2026-10-22"
+    "checked": "2026-10-22",
+    "bibtexAuthors": "Nora Belrose and others"
   },
   {
     "id": "jacobian-lens",
@@ -789,7 +860,8 @@
     "kind": "Transformer Circuits research publication",
     "evidence": "turn6view0",
     "review": "primary methods, matrix dimensions, normalization and limitations",
-    "checked": "2026-10-22"
+    "checked": "2026-10-22",
+    "bibtexAuthors": "Wes Gurnee and others"
   },
   {
     "id": "jacobian-lens-code",
@@ -800,7 +872,8 @@
     "kind": "Official reference implementation",
     "evidence": "turn9view3",
     "review": "official README, estimator convention and model adaptation",
-    "checked": "2026-10-22"
+    "checked": "2026-10-22",
+    "bibtexAuthors": "{Anthropic}"
   },
   {
     "id": "patching-best-practices",
@@ -811,7 +884,8 @@
     "kind": "ICLR 2024; preprint 2023",
     "evidence": "turn6view2",
     "review": "primary abstract and methodological study",
-    "checked": "2026-10-22"
+    "checked": "2026-10-22",
+    "bibtexAuthors": "Fred Zhang and Neel Nanda"
   },
   {
     "id": "patching-interpretation",
@@ -822,7 +896,8 @@
     "kind": "Research preprint",
     "evidence": "turn9view1",
     "review": "primary full text on interventions, controls and metrics",
-    "checked": "2026-10-22"
+    "checked": "2026-10-22",
+    "bibtexAuthors": "Stefan Heimersheim and Neel Nanda"
   },
   {
     "id": "probe-controls",
@@ -833,7 +908,8 @@
     "kind": "EMNLP-IJCNLP 2019",
     "evidence": "turn10view2",
     "review": "primary abstract, authors and publication record",
-    "checked": "2026-10-22"
+    "checked": "2026-10-22",
+    "bibtexAuthors": "John Hewitt and Percy Liang"
   },
   {
     "id": "attention-explanation",
@@ -844,7 +920,8 @@
     "kind": "NAACL 2019",
     "evidence": "turn8search0",
     "review": "primary abstract; experiments on the studied NLP architectures",
-    "checked": "2026-10-22"
+    "checked": "2026-10-22",
+    "bibtexAuthors": "Sarthak Jain and Byron C. Wallace"
   },
   {
     "id": "circuit-tracing",
@@ -855,6 +932,79 @@
     "kind": "Transformer Circuits research publication",
     "evidence": "turn9view2",
     "review": "primary replacement-model method and validation requirements",
-    "checked": "2026-10-22"
+    "checked": "2026-10-22",
+    "bibtexAuthors": "Emmanuel Ameisen and Jack Lindsey and Adam Pearce and others"
+  },
+  {
+    "id": "xiong-layernorm",
+    "title": "On Layer Normalization in the Transformer Architecture",
+    "authors": "Xiong et al.",
+    "year": 2020,
+    "url": "https://proceedings.mlr.press/v119/xiong20b.html",
+    "kind": "Paper · ICML 2020",
+    "checked": "2026-10-22",
+    "evidence": "Primary PMLR record opened and read: initialization-gradient comparison for pre-LN/post-LN, abstract and bibliographic record (turn93view1).",
+    "review": "Verified primary ICML/PMLR abstract and author/title/year metadata; article carefully scopes the algebraic local Jacobian comparison rather than promising universal training stability.",
+    "bibtexAuthors": "Xiong, Ruibin and Yang, Yunchang and He, Di and Zheng, Kai and Zheng, Shuxin and Xing, Chen and Zhang, Huishuai and Lan, Yanyan and Wang, Liwei and Liu, Tieyan"
+  },
+  {
+    "id": "jamba",
+    "title": "Jamba: A Hybrid Transformer-Mamba Language Model",
+    "authors": "Lieber et al.",
+    "year": 2024,
+    "url": "https://arxiv.org/abs/2403.19887",
+    "kind": "Research paper",
+    "checked": "2026-10-22",
+    "evidence": "https://arxiv.org/html/2403.19887v1 sections 2 and 3.1, Figure 1; retrieved turn96view3 / turn98view4 / turn101view4",
+    "review": "Primary paper confirms four blocks of eight layers, attention:Mamba ratio 1:7, and the reduction in attention KV arrays. Article makes no transferred throughput or benchmark claim.",
+    "bibtexAuthors": "Opher Lieber and Barak Lenz and Hofit Bata and Gal Cohen and Jhonathan Osin and Itay Dalmedigos and Erez Safahi and Shaked Meirom and Yonatan Belinkov and Shai Shalev-Shwartz and Omri Abend and Raz Alon and Tomer Asida and Amir Bergman and Roman Glozman and Michael Gokhman and Avashalom Manevich and Nir Ratner and Noam Rozen and Erez Shwartz and Mor Zusman and Yoav Shoham"
+  },
+  {
+    "id": "local-errors",
+    "title": "Deep Supervised Learning Using Local Errors",
+    "authors": "Hesham Mostafa, Vishwajith Ramesh & Gert Cauwenberghs",
+    "bibtexAuthors": "Hesham Mostafa and Vishwajith Ramesh and Gert Cauwenberghs",
+    "year": 2018,
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2018.00608/full",
+    "kind": "Frontiers in Neuroscience",
+    "checked": "2026-10-22",
+    "evidence": "turn99view0; turn103view2; turn108view2",
+    "review": "Primary full text, abstract and section 3: fixed random classifiers, actual supervised labels, local updates and matched-transpose alternative."
+  },
+  {
+    "id": "equilibrium-propagation",
+    "title": "Equilibrium Propagation: Bridging the Gap between Energy-Based Models and Backpropagation",
+    "authors": "Benjamin Scellier & Yoshua Bengio",
+    "bibtexAuthors": "Benjamin Scellier and Yoshua Bengio",
+    "year": 2017,
+    "url": "https://www.frontiersin.org/journals/computational-neuroscience/articles/10.3389/fncom.2017.00024/full",
+    "kind": "Frontiers in Computational Neuroscience",
+    "checked": "2026-10-22",
+    "evidence": "turn108view0; turn109view0; turn109view1",
+    "review": "Primary full text: free and weakly nudged equilibria, same neural dynamics, energy-based recurrent scope and gradient-limit assumptions."
+  },
+  {
+    "id": "hinton-concepts",
+    "title": "Learning distributed representations of concepts",
+    "authors": "Geoffrey E. Hinton",
+    "year": 1986,
+    "url": "https://www.cs.toronto.edu/~hinton/absps/families.pdf",
+    "kind": "Research paper",
+    "checked": "2026-10-22",
+    "evidence": "Direct primary PDF inspected at pages 7–8 (PDF indices 6–7); figure 5 setup, figure 6 and following representational interpretation. Web retrieval refs turn94view0 and turn97view0–2.",
+    "review": "Primary paper: 24 person IDs, 12 relation IDs, six-unit learned input codes; corresponding people across isomorphic trees, generation and branch features; no numeric broad generalization claim.",
+    "bibtexAuthors": "Geoffrey E. Hinton"
+  },
+  {
+    "id": "ddim",
+    "title": "Denoising Diffusion Implicit Models",
+    "authors": "Jiaming Song, Chenlin Meng & Stefano Ermon",
+    "bibtexAuthors": "Jiaming Song and Chenlin Meng and Stefano Ermon",
+    "year": 2020,
+    "url": "https://arxiv.org/abs/2010.02502",
+    "kind": "Research paper",
+    "checked": "2026-10-22",
+    "evidence": "Primary paper HTML https://arxiv.org/html/2010.02502v4, section 4.1 (deterministic sigma=0 reverse update) and section 2 (shared noise-prediction objective); browsed during implementation.",
+    "review": "Verified primary arXiv abstract, authors/date and full-text formulation. No empirical speed or quality claims added."
   }
 ]

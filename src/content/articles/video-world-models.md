@@ -28,8 +28,20 @@ $$
 
 $A=(a_t,\ldots,a_{t+H-1})$ is a candidate action sequence, $D$ a feature discrepancy and $C$ an optional constraint/cost term. This is a generic planning objective. The illustrated candidate scores are not learned-model measurements or reproduced paper results.
 
+The trace companion puts every candidate on **one common scalar-feature axis**, at the same predicted steps $k=0,1,2$. It sets $\lambda=0$ and $D(u,g)=|u-g|$, so the endpoint determines the score:
+
+| Candidate | $\widehat z_t$ | $\widehat z_{t+1}$ | $\widehat z_{t+2}$ | Distance to goal $+34$ | Distance to goal $-35$ |
+| --- | --- | --- | --- | --- | --- |
+| A | 0 | −18 | −35 | $\lvert -35-34\rvert=69$ | $\lvert -35-(-35)\rvert=0$ |
+| B | 0 | 10 | 34 | $\lvert 34-34\rvert=0$ | $\lvert 34-(-35)\rvert=69$ |
+| C | 0 | 6 | 12 | $\lvert 12-34\rvert=22$ | $\lvert 12-(-35)\rvert=47$ |
+
+These invented features are neither meters nor task-success probabilities. Candidate B wins at goal $+34$; A wins at goal $-35$. The slider also exposes intermediate goals, with alphabetical tie-breaking only as a deterministic display rule. Intermediate rollout values are visible even though this particular score uses only the endpoint. Choosing an endpoint-only loss is itself a modeling decision: a path can pass through an unacceptable state while finishing close to the goal. No such physical constraint is modeled by this scalar example.
+
 ## Close the loop
 Execute a prefix of the selected sequence, observe again and replan. This allows new evidence to replace a potentially inaccurate imagined rollout. It also costs sensing and planning time. An action horizon, number of sampled candidates, executed prefix and observation delay are separate quantities; reducing one does not automatically improve all the others.
+
+In the companion, $H=2$ proposed actions connect the three plotted feature times. The prefix control executes either $h=1$ or $h=2$ before a new measured observation replaces the imagined starting context. The feedback wire runs outside the chart so it cannot be mistaken for another candidate trajectory. Its abstract action labels do not specify an executable robot command or future state estimator; those remain necessary interfaces in a real planner. The expandable architecture figure retains the comparison with action-free video prediction.
 
 The V-JEPA 2 work demonstrates image-goal robot planning, with limitations including camera sensitivity and long-horizon behavior. These experiments support particular environments and tasks, not arbitrary physical understanding. A feature-space goal can also omit a requirement that matters to a user. [2](#ref-vjepa2)
 

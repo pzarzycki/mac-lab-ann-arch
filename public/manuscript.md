@@ -4,7 +4,7 @@
 
 Editorial update: 22 October 2026. Original sources reviewed 21 October; embedding and interpretability additions reviewed 22 October.
 
-42 articles · 6 research domains · 78 primary references.
+42 articles · 6 research domains · 84 primary references.
 
 This manuscript is the content source for the interactive site. It is a curated conceptual map, not an exhaustive literature review. Formulas define local conventions; theoretical claims, empirical findings and illustrative calculations are distinguished. Refer to docs/CONSPECT.md for the exploration map and coverage, and docs/PLAN.md for implementation decisions.
 
@@ -57,6 +57,8 @@ The figure uses four invented two-dimensional rows: $e_A=(1,0)$, $e_B=(0,1)$, $e
 $$
 v(\alpha)=\alpha e_A+(1-\alpha)e_B=(\alpha,1-\alpha).
 $$
+
+In mixture mode the input is the probability-like coefficient vector $p=(\alpha,1-\alpha,0,0)^{\mathsf T}$, and the operation is $E^{\mathsf T}p$: a weighted row combination. It is a single-row gather only at the endpoints. The table subtitle changes with this operation. Coordinate ticks identify zero and the unit scale; the connecting trace shows one output dot product, $z_A=(1,0)\cdot v=\alpha$.
 
 At $\alpha=1/2$, a tied, identity-normalization readout has logits $(1/2,1/2,-1/2,-1/2)$. A and B tie; the vector has not become a new vocabulary ID. A learned soft prompt can also lie outside the convex hull of the input table. Compare [soft prompts and continuous thought](#article-soft-latent-reasoning).
 
@@ -144,6 +146,15 @@ $\gamma,\beta\in\mathbb R^d$ are learned scale and offset; $\epsilon>0$ is a num
 ### Read the vector figure
 Select a destination token to highlight its causal attention inputs. Switch between pre-LN and post-LN to see where normalization moves. Each colored vertical path is one token's residual state; bypass paths preserve the same token identity. The drawing shows one head for legibility and labels the omitted multi-head projection. It is a structural figure, not measured activation data.
 
+The companion inspector isolates the additions using synthetic width-3 vectors. For token 3, start with $h=[1,-1,0.5]$, an attention write $\Delta a=[0.5,0.25,-0.5]$, and an MLP write $\Delta m=[-0.25,0.5,1]$. Coordinate-wise addition gives
+
+$$
+h+\Delta a=[1.5,-0.75,0],\qquad
+h+\Delta a+\Delta m=[1.25,-0.25,1].
+$$
+
+Changing only the first coordinate of $\Delta a$ changes only the first coordinate of these sums. This is an arithmetic intervention with the other writes held fixed. In a learned network, changing an earlier state can also change later attention and MLP writes; the inspector does not claim those computations remain fixed naturally.
+
 ```python
 # H: [batch, positions, d_model]; normalize the last dimension only
 U = norm_attention(H)
@@ -155,6 +166,15 @@ H = H + mlp(norm_mlp(H))
 ### Why the identity path matters
 For $y=x+F(x)$, the Jacobian is $I+J_F$. This introduces a direct gradient route, a key contribution of residual learning popularized by ResNet. It does not guarantee stable optimization for arbitrary depth, initialization or normalization. ResNet is a central architectural predecessor, not an incidental analogy. [2](https://arxiv.org/abs/1512.03385)
 
+The normalization toggle changes the scope of that identity route. For one sublayer, the two placements are
+
+$$
+y_{\mathrm{pre}}=x+F(\operatorname{LN}(x)),\qquad
+y_{\mathrm{post}}=\operatorname{LN}(x+F(x)).
+$$
+
+Their input Jacobians are $I+J_FJ_{\mathrm{LN}}$ and $J_{\mathrm{LN}}(I+J_F)$, respectively, with each Jacobian evaluated at its own input. Pre-LN leaves a direct identity summand outside the normalization branch; post-LN passes the whole residual sum through normalization before the next block. This local comparison is not a guarantee about gradients through an entire trained model, which may also include a final normalization. Normalization placement has distinct initialization-gradient behavior under the assumptions studied by Xiong and colleagues. [5](https://proceedings.mlr.press/v119/xiong20b.html) See [normalization, position and gated MLPs](#article-normalization-position) for the feature transformations themselves.
+
 ### Questions worth testing
 Remove the residual path while keeping parameter count comparable; inspect gradient norms by layer. Then vary normalization placement and initialization separately. A change in training stability does not by itself explain the semantic content of the residual stream. For an inference optimization with unchanged learned states, continue to [KV-cache memory](#article-kv-cache).
 
@@ -164,6 +184,7 @@ Remove the residual path while keeping parameter count comparable; inspect gradi
 2. He, Zhang, Ren & Sun (2015). [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385). Research paper.
 3. Ba, Kiros & Hinton (2016). [Layer Normalization](https://arxiv.org/abs/1607.06450). Research paper.
 4. Touvron et al. (2023). [LLaMA: Open and Efficient Foundation Language Models](https://arxiv.org/abs/2302.13971). Research paper.
+5. Xiong et al. (2020). [On Layer Normalization in the Transformer Architecture](https://proceedings.mlr.press/v119/xiong20b.html). Paper · ICML 2020.
 
 ### Related topics
 
@@ -203,8 +224,28 @@ $$
 
 $M_{ij}=0$ for allowed source positions and $-\infty$ otherwise. A causal decoder allows $j\le i$. Every row of $A$ is a distribution over allowed source positions for one destination. The scale $\sqrt{d_k}$ controls the magnitude of dot products under common initialization assumptions. [1](https://arxiv.org/abs/1706.03762)
 
+With row-vector token states, $W_Q,W_K\in\mathbb R^{d\times d_k}$ and $W_V\in\mathbb R^{d\times d_v}$. The attention coefficients form $A\in\mathbb R^{n\times n}$ and the output is $O\in\mathbb R^{n\times d_v}$. A **query** is a destination's read request; a **key** is a source's matching feature; a **value** carries the content to combine. Explicitly,
+
+$$
+O_i=\sum_{j\text{ allowed}} A_{ij}v_j.
+$$
+
+The scaling rationale assumes roughly independent, zero-mean, unit-variance query/key coordinates: a sum of $d_k$ coordinate products then has variance about $d_k$. Dividing by $\sqrt{d_k}$ keeps score variance near one. Without this adjustment large score differences can push softmax toward saturation, where its gradients become small. Learned coordinates need not satisfy these assumptions exactly. [1](https://arxiv.org/abs/1706.03762)
+
+### Work through one row
+The numeric panel starts at destination 3 with synthetic $q_3=[\sqrt2,0]$, keys $[1,0],[0,1],[1,1],[-1,0]$, and values $[1,0],[0,2],[2,1],[-1,1]$. Scaled scores are $[1,0,1,-1]$. The causal mask changes the fourth to $-\infty$, so
+
+$$
+A_{3,:}=\frac{[e,1,e,0]}{2e+1}\approx[0.422,0.155,0.422,0],\qquad
+O_3=\left[\frac{3e}{2e+1},\frac{2+e}{2e+1}\right]\approx[1.267,0.733].
+$$
+
+The output is a mixture of value coordinates, not a selection of the largest score alone. Edit the query to change its match against every key; edit source 3's value to change its contribution without changing any coefficient. The displayed numbers are computed from these toy inputs and are not empirical model attention.
+
 ### Multiple heads
 Head $a$ has its own projections. Concatenating the outputs and applying $W_O$ returns the model width. Heads are not token streams, and the output projection can mix head features before the residual addition. Bahdanau attention provided an influential learned alignment mechanism in recurrent translation; the Transformer made attention the central sequence-mixing operation. [2](https://arxiv.org/abs/1409.0473)
+
+For $h$ heads of value width $d_v$, concatenation has shape $n\times(hd_v)$ and $W_O\in\mathbb R^{hd_v\times d}$, yielding an $n\times d$ residual write. Self-attention takes queries, keys and values from the same sequence; cross-attention takes queries from the destination sequence and keys/values from a source sequence, so its coefficient matrix can be rectangular. [1](https://arxiv.org/abs/1706.03762)
 
 ### The interactive mask
 Choose causal, sliding-window causal, or full attention. The grid displays **connectivity**, not learned attention weights. In a sliding window of width $w$, destination $i$ can access $\max(0,i-w+1)\le j\le i$. The plotted edge count is computed from this rule. Full attention is useful for encoders and denoisers, but using it unchanged in next-token training would leak future targets.
@@ -217,7 +258,7 @@ O = A @ V
 ```
 
 ### Evidence and limits
-Attention weights depend on the input, projection parameters and head. A large coefficient alone is not a causal attribution of the final prediction: values, output projections, residual pathways and later layers also matter. The lab deliberately avoids fabricated weight heatmaps.
+Attention weights depend on the input, projection parameters and head. A large coefficient alone is not a causal attribution of the final prediction: values, output projections, residual pathways and later layers also matter. The graph panel displays deterministic connectivity; the numeric panel displays explicitly synthetic, calculated coefficients. Neither presents invented measurements of a trained model.
 
 ### Experiment
 Compare dense and windowed masks on a synthetic task with a dependency outside the window. Hold parameter count, training tokens and evaluation lengths fixed. Report both task accuracy and actual wall-clock time; fewer edges do not automatically imply faster kernels. Continue to [exact and sparse attention](#article-efficient-attention).
@@ -263,6 +304,15 @@ $$
 
 $x,\gamma\in\mathbb R^d$; $\epsilon$ is positive. RMSNorm and LN are not interchangeable names. Both usually normalize the last feature dimension in a Transformer implementation, independently for each token. [1](https://arxiv.org/abs/1607.06450) [2](https://arxiv.org/abs/1910.07467)
 
+For comparison, LayerNorm uses the centered feature variance:
+
+$$
+\mu=\frac1d\sum_kx_k,\quad \sigma^2=\frac1d\sum_k(x_k-\mu)^2,\qquad
+\operatorname{LN}(x)=\gamma\odot\frac{x-\mu}{\sqrt{\sigma^2+\epsilon}}+\beta.
+$$
+
+$\gamma$ is a learned per-feature gain and $\beta$ a learned offset in the affine LN form; implementations can omit the bias. Before affine parameters, $x=[-1,1,2]$ has mean $2/3$, variance $14/9$, and mean square $2$. Ignoring the tiny $\epsilon$ only for this hand calculation, LN gives approximately $[-1.336,0.267,1.069]$ while RMSNorm gives $[-0.707,0.707,1.414]$. The panel uses $\epsilon=10^{-5}$ exactly. Adding the same scalar to every feature leaves centered LN unchanged, but generally changes RMSNorm. Learned gains and offsets mean the final outputs need not have unit RMS or zero mean. [1](https://arxiv.org/abs/1607.06450) [2](https://arxiv.org/abs/1910.07467)
+
 ### Position changes attention geometry
 Without positional information or another source of ordering, self-attention does not intrinsically identify sequence positions. Rotary position embedding (RoPE) rotates pairs of query/key coordinates according to position. With a compatible block-diagonal rotation $R_i$,
 
@@ -273,6 +323,14 @@ $$
 
 The last identity expresses relative displacement in the dot product. Here $i,j$ are positions, not feature indices. RoPE generally modifies queries and keys, rather than adding a position vector to the residual stream. Its algebra does not guarantee arbitrary-length generalization. [3](https://arxiv.org/abs/2104.09864)
 
+For one pair, define the rotation at angular frequency $\omega$:
+
+$$
+R_i(\omega)=\begin{bmatrix}\cos(i\omega)&-\sin(i\omega)\\\sin(i\omega)&\cos(i\omega)\end{bmatrix}.
+$$
+
+In a head of query/key width $d_k$, apply these $2\times2$ rotations to coordinate pairs in an even-dimensional rotated subspace, with a frequency for each pair; the full $R_i$ is block diagonal. Since $R_i^\top R_j=R_{j-i}$, the intermediate step is $(R_iq_i)^\top(R_jk_j)=q_i^\top R_i^\top R_jk_j=q_i^\top R_{j-i}k_j$. The panel isolates one pair: $q=[1,0]$, $k=[0,1]$, $\omega=\pi/6$. At $i=0,j=1$ both sides equal $-1/2$. Shifting both positions by the same amount preserves this number while rotating both arrows. [3](https://arxiv.org/abs/2104.09864)
+
 ### The position-wise network
 A SwiGLU-style MLP can be written, using column-vector convention, as
 
@@ -281,6 +339,10 @@ $$
 $$
 
 $W_g,W_u\in\mathbb R^{m\times d}$, $W_o\in\mathbb R^{d\times m}$, and $\operatorname{SiLU}(z)=z\operatorname{sigmoid}(z)$. The intermediate width is $m$. This is a gated feature transform applied separately at each token with shared parameters. It does not supply sequence mixing. [4](https://arxiv.org/abs/2002.05202)
+
+The gate and up branches read the same $x$ **in parallel**, then multiply coordinate by coordinate before the down projection. In the toy panel, $x=[1,1]$ gives gate preactivations $[1,1,0]$, up values $[2,0,1]$, product approximately $[1.462,0,0]$, and down-projected output $[1.462,0]$ using the displayed matrices. A SiLU gate is not a probability in $[0,1]$: it can be negative or greater than one.
+
+An ordinary bias-free FFN $W_2\phi(W_1x)$ has $2dm$ weights at intermediate width $m$; this bias-free SwiGLU has $3dm$. Thus equal parameter count calls for a gated width about two-thirds of the ordinary width, subject to implementation rounding. Equal width would spend more parameters. Comparisons of quality need a matched budget and controlled training setup. [4](https://arxiv.org/abs/2002.05202)
 
 ### Implementation discipline
 ```python
@@ -348,8 +410,15 @@ optimizer.step()
 
 Ignore padded positions in a real loss. An optimizer step usually aggregates a batch; gradient accumulation may aggregate several microbatches before that step.
 
+### Align one short sequence
+Let $B$ be batch size, $T$ the number of scored input positions, and $V$ vocabulary size. Integer inputs and targets each have shape $B\times T$; logits have shape $B\times T\times V$. Softmax over the last axis supplies a probability distribution for each position's next target. Flattening in the code preserves that input/target alignment.
+
+For the illustrative sequence `[BOS, The, model, learns, EOS]`, use inputs `[BOS, The, model, learns]` and targets `[The, model, learns, EOS]`, so $B=1,T=4$. At output position 3, the causal model reads `[BOS, The, model]` and scores `learns`; it cannot read the fourth input. A toy target probability $0.60$ contributes $-\ln(0.60)\approx0.511$ **nats**. With stipulated target probabilities $[0.70,0.50,0.60,0.80]$, the unmasked mean loss is about $0.446$ nats. Logarithms here are natural; perplexity is $\exp(\text{mean NLL})$. These numbers illustrate loss arithmetic and are not measurements of a language model.
+
 ### Prefill versus decode
 **Prefill** processes the prompt and constructs cached keys/values. **Decode** adds generated positions, usually one per target-model step. Earlier tokens are available, but the next sampled token is unknown until its distribution has been evaluated. Caching reuses causal computations; it does not remove dependence on previous generated tokens. See [KV cache](#article-kv-cache).
+
+The inference side starts with the three-token prompt `[BOS, The, model]`. Prefill produces three cached K/V positions per layer and prompt logits of shape $1\times3\times V$. The **last** prompt-position distribution predicts the first new token. Suppose sampling returns `learns`: the emitted token is not yet in the cache. The following decode call consumes `learns`, projects its K/V at every layer and appends position 4. Its new query reads positions 1–4, and logits of shape $1\times1\times V$ predict the following token, such as `EOS`. Move the phase control to distinguish prefill, sampling and consumption; sampling itself does not append cache entries.
 
 ### Instruction tuning and preferences
 Supervised fine-tuning changes the data and loss mask, often scoring assistant completions rather than every input token. RLHF adds preference learning and policy optimization. DPO derives a preference objective relative to a reference policy; these are training procedures, not new kinds of attention. [3](https://arxiv.org/abs/2203.02155) [4](https://arxiv.org/abs/2305.18290)
@@ -419,6 +488,18 @@ Move a router logit and change $k$. Only highlighted experts execute in the illu
 ### Evaluate the right quantities
 Compare training compute, communication volume, inference latency at representative batch sizes, parameter storage and downstream quality. Report dropped tokens if capacity-limited routing drops them. A single “trillion parameter” label does not establish superiority over a dense baseline at matched cost.
 
+### Trace data and gate signals separately
+For one explicit vector convention, $h\in\mathbb R^d$, $W_r\in\mathbb R^{E\times d}$, $z\in\mathbb R^E$, and each expert returns $E_e(h)\in\mathbb R^d$. The router receives $h$ to choose **where** to compute. Each chosen expert also receives the original $h$ as its **data**; it does not process the router's probability vector. The selected gate multiplies the expert's output vector before summation.
+
+The synthetic lab uses $d=2$, $h=[1,2]$ and $E_e(h)=[e h_1,h_2-e]$ for one-based expert index $e$. At its default logits, top two selects experts 3 and 1, with gates about $0.690$ and $0.310$. Their outputs are $[3,-1]$ and $[1,1]$, giving $y\approx[2.380,-0.380]$ when both routes are admitted. These small fixed experts make the sum inspectable; they are not learned specializations.
+
+### Capacity is a batch constraint
+Define expert capacity $C$ as the maximum number of token–expert assignments that an expert may admit in a batch. A useful general top-$k$ bookkeeping convention is $C=\lceil\phi Bk/E\rceil$, where $B$ is tokens, $E$ experts and $\phi$ a capacity factor; exact rounding and policies differ across systems. Switch's top-one setting uses the corresponding tokens-per-expert capacity factor. [1](https://arxiv.org/abs/2101.03961)
+
+In the six-token lab, shared default preferences and $k=2$ produce demand $[6,0,6,0,0,0]$. With $C=2$, experts 1 and 3 each accept two routes: four assignments execute and eight overflow. Admission is in token order, with overflow **dropped from this expert branch**, and surviving gates are not renormalized. The enclosing residual bypass can still carry token data; dropping a branch contribution is not deleting a token from the sequence. Select a later batch token to inspect the resulting zero expert-branch output. Cyclic preferences rotate the same logit vector by token index to illustrate a balanced demand pattern. Increasing $k$ raises total requested assignments from $B$ to $Bk$ even when weights sum to one for every token.
+
+One concrete balancing objective in Switch is proportional to $E\sum_e f_eP_e$: $f_e$ is the fraction of tokens dispatched to expert $e$, and $P_e$ the mean router probability for that expert over the batch. The probability term supplies a gradient despite hard dispatch counts. Encouraging uniform load can reduce overload, but its coefficient trades routing preference against balance; it neither guarantees equal realized counts nor eliminates capacity overflow. The lab's cyclic pattern is a hand-built comparison, not training with that loss. [1](https://arxiv.org/abs/2101.03961)
+
 ### Primary references
 
 1. Fedus, Zoph & Shazeer (2021). [Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity](https://arxiv.org/abs/2101.03961). Paper · JMLR.
@@ -485,6 +566,16 @@ This example illustrates the constraint and uses a fixed small matrix; it is not
 ### Evidence and limits
 The mHC paper combines connectivity constraints with system optimizations. Its empirical gains must be read with the training configuration and overhead. Multiple lanes cost memory traffic; the mathematical constraint alone does not eliminate that cost. Compare against both standard residual and unconstrained HC baselines.
 
+### Follow one feature through all three maps
+The lab specializes the displayed update to one token with $m=3,d=1$: $X=[1,2,-1]^\top$. Every output lane is calculated as $(RX)_i=\sum_jR_{ij}X_j$. After sufficient normalization, these are convex combinations of the three inputs. If both marginal constraints hold exactly, their sum is also preserved: $\mathbf1^\top RX=\mathbf1^\top X=2$. Finite Sinkhorn error makes the latter approximate; raw positive weights at zero iterations have neither guarantee.
+
+The lower pathway completes an illustrative HC update rather than stopping at normalization. It sets $a=[0.5,0.25,0.25]^\top$, so $a^\top X=0.75$; a toy token-local sublayer gives $F=\tanh(0.75)\approx0.635$. Redistribution with $b=[1,0.5,0]^\top$ adds approximately $[0.635,0.318,0]^\top$ to $RX$. Thus conservation of the **mixer** does not imply conservation of the whole residual update. Changing lane 3 updates aggregation, mixing and the final sum together. In a real attention sublayer, aggregation occurs for every token before cross-token attention inside $F$.
+
+The positive seed is $[ [\exp(\mathrm{bias}),0.6,1.2],[0.4,1.8,0.8],[1.5,0.3,1] ]$. At zero iterations it is explicitly labeled raw. Logarithmically bounded wires preserve readability even at bias 5, while numeric cells display the unbounded values.
+
+### A scoped empirical comparison
+The original HC paper motivates learned expanded connectivity; mHC subsequently adds constraints and an optimized implementation. In mHC's own 27B comparison, trained on 262B tokens with four residual lanes and 20 Sinkhorn iterations, Table 4 reports 3-shot BBH exact match of 43.8 for the residual baseline, 48.9 for HC and 51.0 for mHC. This compares the paper's configurations, not every HC design. The paper separately reports 6.7% additional training time with expansion four after its infrastructure optimizations; a stochastic matrix alone does not establish that overhead. [3](https://arxiv.org/html/2512.24880v2)
+
 ### Primary references
 
 1. He, Zhang, Ren & Sun (2015). [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385). Research paper.
@@ -532,7 +623,7 @@ Universal Transformers combined self-attention with depth recurrence and adaptiv
 ### More loops are not a theorem of better reasoning
 Convergence to a fixed point requires assumptions. A trained map can oscillate, diverge or reach a stable but unhelpful state. A standard Transformer checkpoint cannot be assumed to support arbitrary repeated layers simply because the tensors have matching shapes.
 
-The lab displays repeated applications of a small **toy contraction**, $z_{k+1}=\tanh(0.6z_k+0.4u)$. Its convergence illustrates recurrence only; the curve is not a benchmark for an actual looped language model.
+The lab’s contraction mode displays repeated applications of a small **toy contraction**, $z_{k+1}=\tanh(0.6z_k+0.4u)$. Its convergence illustrates recurrence only; the curve is not a benchmark for an actual looped language model.
 
 ```python
 h = initialize(tokens)
@@ -546,6 +637,23 @@ Backpropagation through unrolled loops can increase activation memory. Truncatio
 
 ### Evaluation
 Plot accuracy versus total FLOPs and latency across loop counts, including counts outside training. Compare with a larger unshared baseline and with extra output-token reasoning. Report stopping overhead. Distinguish looping a hidden computation from [Coconut-style](#article-soft-latent-reasoning) feedback through a token interface. [3](https://arxiv.org/abs/2412.06769)
+
+### What is shared, and when does computation stop?
+The upper figure keeps the sequence axis visible: the three rows of $H^{(0)},H^{(1)},H^{(2)}$ represent the **same three tokens**, each with $d$ features. The intervening copies of $F_\theta$ use the same parameters, including attention across token rows. Input conditioning can enter each iteration; readout comes after a chosen number of loops. Only emitting a new token advances sequence position. The architecture drawing is schematic; the scalar plot below it is a separately specified dynamical example.
+
+| Choice | Universal Transformer | Recurrent-depth study |
+| --- | --- | --- |
+| Shared computation | Self-attention and transition repeated over depth | A four-layer recurrent core between two-layer prelude and coda |
+| Initial state / conditioning | Token embeddings; position and depth signals | Sampled latent state; prelude features injected into each core iteration |
+| Halting | Adaptive computation can halt separately at each position | Fixed loop budgets, plus an evaluated per-generated-token exit rule |
+| Training / evaluation depth | Task-dependent fixed-depth and adaptive variants | Random training depths around a recurrence target of 32; validation includes 1, 4, 8, 16, 32 and 64 loops |
+
+The later model backpropagates through the last eight recurrent iterations. Its demonstrated exit rule stops when successive output distributions have KL divergence below $5\times10^{-4}$, then emits a token. These are specific design choices, not requirements of every looped model. [1](https://arxiv.org/abs/1807.03819) [2](https://arxiv.org/abs/2502.05171)
+
+### Stability and stopping are different questions
+The auxiliary lab retains the original contraction $z_{k+1}=\tanh(0.6z_k+0.4u)$, initialized at $z_0=-1$. Because $|\tanh'|\le1$, its Lipschitz bound is $0.6$. The dashed horizontal line marks a numerically approximated fixed point, not a target answer.
+
+Two additional fully specified maps expose the caveat. $z_{k+1}=-z_k$ gives the bounded two-cycle $-1,1,-1,1,\ldots$; $z_{k+1}=1.15z_k$ grows in magnitude from this initialization. Neither map is claimed to reproduce a trained Transformer. The optional lab stopping rule tests $|z_{k+1}-z_k|<0.01$, with a hard loop budget. The display distinguishes meeting tolerance from exhausting that budget. A scalar tolerance is not the paper's KL rule, and reaching either sort of tolerance is not a proof of task correctness.
 
 ### Primary references
 
@@ -610,11 +718,27 @@ The Mamba paper's task and throughput results belong to its tested models and ha
 ### Experiment
 Use a long-range associative-recall task with distractors and variable delays. Test lengths beyond training. Measure state size alongside accuracy. Compare against attention at a matched memory or compute budget, rather than only matching model parameters.
 
+### Choose shapes before interpreting selection
+For one input channel, take $x_t,y_t\in\mathbb R$, $s_t\in\mathbb R^N$, $\overline A_t\in\mathbb R^{N\times N}$, $\overline B_t\in\mathbb R^{N\times1}$ and $C_t\in\mathbb R^{1\times N}$. The state update produces the next carried memory. The readout branches from that state and leaves the recurrence; **$y_t$ is not substituted for $s_t$**. Multi-channel implementations add channel and batch axes and often use diagonal structure rather than dense $N\times N$ matrices.
+
+Mamba's selection makes $\Delta_t,B_t,C_t$ input-dependent while its continuous-time $A$ is a learned structured parameter. Discretization makes the effective transition input-dependent: for example $\overline A_t=\exp(\Delta_t A)$. Thus saying “selective $\overline A_t$” does not mean that a fresh unconstrained continuous matrix is predicted at each token. The learned timestep controls retention; the write and read parameters control what enters state and what is exposed. [1](https://arxiv.org/abs/2312.00752)
+
+### A six-token trace
+The synthetic lab reduces the shapes to $N=1$. Start at $s_0=0$. On a write token choose $(a_t,b_t)=(0,1)$; on noise or read tokens choose $(1,0)$. Set $c_t=1$ on read tokens and zero otherwise. This is a hand-written selective rule, not Mamba's learned gate.
+
+For “write 2,” $s_1=0\cdot0+1\cdot2=2$. For the next distractor “noise 9,” $s_2=1\cdot2+0\cdot9=2$. Its readout is zero, yet the next prior remains 2. A second distractor leaves it intact; the read token exposes 2. A later “write −1” overwrites state, so the final read returns −1. The alternative fixed filter uses $a=b=0.5$ at every step: its first two states are 1 and 5, showing how a distractor can enter a nonselective summary. The displayed table computes every retained term, write term, state and readout.
+
+The memory comparison chooses its own exact toy widths: four recurrent FP16 scalars require eight bytes, while K and V of width two each require $2T\cdot2\cdot2=8T$ bytes at length $T$. This describes only those arrays, not full Mamba or Transformer memory; real recurrent blocks may also keep convolution state.
+
+### One concrete hybrid layout
+Jamba's initial released configuration uses four blocks of eight layers, each mixing one attention layer with seven Mamba layers; every layer also has an MLP or expert feed-forward stage. Its attention layers retain token-indexed K/V, while its Mamba layers retain recurrent and convolution states. The placement of only some attention layers reduces the number of growing K/V arrays but preserves explicit attention in the network. This is a documented design point, not a universal best ratio or a claim that an SSM state can reconstruct all prior keys and values. [4](https://arxiv.org/abs/2403.19887)
+
 ### Primary references
 
 1. Gu & Dao (2023). [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/abs/2312.00752). Research paper.
 2. Vaswani et al. (2017). [Attention Is All You Need](https://arxiv.org/abs/1706.03762). Research paper.
 3. Geiping et al. (2025). [Scaling up Test-Time Compute with Latent Reasoning: A Recurrent Depth Approach](https://arxiv.org/abs/2502.05171). Research paper.
+4. Lieber et al. (2024). [Jamba: A Hybrid Transformer-Mamba Language Model](https://arxiv.org/abs/2403.19887). Research paper.
 
 ### Related topics
 
@@ -645,6 +769,8 @@ Use a long-range associative-recall task with distractors and variable delays. T
 ### Why cache keys and values?
 In a causal decoder, earlier positions cannot read later positions. With fixed weights and the same positional convention, their layerwise keys and values can therefore be reused when a new token arrives. Queries for the new position still read the retained context. A KV cache is intermediate inference state, not new model parameters. [1](https://arxiv.org/abs/1911.02150)
 
+After a three-position prefill, each layer holds keys and values separately with shape $[B,H_{\mathrm{KV}},3,d_h]$. Consume one generated token and project its new key/value tensors, each $[B,H_{\mathrm{KV}},1,d_h]$. Append once on the position axis, obtaining $[B,H_{\mathrm{KV}},4,d_h]$. The new query has shape $[B,H_Q,1,d_h]$ and reads the four retained positions; its scores have shape $[B,H_Q,1,4]$. Every query head reads its assigned K/V head. This transition repeats separately at each layer. The new query and attention output are computed for the new position; earlier queries and attention outputs need not be recomputed to extend this ordinary causal cache. [1](https://arxiv.org/abs/1911.02150) [2](https://arxiv.org/abs/2305.13245)
+
 ### The memory calculation
 For a conventional full-context cache, assume equal key/value dimensions and one stored representation per KV head:
 
@@ -662,6 +788,8 @@ With $B=1,L=32,T=8192,H_{\mathrm{KV}}=8,d_h=128,s=2$, the result is **1 GiB**. I
 - **GQA:** groups of query heads share an intermediate number of KV heads.
 
 GQA changes the architecture's representation, rather than merely changing an allocator. The original work also studied converting multi-head checkpoints through additional training. [2](https://arxiv.org/abs/2305.13245)
+
+With equal-sized groups, $H_Q$ must be divisible by $H_{\mathrm{KV}}$ and each K/V head serves $H_Q/H_{\mathrm{KV}}$ query heads. In the calculator's 32-query-head example, 8 KV heads mean 4 queries per group. For zero-based query-head index $a$, its KV-head index is $\lfloor a/(H_Q/H_{\mathrm{KV}})\rfloor$. Change the KV-head selector to trace the same sharing in the schematic: retained tensors scale with KV heads, while the query-head count stays 32. The toy cache timeline below uses only three or four positions to make append/read order visible; the calculator's longer context remains its independent memory estimate. [2](https://arxiv.org/abs/2305.13245)
 
 ### Orthogonal improvements
 PagedAttention organizes cached tensors in blocks to reduce fragmentation and permit sharing; it does not replace GQA's mathematical projection. Multi-head latent attention (MLA), used in DeepSeek models, stores a compressed latent representation with an architecture-specific reconstruction and positional treatment. The simple formula above must not be reused as an exact MLA accounting model. [3](https://arxiv.org/abs/2309.06180) [4](https://arxiv.org/abs/2412.19437)
@@ -709,6 +837,23 @@ End-to-end latency also depends on memory bandwidth, kernel layout, scheduling, 
 
 ### Compute versus materialization
 Dense attention evaluates pairwise query–key scores. The $n\times n$ score matrix is expensive to store, but an implementation need not materialize the entire matrix in high-bandwidth memory. FlashAttention tiles the computation and uses online softmax bookkeeping to reduce memory traffic while computing the same dense attention function, up to floating-point differences. It is **exact attention**, not a sparse approximation. [1](https://arxiv.org/abs/2205.14135)
+
+For a query tile $Q_b\in\mathbb R^{B_r\times d_k}$, load key/value tiles $K_c\in\mathbb R^{B_c\times d_k}$ and $V_c\in\mathbb R^{B_c\times d_v}$ into on-chip SRAM. The temporary score tile is $B_r\times B_c$. Conventional materialization writes full score and probability arrays, each $n\times n$, to HBM. Tiling avoids these full arrays; output and per-row normalization state remain necessary. [1](https://arxiv.org/abs/2205.14135)
+
+### Why tile softmaxes can merge
+For one query row, retain a running maximum $m$, normalizer $\ell$, and unnormalized value accumulator $u$. Given a tile of allowed scaled scores $s_j$ and values $v_j$, update
+
+$$
+m'=\max(m,\max_j s_j),\qquad a=\exp(m-m'),
+$$
+$$
+\ell'=a\ell+\sum_j\exp(s_j-m'),\qquad
+u'=au+\sum_j\exp(s_j-m')v_j,\qquad O=u'/\ell'.
+$$
+
+Initialize $m=-\infty,\ell=0,u=0$, treating the initial rescaling term as zero. The factor $a$ expresses old contributions in the new maximum's scale; adding independently normalized tile outputs without this correction would be wrong. The final ratio equals softmax over all permitted scores. [1](https://arxiv.org/abs/2205.14135)
+
+The synthetic panel uses scores $[0,1,2,-1]$, values $[1,0],[0,2],[2,1],[-1,1]$, and two tiles. After tile 1, $m=1$, $\ell=1+e^{-1}$ and $u=[e^{-1},2]$. Tile 2 raises the maximum to 2 and rescales that state by $e^{-1}$ before adding its terms. The final output is approximately $[1.343,1.150]$, matching the dense calculation. Changing the third score recomputes both routes. All four edges remain present: this is an execution change, unlike the sparse mask below. The example isolates the forward arithmetic and does not simulate GPU timing.
 
 ### A sparse graph changes the function
 Windowed attention restricts each token to a neighborhood. Additional global tokens or other structured connections can restore longer-range paths. Longformer is a primary example of combining local and global connectivity. A decoder adaptation must still enforce causality; the original pattern should not be copied without considering its prediction objective. [2](https://arxiv.org/abs/2004.05150)
@@ -780,10 +925,36 @@ $s>0$ is scale, $z$ zero point and $[q_{\min},q_{\max}]$ the code range. Scale g
 
 Weight quantization, activation quantization and KV-cache quantization change different memory terms. Compression can perturb output distributions. The bit width alone is not a quality or speed guarantee, and scales and packing add storage overhead.
 
+The toy quantizer groups five synthetic weights $[-1.3,-0.35,0.2,0.9,2.1]$. At four bits, $s=0.25$, $z=8$ and unsigned codes $0\ldots15$, it stores $[3,7,9,12,15]$ and reconstructs $[-1.25,-0.25,0.25,1,1.75]$. The last value clips at the representable maximum; smaller rounding errors affect the others. The panel shows signed residual errors and mean squared error as scale and bit width change. Its stated format needs $\lceil5\times4/8\rceil=3$ packed payload bytes plus 4 bytes for one float32 scale and 1 byte for one uint8 zero point, totaling 8 bytes versus 20 bytes of float32 weights. Real grouping, alignment and metadata layouts differ; this simple quantizer is not GPTQ.
+
 ### Speculate, then verify
 A cheap draft model proposes several tokens. The target model evaluates them together and an acceptance/correction procedure preserves the target distribution under the algorithm's assumptions. This differs from accepting the draft whenever two argmax tokens agree. [2](https://arxiv.org/abs/2211.17192)
 
 For a proposed token $x$ from draft distribution $q$, acceptance uses $\min(1,p(x)/q(x))$, where $p$ is the target distribution conditioned on the corresponding accepted prefix. After a rejection, exact correction samples from a distribution proportional to $\max(0,p-q)$. Details such as the extra target token and sequential conditioning are essential.
+
+Here $p$ and $q$ must be the **actual distributions after sampling transformations**, such as temperature or truncation, rather than unadjusted logits. Draft proposal $x_i$ and distributions $p_i,q_i$ use the same original context followed by proposals $x_{<i}$. Once the first rejection occurs, those later proposed contexts are abandoned. [2](https://arxiv.org/abs/2211.17192)
+
+```python
+proposals, q = draft_sequentially(context, proposal_count)
+p = target_verify(context, proposals)  # distributions p[0] ... p[k]
+for i, token in enumerate(proposals):
+    if uniform() < min(1, p[i][token] / q[i][token]):
+        continue                       # keep token; check next proposal
+    correction = normalize(positive_part(p[i] - q[i]))
+    return context + proposals[:i] + [sample(correction)]
+# Every proposal was accepted: p[k] follows the complete proposal prefix.
+return context + proposals + [sample(p[len(proposals)])]
+```
+
+The rejection branch retains the accepted prefix, discards the rejected proposal **and every later proposal**, then samples one correction token. Only the all-accepted branch samples a bonus token from the target after the complete proposal prefix. Stop-token handling can terminate generation earlier. [2](https://arxiv.org/abs/2211.17192)
+
+For a one-step three-token vocabulary, let $p=[0.2,0.5,0.3]$ and $q=[0.5,0.3,0.2]$. Accepted draft mass is $q(x)\min(1,p(x)/q(x))=\min(p(x),q(x))$, namely $[0.2,0.3,0.2]$. Total rejection mass is $0.3$ and the normalized correction is $[0,2/3,1/3]$. Adding its unconditional contribution gives
+
+$$
+[0.2,0.3,0.2]+0.3[0,2/3,1/3]=[0.2,0.5,0.3]=p.
+$$
+
+The interactive cycle uses these same distributions at every prefix as an explicit toy assumption, with draft proposals `A,A,C`. It exposes rejection at the first or second proposal and full acceptance, including the resulting token strips. In a real language model the distributions change with the prefix; the same conditional correction argument applies at each checked step. Exactness assumes consistent distributions and probability arithmetic; it does not imply identical random samples to ordinary decoding. [2](https://arxiv.org/abs/2211.17192)
 
 ### Compare costs
 Drafting adds work. Speed depends on acceptance rate, proposal length, verification efficiency and hardware utilization. A strong draft can be too expensive; a weak draft can have poor acceptance. Published speedups are measurements of a specific system, not an architecture-wide constant.
@@ -851,12 +1022,16 @@ Jain and Wallace give concrete counterexamples to treating attention weights as 
 ### Direct logit attribution and its boundary
 If a pre-normalization state decomposes as $h=\sum_c r_c$, a fixed linear readout gives $Uh=\sum_c Ur_c$. This motivates direct logit attribution to residual contributions. With final normalization included, the normalization scale depends on the combined state; LayerNorm additionally centers features. An exact attribution under a frozen scale is a conditional decomposition, not the effect of deleting a component and recomputing the model.
 
+For a numerical counterexample, use RMS normalization without an epsilon or learned gain, $N(h)=h/\sqrt{(h_1^2+h_2^2)/2}$, and a one-row readout $u=(1,0)$. Let $r_a=(1,0)$ and $r_b=(0,1)$, so $h=(1,1)$ has RMS scale one and $uN(h)=1$. Under that frozen scale, $r_b$ contributes zero to this logit. Actually deleting $r_b$ leaves $(1,0)$, whose RMS scale is $1/\sqrt2$: the recomputed score is $\sqrt2\approx1.414$. Deletion changes the score by about $+0.414$, even though the fixed-scale contribution was zero. This is exact toy algebra; other normalization conventions change the numbers.
+
 Useful analyses can therefore disagree without either being a software bug: one describes an algebraic contribution under fixed conditions; another measures a rerun after perturbing those conditions. State which quantity is being plotted. [3](https://arxiv.org/abs/2303.08112)
 
 ### From measurement to a falsifiable account
 Choose a clean prompt, a controlled alternative, and an output metric such as a target-versus-foil logit difference. Inspect readouts to propose a candidate layer, position, or feature. Then test that candidate with patching, matched controls, and additional prompts. Patching methodology can materially change localization conclusions. [4](https://arxiv.org/abs/2309.16042)
 
-The diagram's three token streams make the axes explicit. Its selectable measurement sites route to different analytical operations. It is a workflow schematic, not an automatic explanation generator.
+The diagram keeps three token streams separate and names two **post-block residual** hooks. Its synthetic cache has shape $[1,3,2]$ at each hook. Selecting a layer or position changes the cached vector; selecting a method changes the computation. The lens applies an explicit three-row unembedding. The illustrative binary probe uses $\sigma((1,-1)^{\mathsf T}h)$, with fixed coefficients standing in for a supervised fit. No labeled evaluation set is provided, so this number is a probe output, not accuracy.
+
+For the derivative and patch views, the downstream toy metric is $m(h)=\tanh(h_1)+h_2^2$, with gradient $(\operatorname{sech}^2 h_1,2h_2)$. A patch copies a clean second coordinate increased by $0.4$ and recomputes this nonlinear metric. These are inspectable synthetic evidence types, not measurements of the omitted Transformer computation. Each method links to the article that develops its assumptions.
 
 ### Follow the question
 For vocabulary readouts, compare the [logit and tuned lenses](#article-logit-tuned-lenses). For an averaged sensitivity-derived transport, inspect the [Jacobian lens](#article-jacobian-lens). For interventions, sparse features, and computational graphs, continue to [causal tracing and feature circuits](#article-causal-features-circuits). Each approach exposes a different part of the evidence; a readable label is the beginning of analysis, not its conclusion.
@@ -918,14 +1093,24 @@ $$
 p_{\ell,i}^{\mathrm{TL}}=\operatorname{softmax}\!\left(U N_f(T_\ell(h_i^{(\ell)}))+b\right).
 $$
 
-The translators are fitted to match the frozen model's final output distribution, commonly using a distribution-matching loss. This differs from training the language model itself. The purpose is a more reliable intermediate prediction readout, not a literal recording of every internal concept. [1](https://arxiv.org/abs/2303.08112)
+Here $A_\ell\in\mathbb R^{d\times d}$ and $c_\ell\in\mathbb R^d$. For a declared distribution of training examples $x$ and eligible positions $i$, the distillation objective is
+
+$$
+\min_{A_\ell,c_\ell}\ \mathbb E_{x,i}\!\left[D_{\mathrm{KL}}\!\left(\operatorname{stopgrad}(p_{L,i}(x))\ \Vert\ p_{\ell,i}^{\mathrm{TL}}(x)\right)\right],\qquad
+D_{\mathrm{KL}}(p\Vert q)=\sum_{v=1}^{V}p_v\log\frac{p_v}{q_v}.
+$$
+
+The **final distribution is the target**; the KL direction is final-to-lens. Freeze the backbone, final normalization and unembedding, and update only the translator. Fit on a training slice; use separate examples to report held-out KL, ranks or other prediction metrics. Fitting on the same activations used to evaluate a claim can conceal overfitting. The purpose is a more reliable intermediate prediction readout, not a literal recording of every internal concept. [1](https://arxiv.org/abs/2303.08112)
 
 ```python
 # Schematic column-vector convention; adapt to the model's actual hook sites.
 h = cached_residual[layer, position]  # [width]
 p_logit = softmax(U @ final_norm(h) + bias)
 p_tuned = softmax(U @ final_norm(A[layer] @ h + c[layer]) + bias)
-# Train the translator on held-out activations; keep backbone and decoder fixed.
+# Translator training examples are separate from the evaluation examples.
+p_final = stop_gradient(softmax(U @ final_norm(h_final) + bias))
+loss = mean_over_examples_and_positions(KL(p_final, p_tuned))
+# Update only A and c; keep backbone, norm and decoder fixed.
 ```
 
 ### A worked coordinate-mismatch example
@@ -937,7 +1122,9 @@ $$
 T=\begin{bmatrix}0&1\\1&0\end{bmatrix}.
 $$
 
-The translated state is $Th=(1,0)$, giving logits $(1,0,-1)$ and favoring A. The same stored activation can produce a different vocabulary readout under a different decoder. The figure does not fit a translator or reproduce the paper's measurements; it exposes these chosen matrices directly.
+The translated state is $Th=(1,0)$, giving logits $(1,0,-1)$ and favoring A. The same stored activation can produce a different vocabulary readout under a different decoder. The fixed-swap mode exposes these chosen matrices directly and does not fit them. A separate **fitted affine lens** mode actually minimizes the stated KL on four synthetic training states, initialized with $A=I,c=0$, using full-batch gradient steps of size $0.25$. The training states have final coordinates $(-1,-.5),(-.4,.9),(.7,-.6),(1,.8)$; layer 1 swaps the final coordinates and layer 2 applies $(2h_1+.2,.5h_2-.1)$. Nothing in this toy is a measurement of the paper's models.
+
+The three evaluation columns instead use final states $(.5,.51),(.51,.5),(-.6,.2)$. They are absent from the fitting set. A layer or input-position selector loads its corresponding intermediate state into the probability bars; the sliders permit an additional hypothetical edit. Solid bars show the selected readout and outlines show its frozen final-distribution target. The final grid row uses the final readout directly. The first two final columns favor different top tokens despite their nearly identical A/B scores: inspect the full distribution before interpreting a changed top-1 label.
 
 A learned translator should earn its interpretation through held-out prediction and control experiments. Merely finding one matrix that gives an appealing word proves little about the model.
 
@@ -1013,13 +1200,23 @@ $$
 
 With equal weight, $\bar J=(J_A+J_B)/2=\operatorname{diag}(1,0)$. Each individual Jacobian has rank two, but their average has rank one. A perturbation along $(0,1)$ has a strong context-specific effect that cancels in the mean. A weak average direction therefore does not establish causal irrelevance in every prompt.
 
-The interactive figure varies the fraction $q$ of context A. Then $\bar J=\operatorname{diag}(1,2q-1)$. At $q=1/2$ the second direction vanishes; at $q=1$ it survives fully. These are exact calculations for the toy matrices, not extracted LLM measurements.
+The interactive figure varies the fraction $q$ of context A. Then $\bar J=\operatorname{diag}(1,s)$ with $s=2q-1$. At $q=1/2$ the second direction vanishes; at $q=1$ it survives fully. Its declared four-token unembedding has rows $u_A=(1,0)$, $u_B=(0,1)$, $u_C=(1,1)$ and $u_D=(0,-1)$. With identity final normalization, transporting $h=(1,1)$ gives $\bar Jh=(1,s)$ and vocabulary logits $(1,s,1+s,-s)$. The displayed probabilities therefore genuinely change with $q$. These are exact toy calculations, not extracted LLM measurements.
 
 ### Reading is different from writing
 Ranking vocabulary directions is a readout. Editing an activation along a direction, ablating it, or swapping coordinates is an intervention requiring a new forward pass. A direction can be useful for both without making a high readout score sufficient evidence of a causal mechanism. Compare a local intervention with a matched random direction, several perturbation sizes, and held-out contexts.
 
 ### J-space is not simply a low-rank matrix
 The paper treats token-associated directions as a correlated, overcomplete frame and uses sparse decompositions to study active contents. This is different from declaring that the rank or leading singular vectors of $\bar J$ alone define the active workspace. A sparse representation can involve few directions even when their full matrix spans a much larger space.
+
+More explicitly, let $D_\ell\in\mathbb R^{d\times V}$ contain token-associated J-lens directions as columns. Choose an allowable sparsity $k$ and approximate a source activation by
+
+$$
+a^*\in\arg\min_{a\ge0,\,\|a\|_0\le k}\|h-D_\ell a\|_2^2.
+$$
+
+Here $\|a\|_0$ counts nonzero coefficients, not a vector norm measuring magnitude. The reconstruction $D_\ell a^*$ and remainder $h-D_\ell a^*$ depend on this constraint and the fitting procedure. The source uses gradient pursuit for its large dictionary; exhaustive support search is practical only for a tiny toy. [1](https://transformer-circuits.pub/2026/workspace/index.html)
+
+In the figure's identity-normalization example, use the transposed rows of $U\bar J$ as the source frame: $A=(1,0)$, $B=(0,s)$, $C=(1,s)$ and $D=(0,-s)$. There are four labeled directions in two dimensions. The figure enumerates supports of size at most one or two, solves nonnegative least squares on each support, and picks the smallest reconstruction error, breaking ties in favor of fewer active coefficients. At $q=.75$, $s=.5$, the source vector $h=(1,1)$ can be reconstructed as $C+B$, while the best single direction leaves a nonzero error. At $q=1$, $h=C=A+B$: correlated directions permit different valid decompositions. At $q=.5$, all four directions lie on the x-axis and every reconstruction leaves y-error one. An ordinary rank-one x-axis projection also leaves error one; that fixed linear subspace is a different object from a union of sparse nonnegative cones.
 
 The named token inventory, context distribution, estimator, and decomposition procedure all affect what becomes visible. Single-token vocabulary labels can also miss multi-token concepts. Global-workspace interpretations are empirical hypotheses about studied models, not a proof of consciousness or a theorem about every Transformer.
 
@@ -1074,9 +1271,21 @@ $$
 R=\frac{m_{\mathrm{patched}}-m_{\mathrm{alternative}}}{m_{\mathrm{clean}}-m_{\mathrm{alternative}}}.
 $$
 
-The figure uses invented clean and alternative margins 4 and 0. Its selectable patches produce 1, 3, or 5, giving $R=0.25$, $0.75$, or $1.25$. The last case illustrates that normalized recovery can exceed one; it is not intrinsically a percentage of “the explanation.” If clean and alternative margins nearly coincide, this ratio is unstable or undefined. Always report the raw margins too.
+The figure's separate **recovery metric** view retains an invented comparison: clean margin 4, alternative 0, patched 1, 3 or 5 give $R=0.25$, $0.75$ or $1.25$. Its sliders also expose the denominator, including the undefined zero case. These chosen margins are a metric lesson, independent of the executable toy network in the activation-patch view. The overshoot case illustrates that normalized recovery can exceed one; it is not intrinsically a percentage of “the explanation.” If clean and alternative margins nearly coincide, this ratio is unstable or undefined. Always report the raw margins too.
 
 Changes to corruption methods and metrics can lead to different localization results. Repeat the analysis over multiple controlled examples and include uncertainty, rather than presenting a single successful patch as a complete account. [2](https://arxiv.org/abs/2309.16042)
+
+### An executed patch with a typed hook
+The activation-patch view uses one token and three explicit vector sites:
+
+$$
+h_0=(x,1-x),\quad h_1=(h_{0,1}+h_{0,2},\ h_{0,1}-h_{0,2}),\quad
+h_2=(\tanh h_{1,1},\ h_{1,2}+\tfrac12h_{1,2}^2),\quad m=2h_{2,1}+h_{2,2}.
+$$
+
+Clean input $x=1$ yields $h_1=(1,1)$ and $m\approx3.023$; alternative input $x=0$ yields $h_1=(1,-1)$ and $m\approx1.023$. Site A copies only the first coordinate of $h_0$: the patched input state is $(1,1)$, not a natural $h_0(x)$, and rerunning produces $h_1=(2,0)$ and $m=2\tanh2\approx1.928$. Site B copies the clean second coordinate of $h_1$, recovering the clean margin. Site C copies the first coordinate of $h_2$, which was already identical in both runs, so the intervention has no effect. Each site identifies a token, block or branch, and coordinate. Copying the entire vector would answer a different question.
+
+Changing clean $x$ recomputes all these states and outcomes. Near $x=0$ the clean and alternative metrics become close, exposing the normalization problem in an actual calculation. The deliberately tiny graph isolates replacement semantics; it is not evidence for a circuit in a language model.
 
 ### From activations to candidate features
 A neuron index is a coordinate, not necessarily one concept. A representation can distribute a feature across coordinates and can superpose multiple features. A sparse-autoencoder-style dictionary describes a state approximately as
@@ -1090,6 +1299,10 @@ Here $f\in\mathbb R^m$ contains feature coefficients, $m$ can exceed residual wi
 
 When patching feature coefficients, preserve the reconstruction error where the intervention protocol calls for it: $h'=W_d f'+b_d+(h-\hat h)$. Otherwise, differences can reflect deleting unexplained activation content rather than changing the chosen feature alone. Decoder directions can be correlated; a label attached to one feature is an empirical summary, not its exact mathematical meaning.
 
+For the **feature and circuit** view, choose $h=(1.2,.7)$, decoder columns $(1,0),(0,1),(1,1)$, zero bias and coefficients $f=(.8,.3,.2)$. Then $\hat h=(1,.5)$ and error $\epsilon=(.2,.2)$. Setting $f_1'=0$ while retaining the error gives $h'=(.4,.7)$. Dropping the error instead gives $(.2,.5)$: both coordinates change, introducing a confound beyond the intended first-feature edit. This is a hand-specified decoder, not an SAE trained in the browser.
+
+Send $h=(a,b)$ through the declared margin $m(h)=2\tanh a+b+\tfrac12b^2$. The candidate edge from feature 1 through $a$ has local slope $2\operatorname{sech}^2(1.2)$. Its dashed edge predicts a first-order change; the solid validation path computes the finite edited margin exactly. A large edit can disagree with the local estimate even in this simple graph. The checkbox makes the reconstruction-error confound directly inspectable.
+
 ### Transcoders and attribution graphs
 An SAE reconstructs an activation. A transcoder instead approximates a component's input-to-output transformation using sparse features. Cross-layer variants can connect these approximations across depth. The 2025 circuit-tracing work builds prompt-specific attribution graphs using a replacement model and validates proposed mechanisms with interventions. Its graph is an approximate analytical object, with a faithfulness boundary to the original network. [3](https://transformer-circuits.pub/2025/attribution-graphs/methods.html)
 
@@ -1098,7 +1311,7 @@ A graph edge should therefore identify the quantity being approximated: a local 
 ### Useful neighboring techniques
 **Path patching** constrains which source-to-destination route is tested. **Attribution patching** uses a gradient-based approximation to rank possible interventions before expensive reruns. **Causal tracing** is a family of corruption-and-restoration experiments. **Steering** adds a chosen activation direction and tests a behavior change. Each requires a precise intervention site and an evaluation distribution; none removes the need to validate the hypothesis on the original model.
 
-The diagram deliberately keeps clean and alternative token streams separate and draws the replacement as a distinct cross-run connection. The displayed recovery values come from the toy margins above; no model is loaded in the browser.
+The diagram keeps clean and alternative runs separate and draws copying as a distinct cross-run connection. Activation and feature views rerun their declared toy computations; the metric view uses independently chosen margins. No language model, SAE training process or fitted replacement model is loaded in the browser.
 
 ### A reproducible investigation
 Specify the checkpoint, prompts, token alignment, hook site, raw metric, replacement rule, and any frozen components. Use exploratory prompts to find candidates and separate prompts to test them. Compare the original model with any replacement or reconstructed model. Retain failures and alternative explanations: a mechanism that works only for one hand-selected sentence is a narrower result than a circuit that generalizes across a controlled prompt family.
@@ -1149,6 +1362,23 @@ $$
 
 The first equation transports an error signal; the second combines it with presynaptic activity. With a batch, gradients sum or average over samples. Reverse-mode differentiation efficiently computes a scalar objective's derivatives; the 1986 papers are major milestones, not the entire historical origin of the chain rule. [1](https://www.cs.toronto.edu/~hinton/absps/naturebp.pdf)
 
+### A signed calculation
+The figure uses one sample, column vectors $x=(1,-1)^\top\in\mathbb R^2$, $W_1=\left[\begin{smallmatrix}0.5&-0.3\\-0.2&0.4\end{smallmatrix}\right]\in\mathbb R^{2\times2}$, $h=\tanh(W_1x)$, and a scalar linear readout $\widehat y=W_2h$ with $W_2=(0.7,-0.5)\in\mathbb R^{1\times2}$. There are no biases. With $y=0.2$ and $\mathcal L=\frac12(\widehat y-y)^2$, forward computation gives
+
+$$
+a=(0.8,-0.6)^\top,\quad h\approx(0.664,-0.537)^\top,\quad \widehat y\approx0.733.
+$$
+
+Because the output is linear, $\delta_2=\widehat y-y\approx0.533$. Reverse credit is $W_2^\top\delta_2\approx(0.373,-0.267)^\top$. Multiply elementwise by $1-h^2\approx(0.559,0.712)^\top$ to obtain $\delta_1\approx(0.209,-0.190)^\top$. The outer product with the **stored input**, rather than the error alone, gives
+
+$$
+\nabla_{W_1}\mathcal L\approx
+\begin{bmatrix}0.209&-0.209\\-0.190&0.190\end{bmatrix},\qquad
+\Delta W_1=-\eta\nabla_{W_1}\mathcal L.
+$$
+
+Changing a downstream weight changes both the output error and its reverse projection. Changing the target reverses some gradient signs when the prediction crosses it. The figure recomputes these dependencies; its numbers are synthetic.
+
 ### What could be biologically difficult?
 Several separate questions are often compressed into “the brain cannot backprop”:
 
@@ -1165,6 +1395,13 @@ Numerically approximating the BP gradient is not the same as implementing textbo
 
 ### A useful evaluation table
 For each method, record: derivative target, finite-budget approximation, communication graph, weight symmetry, stored state, temporal coordination, measured compute and biological evidence. A lower training loss cannot settle the neuroscience questions, and a plausible circuit cannot substitute for task performance.
+
+| Construction | Algorithmic evidence and constraint | What still has to be supplied | Biological evidence |
+| --- | --- | --- | --- |
+| Exact BP | Chain rule gives the exact gradient for this differentiable objective | Transposed weights, activation derivatives, stored forward activity and target error | Derivative correctness alone makes no circuit claim |
+| Feedback alignment | Fixed random $B$ replaces exact $W^\top$; useful learning demonstrated in the cited networks [2](https://www.nature.com/articles/ncomms13276) | Signed feedback, local derivative, presynaptic activity and downstream error; gradient equality is not guaranteed | Relaxing symmetry does not identify a demonstrated biological implementation |
+
+For the fixed network in the next article, the displayed random feedback actually points against exact BP (cosine about $-0.879$). Alignment is a possible result of forward-weight learning over training, not a property guaranteed for an arbitrary initial network.
 
 ### Experiment
 On a fixed small network, compare update direction to exact BP. Then vary depth and inference budget. Report cosine similarity, norm ratio, loss reduction and runtime. Keep this diagnostic distinct from a full training experiment that changes the weights after each batch.
@@ -1211,8 +1448,22 @@ $$
 
 This is an approximate credit signal; it is not generally the gradient of the original loss. Forward weights may learn representations that make the feedback useful in the tested setting. The result relaxes exact weight symmetry, not every biological requirement. [1](https://www.nature.com/articles/ncomms13276)
 
+### Shapes, signs and a complete local update
+Use the two-input, two-hidden-unit tanh network in [the signed BP trace](#article-backprop-biology): $a_1=W_1x\in\mathbb R^2$, $h_1=\tanh(a_1)\in\mathbb R^2$, $W_1\in\mathbb R^{2\times2}$, and linear readout $\widehat y=W_2h_1\in\mathbb R$. For squared loss, initialize $\widetilde\delta_2=\widehat y-y\in\mathbb R$; this is a derivative sign convention, so descent subtracts it. Here $B_1\in\mathbb R^{2\times1}$ and
+
+$$
+\widetilde\delta_1=(B_1\widetilde\delta_2)\odot(1-h_1^2),\qquad
+\Delta W_1=-\eta\widetilde\delta_1x^\top\in\mathbb R^{2\times2}.
+$$
+
+At the default values, $B_1=(-0.4,0.9)^\top$ and $\widetilde\delta_2\approx0.533$ produce $\widetilde\delta_1\approx(-0.119,0.342)^\top$. Exact BP instead gives $(0.209,-0.190)^\top$. The cosine is about $-0.879$; neither a useful gradient direction nor biological plausibility follows merely from freezing $B$. The readout can still receive its ordinary gradient $(\widehat y-y)h_1^\top$. [1](https://www.nature.com/articles/ncomms13276)
+
 ### Give a layer its own objective
 Another design attaches an auxiliary predictor to intermediate features. A layer can reduce $\mathcal L_\ell(g_\ell(h_\ell),y)$ without waiting for the final network's exact gradient. That local goal may conflict with downstream needs. “Local loss” specifies where a target acts; it does not guarantee globally optimal representations.
+
+Mostafa, Ramesh and Cauwenberghs give a concrete local-error construction: a fixed random classifier maps each layer's activations to class scores; the true training label defines a local loss, and feedback from that classifier teaches the layer. Their paper distinguishes transpose feedback from other feedback choices. “Random” describes classifier weights, not random labels. [4](https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2018.00608/full)
+
+The figure uses a regression analogue with a fixed $C=(0.6,0.2)$, scalar target $0.2$ and $\mathcal L_1=\frac12(Ch_1-y)^2$. Its hidden signal is $C^\top(Ch_1-y)\odot(1-h_1^2)\approx(0.031,0.013)^\top$. Update the incoming $W_1$ with its outer product with $x$; hold $C$ fixed and do not update $W_2$ from this head loss. In a deeper block, detach $h_{\ell-1}$ for this local loss so it does not update earlier blocks. A trainable-head variant would also update that head; it is a different specification.
 
 ### Enforce neighboring consistency
 Predictive coding instead uses hidden-state inference and neighboring prediction errors. PC-ALM adds multipliers to accumulate constraint violations. These methods address the same broad credit-assignment problem through different mathematical constructions. [2](https://pubmed.ncbi.nlm.nih.gov/28333583/) [3](https://arxiv.org/html/2605.31022v1)
@@ -1223,6 +1474,9 @@ Predictive coding instead uses hidden-state inference and neighboring prediction
 | Layer-local objective | Auxiliary target at each layer | Local goals may conflict |
 | Predictive coding | Inferred neighboring consistency | Finite inference and equilibrium assumptions |
 | PC-ALM | Primal–dual local dynamics | Proven scope narrower than nonlinear use |
+
+### A separate equilibrium method
+Equilibrium propagation uses a free equilibrium and a nearby equilibrium obtained by weakly nudging outputs toward targets in an energy-based recurrent network. The contrast between equilibria supplies a parameter-learning signal under its assumptions. This two-phase equilibrium construction is distinct from a fixed random backward matrix, an independent local classifier, and the PC-ALM multiplier update. Finite settling time and the weak-nudging limit matter to its gradient interpretation. [5](https://www.frontiersin.org/journals/computational-neuroscience/articles/10.3389/fncom.2017.00024/full)
 
 ### Implementation discipline
 ```python
@@ -1241,6 +1495,8 @@ Scaling local learning to modern language tasks requires evidence about optimiza
 1. Lillicrap et al. (2016). [Random synaptic feedback weights support error backpropagation for deep learning](https://www.nature.com/articles/ncomms13276). Nature Communications.
 2. Whittington & Bogacz (2017). [An Approximation of the Error Backpropagation Algorithm in a Predictive Coding Network with Local Hebbian Synaptic Plasticity](https://pubmed.ncbi.nlm.nih.gov/28333583/). Neural Computation.
 3. Jeffrey Seely & Julian Gould (2026). [Augmented Lagrangian Predictive Coding](https://arxiv.org/html/2605.31022v1). Preprint · May 2026.
+4. Hesham Mostafa, Vishwajith Ramesh & Gert Cauwenberghs (2018). [Deep Supervised Learning Using Local Errors](https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2018.00608/full). Frontiers in Neuroscience.
+5. Benjamin Scellier & Yoshua Bengio (2017). [Equilibrium Propagation: Bridging the Gap between Energy-Based Models and Backpropagation](https://www.frontiersin.org/journals/computational-neuroscience/articles/10.3389/fncom.2017.00024/full). Frontiers in Computational Neuroscience.
 
 ### Related topics
 
@@ -1289,6 +1545,26 @@ W = one_batch_aggregated_parameter_step(h, W, y)
 ```
 
 “Local” here means neighboring layers in the computational graph. An implementation may use automatic differentiation to compute local derivatives; locality is not the absence of any derivative calculation.
+
+### Expand the neighboring messages
+Let $h_i,r_i\in\mathbb R^{d_i}$ and $J_{i+1}=\partial f_{i+1}/\partial h_i\in\mathbb R^{d_{i+1}\times d_i}$. For an interior hidden activity in the stated energy,
+
+$$
+\nabla_{h_i}\mathcal F=\rho r_i-J_{i+1}^\top\rho r_{i+1}.
+$$
+
+The output boundary differs: $\nabla_{h_{L-1}}\mathcal F=\rho r_{L-1}+J_L^\top\nabla_{\widehat y}\ell(y,\widehat y)$. The transpose maps a neighboring error back into the activity's own dimension; $h_0=x$ remains clamped. This is locality between neighboring layers, not a proof of a biological circuit. [2](https://arxiv.org/html/2605.31022v1)
+
+For the figure's scalar network, $f_1(x)=0.8x$, $f_2(h_1)=0.7h_1$, $\widehat y=1.2h_2$, $\rho=1$ and $y=0.2$. Forward initialization gives $(h_1,h_2)=(0.8,0.56)$ and $(r_1,r_2)=(0,0)$. Thus
+
+$$
+\partial_{h_1}\mathcal F=r_1-0.7r_2=0,\quad
+\partial_{h_2}\mathcal F=r_2+1.2(1.2h_2-0.2)=0.5664.
+$$
+
+One **simultaneous** step of size $0.06$ gives $(h_1,h_2)=(0.8,0.526016)$ and new residual $r_2=-0.033984$. At the next step, this neighboring mismatch reaches $h_1$ through $-0.7r_2$. Target pressure therefore changes the last hidden state before earlier states respond. Only after inference do weights change: in this linear example $\nabla_{W_1}\mathcal F=-\rho r_1x$, $\nabla_{W_2}\mathcal F=-\rho r_2h_1$, and $\nabla_{W_3}\mathcal F=(\widehat y-y)h_2$.
+
+The figure opens in **Penalty PC**. Its optional PC-ALM comparison adds $\lambda_i^\top r_i$ to the energy, uses composite error $e_i=\lambda_i+\rho r_i$, and accumulates $\lambda_i$ after nonfinal activity steps. See [the multiplier derivation](#article-pc-alm) before interpreting that comparison. No multiplier is present in the penalty-only derivation above.
 
 ### Why the penalty matters
 At a stationary point of a finite quadratic penalty, residuals need not be zero. Therefore activity-inferred weight updates need not equal backpropagation gradients of the original feed-forward network. The relationship depends on the formulation, limits and inference assumptions. One should not turn a correspondence result into a blanket claim of exact equivalence for finite-budget nonlinear networks.
@@ -1398,6 +1674,12 @@ The accumulated multiplier resembles an integral feedback state. This motivates 
 
 The adjacent lab solves a **two-hidden-layer scalar linear instance** with fixed weights; it shows actual primal–dual updates and BP reference gradients. It is an educational mechanism check, not a reproduction of the published datasets or accuracy curves.
 
+
+### Read the inference history
+The additional local-feedback panel plots the actual residual norm, multiplier norm and relative gradient error for one fixed-weight run. Norm curves show magnitudes; signed $e_i$, residuals, states and parameter gradients remain printed separately. A falling residual alone is not a complete gradient test, so the BP comparison remains visible. For example, a finite-penalty PC equilibrium can retain nonzero residuals and a gradient mismatch even after its activities settle.
+
+In the panel, select zero steps to inspect the forward initialization: both residuals and multipliers are zero, but target pressure $1.2(1.2h_2-y)$ is not. The first activity step changes $h_2$; later neighboring messages and accumulated multipliers carry that pressure through the network. The preview computes one more **primal** step with the displayed multipliers held fixed; it is not an extra parameter update. The original gradient lab and this companion panel have independent controls and share the same numerical helper. [1](https://arxiv.org/html/2605.31022v1)
+
 ### Primary references
 
 1. Jeffrey Seely & Julian Gould (2026). [Augmented Lagrangian Predictive Coding](https://arxiv.org/html/2605.31022v1). Preprint · May 2026.
@@ -1441,11 +1723,11 @@ $$
 $u_t$ is membrane potential, $I_t$ input drive, $0\le\beta<1$ a leak factor, $\vartheta$ threshold and $z_t$ a binary spike. This is one reset convention; other models reset before or after integration or clamp to a reset potential. State and timing matter beyond an ordinary static activation.
 
 ### The gradient problem
-A hard threshold has zero derivative almost everywhere and an undefined derivative at its threshold. Surrogate-gradient methods keep the forward spike but use a smooth proxy derivative during learning. Backpropagation through time can still assign credit through the resulting temporal computation. Thus “spiking” does not imply “trained without backpropagation.” [1](https://arxiv.org/abs/1901.09948)
+A hard threshold has zero derivative almost everywhere and an undefined derivative at its threshold. Surrogate-gradient methods keep the forward spike but use a continuous or smooth proxy derivative during learning. Backpropagation through time can still assign credit through the resulting temporal computation. Thus “spiking” does not imply “trained without backpropagation.” [1](https://arxiv.org/abs/1901.09948)
 
 ```python
 spike = (membrane >= threshold).float()    # hard forward event
-# In a custom backward rule, substitute a bounded smooth derivative.
+# In a custom backward rule, substitute a bounded continuous proxy derivative.
 # Temporal learning may still require an unrolled computation graph.
 ```
 
@@ -1459,6 +1741,23 @@ Use an event-timing task where the timing genuinely carries information. Compare
 
 ### Limits
 A sparse spike raster does not reveal whether the learning rule is local. Conversely, a local plasticity rule does not guarantee that a network learns deep supervised tasks effectively. Keep neural dynamics, credit assignment and hardware implementation as distinct comparison axes.
+
+### Follow threshold crossing and reset timing
+The lab computes $u_0=0$ and, at each integer $t$, first tests $z_t=\mathbf1[u_t\ge\vartheta]$, then performs the stated update. Its aligned input, membrane and spike panels use the same timestep axis. The membrane curve shows the value **before** the subtractive reset in that update; a threshold crossing appears as a spike at that sample, and the reset affects the following membrane sample. There is at most one binary spike per step and no refractory period in this toy.
+
+For example, with $\beta=0.5,I_t=1,\vartheta=1$, $u_1=1$ emits $z_1=1$. The next update gives $u_2=0.5\cdot1+1-1=0.5$, so $z_2=0$. Then $u_3=1.25$ emits another spike. Constant and pulsed inputs, leak, threshold and the inspected timestep all change the calculated trace. A coarse discrete sample can overshoot threshold; it is not an exact continuous-time event solver.
+
+### Make the backward substitution explicit
+One illustrative surrogate derivative is the triangular window
+
+$$
+\widetilde{\frac{\partial z}{\partial u}}=
+\gamma\max\left(0,1-\frac{|u-\vartheta|}{w}\right),\qquad w>0,\ \gamma\ge0.
+$$
+
+$w$ controls the membrane interval around threshold that receives gradient; $\gamma$ controls its peak. This is an illustrative member of the surrogate-gradient design space, not a claim that all methods use this shape. It is **not the true derivative** of the hard spike. Changing width at fixed peak also changes total gradient area, so comparing shapes requires stating both parameters. The forward event remains binary. [1](https://arxiv.org/abs/1901.09948)
+
+With upstream derivative $\partial L/\partial z=2$, $u-\vartheta=0.1$, $w=0.5$ and $\gamma=1$, the local spike branch supplies $\partial L/\partial u\approx2(1-0.1/0.5)=1.6$. The figure evaluates this contribution at the selected membrane sample. Full temporal backpropagation also includes the membrane's direct recurrent path and whichever treatment of reset gradients the implementation adopts. A useful biased backward rule is not an exact gradient of the hard-threshold forward model.
 
 ### Primary references
 
@@ -1501,7 +1800,7 @@ $$
 \frac{dx(t)}{dt}=-\left[\frac1\tau+f(x(t),I(t),t;\theta)\right]x(t)+f(x(t),I(t),t;\theta)A.
 $$
 
-$x(t)$ is a state variable, $I(t)$ input, $\tau>0$ a baseline time constant, $A$ a driving level and $f$ a learned nonlinear gate. The effective time constant is $\tau_{\mathrm{eff}}=\tau/(1+\tau f)$ under this scalar form and appropriate gate assumptions. Vector networks require explicit elementwise and coupling conventions.
+$x(t)$ is a state variable, $I(t)$ input, $\tau>0$ a baseline time constant, $A$ a driving level and $f$ a learned nonlinear gate. The effective time constant is $\tau_{\mathrm{eff}}=\tau/(1+\tau f)$ under this scalar form with $f\ge0$ and $\tau>0$, as in the bounded gate below. Vector networks require explicit elementwise and coupling conventions.
 
 ### What is liquid?
 The state's response speed depends on the input and state through the gate. This does **not** mean the weights $\theta$ are automatically updated at inference. Continuous dynamics, recurrent state adaptation and parameter learning are three different notions.
@@ -1519,6 +1818,25 @@ Like an SSM, an LTC network maintains a recurrent state, but its continuous-time
 
 ### Research questions
 Evaluate irregularly sampled trajectories and distribution shifts in input timing. Compare interpolation, numerical solver cost, stability and task error. Specify whether learning is offline or online. Do not infer general continual-learning ability from an adaptive time constant alone.
+
+### State the gate assumptions
+For the scalar response lab, assume normalized time, $\tau=1$, $A=1$ and the bounded nonnegative gate $f(x,I)=2\,\operatorname{sigmoid}(I+ax)$. The baseline inverse time constant $1/\tau$ and $f$ both have inverse-time units; $I+ax$ is dimensionless. The gate is strictly between zero and two, and the decay coefficient $1/\tau+f$ stays positive. These are explicit synthetic assumptions; vector LTC constructions require their own coupling and bounds. Crucially, current state feeds both the direct leak term and the gate. Setting $a=2$ exposes this feedback; setting $a=0$ freezes the gate for a constant input. [1](https://arxiv.org/abs/2006.04439)
+
+### Frozen coefficients reveal two effects
+Hold the gate at a constant $f_0\ge0$ and let $\lambda=1/\tau+f_0$. The resulting linear ODE has
+
+$$
+\tau_{\mathrm{eff}}=\lambda^{-1},\qquad
+x_\infty=\frac{f_0 A}{\lambda},\qquad
+x(t)=x_\infty+[x(0)-x_\infty]e^{-\lambda t}.
+$$
+
+With $\tau=A=1,I=0,a=0$, the gate equals one: $\tau_{\mathrm{eff}}=0.5$, $x_\infty=0.5$ and, from $x(0)=0$, $x(t)=0.5(1-e^{-2t})$. Increasing a positive gate shortens the response time and shifts the equilibrium toward $A$; it changes more than speed. These formulas describe frozen coefficients. When $f$ depends on $x$, the displayed initial $\tau_{\mathrm{eff}}$ and $x_\infty$ are local interpretations, not the full nonlinear trajectory's fixed global constants.
+
+### Compare the numerical response
+The figure compares Euler samples with the exact frozen-gate solution. In the example above, an Euler step of $\Delta t=0.2$ gives $x_1=0.2$, while the exact value at that time is about $0.16484$. With frozen coefficients, Euler error around equilibrium is multiplied by $1-\Delta t\lambda$ each step; stability requires $|1-\Delta t\lambda|<1$. Large steps can overshoot or fail this condition despite a stable continuous ODE.
+
+For state-dependent gating, the solid reference instead uses numerical fourth-order Runge–Kutta with 100 substeps per displayed Euler step; it is labeled numerical, not exact. The orange dashed curve keeps the initial gate fixed to expose the difference in assumptions. The terminal error compares Euler with the appropriate reference, and changing input, state feedback or step size recomputes the response. This is a solver illustration, not an LTC benchmark or a guarantee of accuracy for another coupled system.
 
 ### Primary references
 
@@ -1560,7 +1878,21 @@ A useful comparison asks three independent questions: what is encoded, what prod
 ### A genome records structure and ancestry
 NEAT uses a direct encoding: node genes identify units, while connection genes record endpoints, weight, enabled status and an innovation identifier. Historical markings let crossover align genes descended from the same structural innovation, even when parental genomes have different lengths. An innovation identifier is bookkeeping, not a fitness score or a label for a semantic capability. [1](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)
 
-The adjacent figure lets you inspect one invented genome before and after splitting a connection. Its gene identifiers are illustrative. They show why a disabled connection can remain in the genotype while disappearing from the expressed network. The figure does not execute selection or reproduce a published run.
+The figure separates add-node mutation, aligned crossover, and an evaluated toy population. Its identifiers and outcomes are illustrative. A disabled connection remains in the genotype but disappears from the expressed computation; its dashed trace in the mutation view is explicitly a historical ghost. The population view executes a declared synthetic task and does not reproduce a published NEAT run.
+
+### Align unequal parents before crossing them
+The crossover view uses these connection innovations (endpoint, weight, enabled flag):
+
+| ID | Parent A | Parent B | Correspondence |
+| --- | --- | --- | --- |
+| 1 | $1\to3$, .8, off | $1\to3$, 1, on | Matching |
+| 2 | $2\to3$, −.2, on | $2\to3$, .2, on | Matching |
+| 3 | $1\to4$, 1, on | $1\to4$, .8, on | Matching |
+| 4 | $4\to3$, .8, on | Absent | Disjoint |
+| 5 | Absent | $2\to4$, .4, on | Excess |
+| 6 | Absent | $4\to3$, .5, on | Excess |
+
+IDs 1–3 align regardless of list length. ID 4 lies inside the other parent's innovation range; IDs 5–6 extend beyond A's largest ID. If A is fitter, a possible child inherits its unmatched ID 4 and chooses each matching gene from either parent. If B is fitter, its unmatched IDs 5–6 are eligible instead. The controls choose one possible matching-weight outcome and execute the resulting child's forward pass. Hidden node 4 uses tanh; output node 3 is linear. The displayed child keeps ID 1 disabled as one possible outcome; the source's crossover rule allows disabled genes to be reenabled stochastically. [2](https://www.cs.cmu.edu/afs/cs/project/jair/pub/volume21/stanley04a-html/node3.html)
 
 ### Complexification changes the search space
 Weight mutation changes numeric parameters; structural mutation can add a connection or split an existing connection with a new node. Starting with simple networks allows additional structure to accumulate through search. The original add-node construction disables the old edge and inserts two new edges, assigning the incoming edge weight one and retaining the old weight on the outgoing edge. An inserted nonlinear activation means this is not generally an exact function-preserving identity transformation. [2](https://www.cs.cmu.edu/afs/cs/project/jair/pub/volume21/stanley04a-html/node3.html)
@@ -1569,6 +1901,16 @@ For an illustrative original edge with weight 0.8 and input 0.5, its contributio
 
 ### Speciation protects opportunities, not guaranteed progress
 NEAT groups compatible genomes and shares fitness within species, giving new structures time to optimize before direct competition with established structures. Compatibility uses structural differences and matching-weight differences. Speciation therefore addresses premature loss of innovation; it does not guarantee that every species improves or that useful diversity persists indefinitely. [1](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)
+
+Those same parents make compatibility concrete:
+
+$$
+\delta=\frac{c_1E}{N}+\frac{c_2D}{N}+c_3\bar W.
+$$
+
+Here $E$ and $D$ count excess and disjoint genes; $\bar W$ is the mean absolute weight difference across matching genes. With $E=2$, $D=1$, $\bar W=(.2+.4+.2)/3\approx.267$, coefficients $(c_1,c_2,c_3)=(1,1,.4)$ and the small-genome convention $N=1$, $\delta\approx3.107$. A compatibility threshold 3 separates these parents; threshold 3.2 groups them. In the general formula $N$ is the larger genome length, with the small-genome exception explicitly chosen here. Compatibility is compared with a species representative, rather than treating distance alone as a universal partition. [2](https://www.cs.cmu.edu/afs/cs/project/jair/pub/volume21/stanley04a-html/node3.html)
+
+The population view evaluates four fixed input pairs against $y^*=.8\tanh(x_1)-.2x_2$, with fitness $1/(1+\mathrm{MSE})$. A next-generation step retains the best genome, tries an add-node mutation, and creates matching-gene/weight variants before reevaluation. The target favors exactly the illustrated hidden nonlinearity, so solving it is deliberately easy. This deterministic toy demonstrates how task execution supplies selection; it omits species fitness sharing, noisy episodes, and the full original mutation schedule.
 
 An experiment can compare the full method with fixed topology, removed historical alignment and removed speciation. Keep evaluation budgets comparable, record unsuccessful seeds, and count environment interactions as well as generations. Population size changes the cost of a generation, so generation count alone is not an efficiency metric.
 
@@ -1622,22 +1964,32 @@ $$
 
 Here $f_\phi$ is the CPPN, and its output determines a candidate weight under the chosen scaling and connection-expression convention. Extra inputs such as distance or bias, and additional outputs for different connection sets, are implementation choices. The coordinates describe network geometry; they are not observations arriving from the task environment. [1](https://stars.library.ucf.edu/facultybib2000/2178/)
 
-The interactive diagram uses two rows of three neurons. Select a source and target to inspect the corresponding coordinate query. Switching the symmetry control changes an explicitly written toy weight field. It does not evolve a CPPN, simulate a controller or measure performance.
+The interactive diagram uses two rows of three neurons. Select a source and target to inspect the corresponding coordinate query. Switching the symmetry control changes the permitted generator terms. The figure composes a small explicit CPPN and evaluates a synthetic substrate task; its bounded coefficient search is distinct from full HyperNEAT, which also evolves CPPN topology.
 
 ### Why a CPPN can express regularity
 CPPNs compose functions with different spatial biases. Symmetric and periodic functions can create repeated motifs, while other compositions introduce variation. Their developmental analogy concerns the genotype-to-phenotype mapping rather than a literal simulation of cell division. A coordinate-to-pattern function can describe a coherent large object through shared rules instead of independent values. [2](https://stars.library.ucf.edu/facultybib2000/7682/)
 
-For intuition, our toy symmetric field is $w=\exp[-2(x_s-x_t)^2]$. Simultaneously reflecting both coordinates leaves the weight unchanged: replacing $(x_s,x_t)$ by $(-x_s,-x_t)$ preserves their squared difference. Adding $0.35x_t$ breaks that reflection symmetry. These hand-written functions demonstrate a geometric bias; neither is a claim about the evolved generator in the original paper.
+The figure makes the composition explicit:
+
+$$
+g=\exp[-2(x_s-x_t)^2],\qquad p=\sin[\pi(x_s+x_t)/2],\qquad l=x_t,\qquad w=ag+bp+cl-.3.
+$$
+
+These nodes form a small hand-designed CPPN; only its coefficients are varied in the toy search. The Gaussian branch supplies locality and reflection symmetry; sine supplies a periodic branch and the linear branch depends on target location. With $b=c=0$, simultaneously reflecting both coordinates preserves every weight. With nonzero $b,c$, this invariance can break. The fixed y-coordinates identify source and target rows; this particular generator's active branches use only x. The inset displays every intermediate value for the selected pair.
+
+Substrate edges preserve sign even when selected: solid means positive, dashed means negative, width reflects magnitude, and an orange halo marks the selected query. The synchronized matrix supplies exact signed values, including tiny weights. Neither color nor minimum stroke width alone is a quantitative weight scale.
 
 A geometry-sensitive encoding can be a poor fit when nearby coordinates do not imply related roles. Choosing coordinates and permitted layer connections already introduces design knowledge. Compactness is useful only if its biases match useful solutions.
 
 ### Evolution acts on the generator
 HyperNEAT uses NEAT to evolve CPPNs, including their weights and topology. Each candidate CPPN generates a substrate, whose task performance supplies the fitness signal. Thus an evolutionary change to one generator parameter may coherently alter many substrate connections. In direct NEAT, connection genes instead describe the task network more directly. [3](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)
 
+In the figure's toy fitness loop, four coefficient candidates generate a three-by-three weight matrix $W$. The substrate then executes $y_j=\sum_i x_iw_{ij}$ for input $x_i$ equal to source coordinate and desired output $y_j^*$ equal to target coordinate. Candidate fitness is $1/(1+\frac13\sum_j(y_j-y_j^*)^2)$. Retain the best generator and compare local coefficient variants in the next generation. The evaluation is deterministic and has a fixed three-by-three grid; it is not a controller rollout, does not demonstrate generalization, and does not evolve topology. The fitness panel exposes scores before selection rather than assigning an appealing-looking pattern a fitness by hand.
+
 For the mechanism diagram, the relevant distinction is between a query-time computation that generates weights and the later execution of those weights on task inputs. Neither should be confused with gradient-based architecture optimization or online plasticity. A hybrid that learns after generation must state that extra update rule and include its cost.
 
 ### Scale the representation, then test the behavior
-A coordinate function can be queried on a finer grid without increasing its own parameter count. This permits re-expression at another substrate resolution, but successful task transfer still depends on input/output semantics, scaling and evaluation. The original HyperNEAT work demonstrated particular visual-discrimination and food-gathering settings; that evidence does not establish automatic generalization to arbitrary larger networks. [1](https://stars.library.ucf.edu/facultybib2000/2178/)
+A coordinate function can be queried on a finer grid without increasing its own parameter count. The five-by-five resolution control holds the selected generator coefficients fixed and queries more coordinates; it does not select a new generator for the finer grid. The displayed substrate output and error are recomputed at that resolution, while evolutionary selection continues to use the declared three-by-three evaluation grid. This permits re-expression at another substrate resolution, but successful task transfer still depends on input/output semantics, scaling and evaluation. The original HyperNEAT work demonstrated particular visual-discrimination and food-gathering settings; that evidence does not establish automatic generalization to arbitrary larger networks. [1](https://stars.library.ucf.edu/facultybib2000/2178/)
 
 Compare direct and indirect encodings at matched environment-evaluation budgets. Record generator size, expressed connections, substrate runtime and variation across seeds. Deliberately scramble coordinates as an ablation to test whether geometry supplies the claimed advantage. Return to [NEAT](#article-neat) for historical alignment and speciation, or compare [multimodal interfaces](#article-multimodal-fusion) to see another setting where the choice of representation constrains what a learner can discover.
 
@@ -1701,6 +2053,28 @@ Adapters or low-rank modules can isolate some task-specific parameters. They can
 
 ### Evaluation
 Measure forward transfer, backward transfer, forgetting and new-task learning under a stated memory/computation budget. State whether task IDs are provided at inference. Keep a joint-training baseline where feasible. A model that stores one complete checkpoint per task solves a different resource problem than a fixed-capacity continual learner.
+
+### Calculate retention from a task matrix
+For one explicit higher-is-better convention, let $T$ be the final stage and define old-task forgetting and backward transfer by
+
+$$
+f_j=\max_{t=j,\ldots,T-1}A_{t,j}-A_{T,j},\qquad
+\mathrm{BWT}=\frac1{T-1}\sum_{j<T}(A_{T,j}-A_{j,j}).
+$$
+
+This “previous best” definition allows negative forgetting if the final score exceeds every earlier score; some protocols include the final stage in the maximum to clamp forgetting at zero. Report the convention. Define forward transfer as $\mathrm{FWT}=\frac1{T-1}\sum_{j=2}^T(A_{j-1,j}-b_j)$, where $b_j$ is the untrained-model performance on the same task and metric. Forward transfer requires evaluation **before** learning each task; it cannot be recovered from only a final row.
+
+The figure calculates its matrix from three invented quadratic tasks, not benchmark accuracies. Each uses $\ell_j(\theta)=\frac12\|\theta-v_j\|^2$ with $v_A=(1,0)$, $v_B=(-1,1)$, $v_C=(0,-1)$ and score $\exp(-\ell_j)$. Sequential exact fitting gives
+
+| Training stage | Task A | Task B | Task C |
+| --- | --- | --- | --- |
+| After A | 1.000 | 0.082 | 0.368 |
+| After B | 0.082 | 1.000 | 0.082 |
+| After C | 0.368 | 0.082 | 1.000 |
+
+Old-task forgetting is $(0.632,0.918)$, mean $0.775$; BWT is $-0.775$. For an untrained $\theta_0=(0,0)$, $b_B=\exp(-1)\approx0.368$ and $b_C=\exp(-0.5)\approx0.607$. Thus FWT is $[(0.082-0.368)+(0.082-0.607)]/2\approx-0.405$.
+
+The comparison solves its quadratics exactly. EWC-like consolidation uses fixed illustrative $F=(5,0.2)$ and $\theta_{t,k}=(v_{t,k}+\lambda F_k\theta_{t-1,k})/(1+\lambda F_k)$; these manual values are **not** measured Fisher information. Replay uses $\theta_t=(v_t+\beta\bar v_{<t})/(1+\beta)$, equivalent to a weighted average of prior target losses plus the fresh loss. Isolation stores one vector per task and selects it using a known task ID. Its perfect toy retention costs growing storage; it is not a fair fixed-memory victory. The controls show retention and new-task score together.
 
 ### Limits
 A growing context window is not persistent parameter learning. A recurrent state that resets between sessions is not accumulated knowledge. A continually updated retrieval index is a memory-system change, distinct from weight consolidation. Continue to [memory and test-time adaptation](#article-memory-adaptation).
@@ -1768,6 +2142,18 @@ prediction = adapted(unlabeled_input)
 
 A copied/reset model and a continuously updated model create different evaluation protocols. Explicitly state which is used. Low-rank adaptation can restrict the update space but does not solve objective selection. [3](https://arxiv.org/abs/2106.09685)
 
+### Specify the test-time objective and update boundary
+In Sun et al.'s image example, an auxiliary head predicts which rotation ($0°,90°,180°,270°$) was applied to an unlabeled image. A shared feature extractor $\theta_e$ feeds both the rotation head $\theta_s$ and the target object-classification head $\theta_m$. Training jointly learns the main and auxiliary tasks. At test time, their standard formulation minimizes rotation loss over **shared features** $\theta_e$ while keeping the heads fixed, then classifies the image using $(\theta_e^{\mathrm{adapted}},\theta_m)$. The known rotation provides a self-supervised label; the object's unknown class does not. [2](https://proceedings.mlr.press/v119/sun20b.html)
+
+Lower auxiliary loss need not mean better classification. In the paper's airplane example, image margins can reveal orientation without useful object information, and the authors report no classification improvement for that class in the examined comparison. This is an objective-alignment failure, not a proof against test-time adaptation generally. [2](https://proceedings.mlr.press/v119/sun20b.html)
+
+A reproducible sequence is: copy the base shared features; adapt on the current unlabeled image's rotation task; classify with the main head; discard that copy before the next independent sample. An online protocol instead carries the adapted features into later samples. State this reset choice before reporting a result.
+
+### Follow one information lifecycle
+The figure tracks the synthetic fact “code = IRIS” as a state inventory, without claiming to simulate a model. Injecting it fills context, an external record, a loaded and saved adapter, and test-time parameter state. **Reset context** removes only transient context. **Reset parameters** restores the base parameter state, leaving stored records and the saved adapter file. **Retrieve** copies an existing record into context; **reload** restores the saved adapter, not the test-time update. These operations are deliberately separate so a session reset need not imply a parameter reset.
+
+A flag says that a route contains the information. It cannot certify faithful retrieval use or successful parameter encoding. The lifecycle is an analogy for persistence; real test-time rotation training is not a general fact-writing operation.
+
 ### Evaluate persistence and interference
 Test retained behavior after adaptation and after reset. Account for memory write policies, stale documents, retrieval failures and adaptation compute. For streaming updates, include forgetting diagnostics such as those motivated by replay work. [4](https://arxiv.org/abs/1811.11682)
 
@@ -1826,6 +2212,21 @@ accepted = [c for c in candidates if independent_verifier(c)]
 next_model = train(current_model, accepted)
 evaluate(next_model, untouched_test_set)
 ```
+
+### A verifier success and a verifier failure
+Use the synthetic training prompt “compute $(2+3)\times4$,” with known answer 20 supplied by an external arithmetic procedure. Consider three candidates:
+
+| Candidate | Generated rationale and answer | Answer-only verifier | Executable-step verifier |
+| --- | --- | --- | --- |
+| A | $2+3=5$; $5\times4=20$; answer 20 | Accept | Accept |
+| B | $2+3=6$; $6\times4=20$; answer 20 | Accept | Reject both false equalities |
+| C | $2+3=5$; $5\times4=9$; answer 9 | Reject | Reject false multiplication |
+
+The answer-only rule retains two candidates, one with invalid reasoning. Executing the two operations retains only A. The supervision comes from known arithmetic and the verifier's grammar, not from the generator magically creating ground truth. Even the stricter rule certifies only those displayed operations; it does not validate unrestricted prose or every kind of reasoning.
+
+This concern appears in STaR itself: its CommonsenseQA error analysis identifies correct final answers accompanied by circular, irrelevant or otherwise defective arguments. Its rationalization step conditions on a known correct answer when an initial attempt fails; a selected rationale is therefore neither independent evidence nor a proof that the model reached its answer by the printed reasoning. [1](https://arxiv.org/abs/2203.14465)
+
+For a separate check, freeze the held-out prompt $(3+4)\times5$ (answer 35) before selection and training. Neither its answer nor its candidate scores may select the training traces. A training acceptance count of 1 or 2 is **not** a before/after test score. The figure reports held-out improvement as unmeasured because it trains no model. Its other control illustrates a bounded, scripted refinement sequence with fixed $\theta$: incorrect output → feedback → corrected answer with flawed steps → corrected steps, then stop at acceptance or the two-revision budget. This output loop is separate from the optional train-and-regenerate loop. [2](https://arxiv.org/abs/2303.17651)
 
 ### The hard part is evidence
 A model judging its own output may prefer its own characteristic mistakes. Training on accepted synthetic text can amplify a biased selection signal. Repeatedly inspecting a test set can turn it into training feedback even without gradient updates. Preference-based post-training also depends on what labels reward. [3](https://arxiv.org/abs/2203.02155)
@@ -1886,6 +2287,20 @@ For image features $Z\in\mathbb R^{p\times d_v}$ and a learned projector $P\in\m
 
 LLaVA provides an influential encoder–projector–language-model route. BLIP-2 uses a Q-Former between frozen pretrained components. Flamingo uses a visual resampler and gated cross-attention to connect pretrained vision and language systems. These are specific designs, not interchangeable names for “multimodal attention.” [2](https://arxiv.org/abs/2204.14198) [3](https://arxiv.org/abs/2301.12597) [4](https://arxiv.org/abs/2304.08485)
 
+### Sequence membership and an explicit mask
+Take $p=8$ encoded visual tokens and $n=4$ text tokens. A projected prefix has order $[v_1,\ldots,v_8,t_1,\ldots,t_4]$, length 12, all at language width $d$. One illustrative prefix mask allows each visual position to read all visual positions and no text, and each text position to read all visual positions plus text positions up to itself. This is a specified example, not the universal mask of all named systems.
+
+| Interface in the figure | Language self-attention length | Visual read / extra work per head |
+| --- | --- | --- |
+| Projected prefix | $p+n=12$ | Dense score matrix has $12^2=144$ entries |
+| $m=2$ query outputs projected as prefix | $m+n=6$ | $mp=16$ query-to-vision scores, then $6^2=36$ self scores |
+| External visual memory | $n=4$ | $4^2=16$ language self scores plus $np=32$ cross scores |
+| Resampled external memory | $n=4$ | $mp=16$ resampler scores plus $4^2=16$ self and $nm=8$ cross scores |
+
+These are dense score-entry counts before masking, not full FLOPs or wall-clock speed predictions; projections, encoder computation, depth and compression loss also matter. For external cross-attention, $Q=H W_Q\in\mathbb R^{n\times d_k}$ and $K=V W_K\in\mathbb R^{p\times d_k}$ come from different sequences; the value projection has $p$ rows too. The $n\times p$ read produces $n$ outputs returned to the language stream. Visual memory never becomes an additional language position in that mode.
+
+Query compression is an upstream choice that can feed prefix fusion **or** cross-attention. BLIP-2 projects Q-Former outputs to the LLM input width and prepends them as soft visual prompts. Flamingo instead combines a learned-query resampler with external visual cross-attention whose queries come from language and whose keys/values come from vision. [2](https://arxiv.org/abs/2204.14198) [3](https://arxiv.org/abs/2301.12597)
+
 ### Inspect the interface
 Switch the fusion mode in the vector figure. Count which tensors join the language sequence and which remain external memory. The displayed token counts are illustrative; actual models differ in image crops, resolution, resampling and temporal handling.
 
@@ -1893,7 +2308,8 @@ Switch the fusion mode in the vector figure. Count which tensors join the langua
 visual = vision_encoder(images)
 visual_tokens = projector(visual)
 sequence = concatenate([visual_tokens, text_embeddings], axis='positions')
-answer = decoder(sequence, mask=multimodal_mask)
+# Prefix example: V reads V only; text reads V and earlier/current text.
+answer = decoder(sequence, mask=prefix_mask(visual_count=len(visual_tokens)))
 ```
 
 ### Evidence and limits
@@ -1941,6 +2357,15 @@ $$
 
 $v_i,t_i$ are normalized image/text embeddings, $s$ their dot product and $\tau>0$ temperature. The symmetric objective also scores text-to-image retrieval. In-batch negatives create the classification problem; false negatives and biased captions can affect learning. [1](https://arxiv.org/abs/2103.00020)
 
+### A three-pair batch that can be calculated
+The figure uses synthetic normalized image and text vectors $[1,0]$, $[0,1]$, $[0.8,0.6]$ with invented labels red square, blue circle and red object. Their dot-product matrix is
+
+$$
+S=\begin{bmatrix}1&0&0.8\\0&1&0.6\\0.8&0.6&1\end{bmatrix}.
+$$
+
+At $\tau=0.3$, image 1's row gives probabilities $[0.646,0.023,0.331]$ over text candidates, so the paired-target loss is $-\log(0.646)=0.438$ nats. Text-to-image instead normalizes a column. This matrix happens to be symmetric because the toy encoders share the displayed vectors; trained dual encoders need not produce a symmetric cross-batch matrix. A smaller temperature sharpens the distribution and changes the loss; it does not change which pair is labeled positive. Red object might also describe image 1, exposing the possible false-negative problem of diagonal pair labels. The symmetric training loss averages the row and column batch means. [1](https://arxiv.org/abs/2103.00020)
+
 ### Conditional language generation
 A generative vision-language objective instead scores text given visual input $v$:
 
@@ -1958,6 +2383,16 @@ loss = image_text_contrastive_loss(image_repr, text_repr)
 # A separate generative stage may optimize answer tokens only.
 loss = conditional_answer_loss(images, instructions, answers, answer_mask)
 ```
+
+Visual instruction tuning here is a **data and training regime using conditional likelihood**, not a third mathematical loss separate from generation. What changes is the instruction/response data and the supervised span. In the figure, the conditioning sequence is `[image] User: What color? Assistant:`; the answer is `red [stop]`. The target for `red` is predicted from the preceding positions, and the target for `[stop]` includes `red` in its context. An answer mask $[0,0,0,0,0,1,1]$ scores only those last two target positions; it is a loss mask, not an attention mask. With assumed probabilities 0.8 and 0.5, the summed loss is $-\log(0.8)-\log(0.5)=0.916$, or 0.458 per scored token. Prompt positions still affect the answer through conditioning. [3](https://arxiv.org/abs/2304.08485)
+
+| Regime | Supervision / output | Loss and scored span | Typical trainable modules in the cited example |
+| --- | --- | --- | --- |
+| CLIP alignment | Paired image/text; pair identity | Symmetric batch classification | Image and text encoders |
+| Conditional caption generation | Image/caption; caption tokens | Conditional likelihood of target text | Architecture/stage dependent; state which modules are frozen |
+| LLaVA visual instruction tuning | Image, instruction, response; assistant answer | Same conditional token likelihood, assistant response spans | Projector and language model in instruction tuning; vision encoder frozen |
+
+BLIP-2 combines objectives in two stages: with its image encoder frozen, it trains Q-Former with image–text contrastive, image-grounded generation and image–text matching losses; then it trains Q-Former and its width projection to condition a frozen LLM with a generative objective. The pretrained image encoder stays frozen. The image/text interface, objective and frozen modules are thus separate choices even within one system. [2](https://arxiv.org/abs/2301.12597)
 
 ### Keep the axes separate
 An early-fusion model can be trained generatively. A dual encoder can be trained contrastively. A query bottleneck can support several losses. The interface, attention pattern, data mixture and training objective should be separate fields in a model comparison.
@@ -2005,8 +2440,17 @@ For a clip duration $T$ seconds sampled at $f$ frames per second with $p$ visual
 ### Temporal position and synchronization
 Spatial patch indices and temporal indices serve different roles. Interleaving frames and text requires masks that preserve intended access. Audio/video synchronization can be represented by timestamps or aligned feature windows, but positional tags do not correct an inaccurate clock or dropped observations.
 
+### A timestamp changes access, not observation
+The figure uses a synthetic four-second clip and an event visible only on $[1.15,1.35)$ seconds. At 2 fps with phase zero, frames are sampled at $0,0.5,1.0,1.5,\ldots$: the event is missed. A half-interval phase moves the sample grid to $0.25,0.75,1.25,\ldots$, retaining the event at 1.25 s without increasing frame count. In either case, eight frames times 196 patches gives 1,568 visual tokens. Equal token budgets can therefore retain different evidence.
+
+For audio, let a feature centered on physical time 1.25 s be stamped 1.55 s because its clock has offset $\Delta=+0.30$ s: $t_{reported}=t_{physical}+\Delta$. A video query at 1.25 s with the illustrative access rule $|t_{audio}-1.25|\leq0.26$ s excludes that feature. Subtracting the known offset admits it. This correction changes the alignment of retained evidence; it cannot reconstruct a video frame that was never sampled. The figure uses 0.20 s audio windows every 0.50 s for readability, not a released speech frontend.
+
+For an online causal system, one could additionally require each window's **end** timestamp to be no later than the query time; an offline clip model may allow the whole observed clip. That access policy and any latency must be stated independently of positional encoding. See [modality interfaces](#article-multimodal-fusion) for how retained features enter self-attention or external memory.
+
 ### Two concrete reference points
 Whisper is an encoder–decoder speech model trained on large-scale weak supervision with task and language conditioning. It is a speech-system reference, not an example of every “native audio” LLM. Flamingo provides a visual-language architecture that can ingest images and videos through its visual interface. [1](https://arxiv.org/abs/2212.04356) [2](https://arxiv.org/abs/2204.14198)
+
+Whisper's concrete frontend resamples audio to 16 kHz and computes 80-channel log-Mel features from 25 ms windows with a 10 ms stride. At that sampling rate, each window spans 400 samples and successive starts are 160 samples apart, so adjacent windows overlap by 240 samples. These are frontend windows, not one-to-one language tokens; the model's convolutional stem further processes them before its Transformer encoder. Task/language tokens condition the decoder. This provides an operational audio example while preserving the distinction from the much coarser synthetic timeline. [1](https://arxiv.org/abs/2212.04356)
 
 ```python
 frames, times = sample_video(video, frames_per_second=2)
@@ -2083,6 +2527,20 @@ $$
 
 $\operatorname{sg}$ stops gradients through the target; $m\in[0,1)$ controls an exponential moving average. Gradient updates train the context encoder and predictor, while the target follows the moving average. The penalty $\rho$ is method-specific: V-JEPA uses absolute error. This is a family-level notation, not a claim that all JEPA variants use identical losses. Naive jointly learned feature matching admits a constant-output collapse; the asymmetric predictor, moving-average target and stop-gradient form a practical prevention strategy, not a universal theorem of successful representation learning. [2](https://arxiv.org/abs/2404.08471)
 
+### Trace matched rows and an update
+The numerical companion retains original target-position IDs, rather than comparing arbitrary rows. Its **invented** width-two feature rule is $Y_i=(i/10,1-i/20)$ and $\widehat Y_i=Y_i+(0.2,-0.1)$. For two of the block's target positions:
+
+| Original position | Prediction $\widehat Y_i$ | Stopped target $Y_i$ | Entrywise absolute difference |
+| --- | --- | --- | --- |
+| 7 | $(0.90,0.55)$ | $(0.70,0.65)$ | $(0.20,0.10)$ |
+| 8 | $(1.00,0.50)$ | $(0.80,0.60)$ | $(0.20,0.10)$ |
+
+Mean absolute error over these four scalar entries is $(0.2+0.1+0.2+0.1)/4=0.15$. The figure includes positions $12,13$ as well, with the same error per entry, so its eight-entry mean remains $0.15$. Changing the mask changes both displayed position IDs and their target values; the prediction-error control changes every residual and the reduced loss. The backward arrows run from loss through the predictor **and context encoder**, with no loss-gradient route through the target encoder.
+
+A separate two-parameter example makes EMA arithmetic visible. With old target parameters $\bar\theta=(0.4,0.8)$, updated online parameters $\theta=(1.0,0.2)$ and $m=0.9$, the next target parameters are $(0.46,0.74)$. These are parameter coordinates, not the feature values in the table. The target is moved by that rule after the online update, not trained by differentiating the target side of the matching loss. [1](https://arxiv.org/abs/2301.08243) [2](https://arxiv.org/abs/2404.08471)
+
+If both freely learned branches output $(0,0)$ for every image and position, their matching loss is zero while every feature-coordinate variance across examples is zero. They have erased input distinctions. The companion prints the mean feature-coordinate variance across its four target rows; this is a small diagnostic of variation, not a guarantee of semantic quality. Real evaluations should inspect variability across held-out inputs as well as positions. A nonzero variance alone can coexist with useless features, and a low regression loss alone cannot rule out collapse.
+
 ### From images to video
 I-JEPA uses spatial image context and targets. V-JEPA extends masked feature prediction to video, making positions spatiotemporal and evaluating motion-sensitive representations. A hidden region need not be strictly in the future: masked video modeling and causal forecasting are different prediction tasks. V-JEPA 2 scales video representation learning, while its action-conditioned extension adds a further stage for planning. Follow [video world models](#article-video-world-models) for that distinction. [2](https://arxiv.org/abs/2404.08471) [3](https://arxiv.org/abs/2506.09985)
 
@@ -2155,8 +2613,20 @@ $$
 
 $A=(a_t,\ldots,a_{t+H-1})$ is a candidate action sequence, $D$ a feature discrepancy and $C$ an optional constraint/cost term. This is a generic planning objective. The illustrated candidate scores are not learned-model measurements or reproduced paper results.
 
+The trace companion puts every candidate on **one common scalar-feature axis**, at the same predicted steps $k=0,1,2$. It sets $\lambda=0$ and $D(u,g)=|u-g|$, so the endpoint determines the score:
+
+| Candidate | $\widehat z_t$ | $\widehat z_{t+1}$ | $\widehat z_{t+2}$ | Distance to goal $+34$ | Distance to goal $-35$ |
+| --- | --- | --- | --- | --- | --- |
+| A | 0 | −18 | −35 | $\lvert -35-34\rvert=69$ | $\lvert -35-(-35)\rvert=0$ |
+| B | 0 | 10 | 34 | $\lvert 34-34\rvert=0$ | $\lvert 34-(-35)\rvert=69$ |
+| C | 0 | 6 | 12 | $\lvert 12-34\rvert=22$ | $\lvert 12-(-35)\rvert=47$ |
+
+These invented features are neither meters nor task-success probabilities. Candidate B wins at goal $+34$; A wins at goal $-35$. The slider also exposes intermediate goals, with alphabetical tie-breaking only as a deterministic display rule. Intermediate rollout values are visible even though this particular score uses only the endpoint. Choosing an endpoint-only loss is itself a modeling decision: a path can pass through an unacceptable state while finishing close to the goal. No such physical constraint is modeled by this scalar example.
+
 ### Close the loop
 Execute a prefix of the selected sequence, observe again and replan. This allows new evidence to replace a potentially inaccurate imagined rollout. It also costs sensing and planning time. An action horizon, number of sampled candidates, executed prefix and observation delay are separate quantities; reducing one does not automatically improve all the others.
+
+In the companion, $H=2$ proposed actions connect the three plotted feature times. The prefix control executes either $h=1$ or $h=2$ before a new measured observation replaces the imagined starting context. The feedback wire runs outside the chart so it cannot be mistaken for another candidate trajectory. Its abstract action labels do not specify an executable robot command or future state estimator; those remain necessary interfaces in a real planner. The expandable architecture figure retains the comparison with action-free video prediction.
 
 The V-JEPA 2 work demonstrates image-goal robot planning, with limitations including camera sensitivity and long-horizon behavior. These experiments support particular environments and tasks, not arbitrary physical understanding. A feature-space goal can also omit a requirement that matters to a user. [2](https://arxiv.org/abs/2506.09985)
 
@@ -2212,24 +2682,59 @@ $$
 
 $x_0$ is data, $t$ a noise level and $\bar\alpha_t\in[0,1]$ the signal-retention schedule. A network may predict noise, clean data or another equivalent parameterization under stated assumptions. Sampling involves a chosen reverse-time solver. The denoiser architecture need not be a Transformer. [1](https://arxiv.org/abs/2006.11239)
 
+One concrete training choice samples a data vector $x_0\in\mathbb R^d$, Gaussian noise $\epsilon\in\mathbb R^d$ and a discrete schedule index $t$ uniformly from $1,\ldots,T$, then minimizes
+
+$$
+\mathcal L_\epsilon=\mathbb E_{x_0,t,\epsilon}\|\epsilon-\epsilon_\theta(x_t,t,c)\|_2^2.
+$$
+
+$c$ is optional conditioning and is omitted for unconditional generation. Noise is known during training because we sampled it; at inference the network must estimate it. A simplified unweighted noise loss should not be confused with every weighting of a variational objective. [1](https://arxiv.org/abs/2006.11239)
+
+For a concrete **deterministic DDIM-style step**, choose a less noisy index $s<t$ with $\bar\alpha_s>\bar\alpha_t$:
+
+$$
+\widehat x_0=\frac{x_t-\sqrt{1-\bar\alpha_t}\widehat\epsilon}{\sqrt{\bar\alpha_t}},\qquad
+x_s=\sqrt{\bar\alpha_s}\widehat x_0+\sqrt{1-\bar\alpha_s}\widehat\epsilon.
+$$
+
+Here $\widehat\epsilon=\epsilon_\theta(x_t,t,c)$. This zero-variance choice differs from an ancestral DDPM step, which also specifies reverse variance and a random draw. It is a solver choice, not a new training target. [4](https://arxiv.org/abs/2010.02502)
+
+The figure's scalar training pair has $x_0=2$, $\epsilon=1$ and $\bar\alpha_t=0.25$, giving $x_t=1.866$. With $\widehat\epsilon=1$, the clean estimate is exactly $2$; at $\bar\alpha_s=0.64$, $x_s=0.8(2)+0.6(1)=2.2$. “Less noisy” refers to the schedule, not a guarantee that each scalar value approaches zero or changes monotonically. Change the estimated noise to trace its effect on both loss and sampling. The true $x_0$ shown for checking this arithmetic is unavailable to a real sampler.
+
 ### Discrete language diffusion
 LLaDA instead uses a forward masking process and a Transformer trained to predict masked tokens. Iterative generation can fill positions in an order unlike left-to-right autoregression. Changing the objective and decoding procedure does not mean the attention backbone has disappeared. [2](https://arxiv.org/abs/2502.09992)
 
-The interactive figure shows a **deterministic illustrative reveal schedule**, not samples from a trained diffusion model. Move the step control to compare left-to-right reveal with a mask-based order. A real diffusion sampler must specify confidence, remasking, conditioning and number of network evaluations.
+For a sequence $y=(y_1,\ldots,y_L)$, sample $t\sim\mathcal U(0,1)$ and independently replace each response token with a mask with probability $t$, producing $y_t$. A masked-token objective used by LLaDA has the form
+
+$$
+\mathcal L_{\mathrm{mask}}=-\mathbb E_{y,t,y_t}\left[\frac1t\sum_{i:(y_t)_i=\mathrm{MASK}}\log p_\theta(y_i\mid y_t,c)\right].
+$$
+
+Only masked response positions contribute; an unmasked prompt $c$ supplies conditioning in the conditional setting. The model sees the current partly observed sequence and predicts distributions for masked positions. One forward pass can predict many positions; deciding which predictions become conditioning tokens for the next pass is a separate sampling operation. [2](https://arxiv.org/abs/2502.09992)
+
+The new masked view prints its **synthetic confidence rule**: score each proposal, accept the top two, and optionally reopen one old token on round 2. Its provisional “box” can be replaced by “cup” before acceptance; confidence is arithmetic, not a learned probability. Remasking an accepted position changes the following network input. The retained supporting reveal view compares a fixed mask order with left-to-right order. Neither view is a sample from a trained language model.
 
 ### Continuous flow matching
-For noise $x_0$ and data $x_1$, a linear interpolant is $x_t=(1-t)x_0+tx_1$. A simple flow-matching objective is
+Use $z\sim\mathcal N(0,I_d)$ for noise and $y\sim p_{\mathrm{data}}$ for data, sampled independently as a simple endpoint coupling, and $t\sim\mathcal U(0,1)$. Both endpoints have dimension $d$. A linear interpolant is $x_t=(1-t)z+ty$. A simple flow-matching objective is
 
 $$
-\mathcal L_{\mathrm{FM}}=\mathbb E_{t,x_0,x_1}\left\|v_\theta(x_t,t)-(x_1-x_0)\right\|^2.
+\mathcal L_{\mathrm{FM}}=\mathbb E_{t,z,y}\left\|v_\theta(x_t,t)-(y-z)\right\|^2.
 $$
 
-$v_\theta$ predicts a velocity field. Sampling integrates $dx/dt=v_\theta(x,t)$. The conditional straight-line target does not imply that every learned marginal trajectory is exactly straight or that one Euler step is always accurate. [3](https://arxiv.org/abs/2209.03003)
+$v_\theta$ predicts a velocity field. Sampling starts at noise at $t=0$ and integrates $dx/dt=v_\theta(x,t)$ toward data at $t=1$. This time direction is opposite to the Gaussian corruption index above, where increasing $t$ means adding noise. Naming endpoints $z,y$ avoids calling both clean data and noise “$x_0$.” Other couplings are possible. The conditional straight-line target does not imply that every learned marginal trajectory is exactly straight or that one Euler step is always accurate. [3](https://arxiv.org/abs/2209.03003)
 
 ```python
 x_t = (1 - t) * noise + t * data
 loss = mean_squared_error(velocity(x_t, t), data - noise)
 ```
+
+The independent solver illustration uses the fully specified field $v(x,y,t)=(1,x)$, starting at $(0,0)$. The exact endpoint is $(1,0.5)$; explicit Euler with $N$ equal steps gives $(1,(N-1)/(2N))$. At $N=4$ it reaches $(1,0.375)$. This curved benchmark isolates integration error; it is not a fitted flow model or a claim that the displayed training pair learns this field.
+
+| Construction | Learned prediction | One inference operation |
+| --- | --- | --- |
+| Gaussian example | Noise vector, same shape as sample | Estimate clean data, then move to a less noisy level |
+| Masked language | Token probabilities at masked positions | Predict proposals, then accept/remask under a schedule |
+| Flow example | Velocity vector, same shape as sample | Integrate $x\leftarrow x+\Delta t\,v_\theta(x,t)$ |
 
 ### Evidence and limits
 Compare generation quality against **network evaluations, total FLOPs, latency and output length**, not only the number of decoding rounds. A bidirectional denoiser can expose more context per iteration, but repeated full-sequence passes can be costly. Variable lengths and KV reuse require method-specific treatment.
@@ -2239,6 +2744,7 @@ Compare generation quality against **network evaluations, total FLOPs, latency a
 1. Ho, Jain & Abbeel (2020). [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239). Research paper.
 2. Nie et al. (2025). [Large Language Diffusion Models](https://arxiv.org/abs/2502.09992). Research paper.
 3. Liu, Gong & Liu (2022). [Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow](https://arxiv.org/abs/2209.03003). Research paper.
+4. Jiaming Song, Chenlin Meng & Stefano Ermon (2020). [Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502). Research paper.
 
 ### Related topics
 
@@ -2278,15 +2784,22 @@ $m$ is prompt length and $d$ model width. These vectors need not correspond to v
 ### Soft token mixtures
 Another possible construction embeds a probability distribution $p\in\Delta^{V-1}$ as $v=\sum_k p_kE_k$. The simplex $\Delta^{V-1}$ contains nonnegative weights summing to one. Such a convex mixture is mathematically distinct from an arbitrary learned prompt vector; not every vector lies in the convex hull of the embedding table. This formula describes a representation option, not a claim that all latent reasoning systems use it.
 
+The figure makes both constructions numerical. Its scalar prompt example freezes $\widehat y=P+0.5$ and uses $\mathcal L=\tfrac12(\widehat y-1)^2$, so $\partial\mathcal L/\partial P=P-0.5$. At $P=0$, learning rate $0.25$ moves $P$ to $0.125$; the backbone has no parameter update. In the mixture example, $E_1=(1,0)$, $E_2=(0,2)$ and $E_3=(-1,0)$. At $p=(0.5,0.3,0.2)$, $v=(0.3,0.6)$, inside their triangle. Adjusting the first weight redistributes the remainder in a fixed $3:2$ ratio. These toy values illustrate computation, not trained prompts or language semantics.
+
 ### Hidden-state feedback
 Coconut feeds a last hidden state back as a subsequent input embedding during latent reasoning, rather than decoding each step into a word. That state is input-dependent and computed at inference; it is not simply a fixed soft prompt. [2](https://arxiv.org/abs/2412.06769)
 
-```python
-state = model(context).last_hidden_state
-for _ in range(latent_steps):
-    state = model(inputs_embeds=state).last_hidden_state
-# Schematic only: real implementations preserve their context and cache layout.
-```
+Let $U_j\in\mathbb R^{j\times d}$ contain **all** input vectors through position $j$, and let $h_j=[F_\theta(U_j)]_j\in\mathbb R^d$ select only the final-position normalized hidden state. During a latent step,
+
+$$
+U_{j+1}=[U_j;h_j],\qquad h_{j+1}=[F_\theta(U_{j+1})]_{j+1}.
+$$
+
+In ordinary decoding, the appended vector instead comes from a vocabulary choice: $w_{j+1}\sim\operatorname{softmax}(Wh_j)$, followed by $E(w_{j+1})$. The latent path bypasses both operations; it does not reinterpret $h_j$ as vocabulary probabilities.
+
+Coconut brackets latent positions with **`<bot>` and `<eot>`**. After the entry marker, the final-position state supplies the next embedding; at exit, token embeddings and vocabulary decoding resume. Retaining $U_j$ is essential. An equivalent cached implementation keeps prior key/value states, advances positions and supplies only the new embedding; it does not repeatedly treat one isolated state as the whole context. The figure compares these paths with an explicitly invented recurrence, not a trained model. [2](https://arxiv.org/abs/2412.06769)
+
+Training starts with ordinary language reasoning chains, then stage $k$ replaces the first $k$ reasoning steps by $kc$ continuous thoughts, where $c$ is a chosen count per removed step. Cross-entropy supervises remaining language/answer tokens, with question and latent-position losses masked; gradients still pass through the latent computations. The published experiments generally fix the inference latent count to the final training stage; a learned stop classifier is another discussed option. Applying feedback to an arbitrary frozen model does not reproduce this training. [2](https://arxiv.org/abs/2412.06769)
 
 ### What continuous does not imply
 A continuous vector is not automatically an interpretable probability distribution over alternative thoughts. A paper's search analogy must be separated from a verified explicit search algorithm. Latent steps consume compute even if they emit no readable tokens.
@@ -2343,13 +2856,27 @@ $o$ denotes observations, $\ell$ a language instruction, $q_t$ proprioceptive st
 ### Two foundational examples
 RT-2 studies co-fine-tuning vision-language models with robot trajectories and web-derived vision-language tasks, representing actions through a token interface. OpenVLA provides an open 7B model built from a language backbone and visual representations, with a recipe for robot adaptation. Their reported success rates belong to their own task and embodiment evaluations. [1](https://arxiv.org/abs/2307.15818) [2](https://arxiv.org/abs/2406.09246)
 
+RT-2's action interface includes a termination command, three end-effector translation displacements, three rotation displacements and gripper extension. Continuous coordinates use 256 bins; valid action tokens are selected and converted back to commands. OpenVLA also bins each action dimension into 256 values, using dimension-specific training-data 1st/99th quantiles to set its interval; it applies next-token cross-entropy to action tokens. This action supervision supplies the missing connection from visual-language features to motor labels. [1](https://arxiv.org/abs/2307.15818) [2](https://arxiv.org/abs/2406.09246)
+
+For action tokens $b_1,\ldots,b_K$ and observation/instruction context $c$, a schematic imitation loss is $-\sum_j\log p_\theta(b_j\mid c,b_{<j})$. A **toy** translation coordinate makes the representation change explicit: eight uniform bins on $[-10,10]$ mm have width $2.5$ mm. A $+2$ mm demonstration maps to $b=\lfloor(2+10)/2.5\rfloor=4$; decoding that bin's center gives $-10+(4+\tfrac12)2.5=1.25$ mm. Edge values are clipped to bins $0,\ldots,7$. Eight bins, this unit interval and bin-center reconstruction are illustration choices, not a published robot calibration.
+
 ### Representation is not control
 A visual-language backbone can transfer object and instruction knowledge. It still needs action supervision and compatible actuation semantics. Joint positions, joint deltas, end-effector pose deltas, forces and gripper commands have different units, constraints and controllers. Normalizing an action vector is not sufficient to make robots interchangeable.
 
-The vector figure follows visual features and language through a policy, an action representation, a low-level controller and a new observation. Toggle discrete or continuous actions to locate the changing component. It is a generic interface diagram, not an exact reproduction of RT-2, OpenVLA or π₀.
+The vector figure follows visual features and language through a policy, an action representation, execution and a new observation. Its environmental return branches into **camera acquisition and proprioception**, both indexed $t+1$, then synchronizes them before the next policy call. The instruction remains persistent task conditioning. Toggle action tokens, noise prediction or velocity flow to expose the actual representation computation. It is a generic interface diagram, not an exact reproduction of RT-2, OpenVLA or π₀; its two-coordinate action assumes a compatible low-level controller.
 
 ### Continuous action experts
 π₀ builds on a pretrained VLM with a flow-matching action architecture. This bridges a semantic representation to continuous action chunks, rather than requiring each action coordinate to be generated as ordinary text. [3](https://arxiv.org/abs/2410.24164)
+
+An action chunk $A_t\in\mathbb R^{H\times d_a}$ contains $H$ future action vectors, each with $d_a$ coordinates. The figure uses $H=4,d_a=2$ with displacement coordinates in mm. It marks the executed prefix $h$ and discards the remaining proposed actions when replanning. Generative time $\tau$ labels iterations that construct the chunk; physical time labels when its rows execute. Changing sampler iterations is therefore different from changing how long the robot acts before refreshing its sensors.
+
+| Interface | Conditioning at the abstraction used here | Output and horizon |
+| --- | --- | --- |
+| RT-2 token policy | Camera image and task instruction | Serialized coordinates of a robot action; not the figure's four-row chunk |
+| Original OpenVLA token policy | Image and language context | Discretized dimensions of one action; conventions depend on embodiment |
+| π₀ continuous expert | Visual/language context and robot state | Continuous action chunk; execution prefix is a control-system choice |
+
+These rows identify representation boundaries rather than matching observation layouts, control rates or horizons across papers. [1](https://arxiv.org/abs/2307.15818) [2](https://arxiv.org/abs/2406.09246) [3](https://arxiv.org/abs/2410.24164)
 
 ```python
 observation = synchronize(cameras, robot_state)
@@ -2395,10 +2922,12 @@ Generalization across objects, language, scenes and embodiments are different ax
 ### Discretized actions
 A continuous action coordinate can be quantized to a finite set of bins and predicted as a token. This connects robot supervision to a language-model output interface, as studied in RT-2. Quantization resolution, coordinate order and autoregressive dependencies affect precision and latency. [1](https://arxiv.org/abs/2307.15818)
 
+For a deliberately coarse example, eight bins span $[-10,10]$ mm with width $w=2.5$ mm. Encode $x$ by $b=\operatorname{clip}(\lfloor(x+10)/w\rfloor,0,7)$ and decode $\widehat x=-10+(b+\tfrac12)w$. Thus $x=2$ mm becomes bin $4$ and reconstructs as $1.25$ mm. For in-range inputs the bin-center error is at most $w/2=1.25$ mm; clipping out-of-range commands has no such bound. These are toy units and eight bins; RT-2 uses 256 for continuous action coordinates. A serialized action vector also fixes coordinate order, so “one action” can require several autoregressive token predictions. [1](https://arxiv.org/abs/2307.15818)
+
 ### Continuous action distributions
 Diffusion Policy models an action sequence through conditional denoising, supporting multimodal action distributions rather than collapsing incompatible actions into their mean. π₀ uses a flow-matching action architecture on top of a VLM. These share iterative generative computation but are not identical objectives or samplers. [2](https://arxiv.org/abs/2303.04137) [3](https://arxiv.org/abs/2410.24164)
 
-For a simple conditional flow objective, let $a_0$ be noise, $a_1$ a demonstrated action chunk and $c$ observation/instruction context:
+For a simple conditional flow objective, let $a_0\sim\mathcal N(0,I)$ be noise with shape $H\times d_a$, $(c,a_1)$ a context/demonstrated-chunk pair sampled from the training set, and $\tau\sim\mathcal U(0,1)$ independent of the noise and training pair. The $H$ rows are future physical action steps; the $d_a$ columns are coordinates in a specified convention. Then
 
 $$
 a_\tau=(1-\tau)a_0+\tau a_1,\qquad
@@ -2407,8 +2936,21 @@ $$
 
 $\tau\in[0,1]$ is generative time, not wall-clock robot time. The action horizon is a separate axis. The formula illustrates conditional flow matching; each model specifies its own parameterization and conditioning. [4](https://arxiv.org/abs/2209.03003)
 
+At inference, the demonstrated endpoint $a_1$ is **unavailable**. Sample an initial noise chunk and solve
+
+$$
+\frac{da}{d\tau}=v_\theta(a,\tau,c),\qquad
+a_{k+1}=a_k+\Delta\tau\,v_\theta(a_k,\tau_k,c).
+$$
+
+The second expression is explicit Euler, not an exact solver in general. Conditioning $c$ remains fixed during these sampling iterations, then changes when a new observation arrives. In this parameterization a flow network predicts velocity; a noise-parameterized diffusion network predicts the noise in a scheduled corrupted chunk and uses it in a reverse denoising update. Both can update all chunk entries in one network evaluation; neither fact makes the two objectives identical. [2](https://arxiv.org/abs/2303.04137) [4](https://arxiv.org/abs/2209.03003)
+
+The figure isolates these operations with an analytic **toy** conditional center $\mu(c)$ and a fixed seed. Its flow uses $v=\mu(c)-a$; at $N=4$, the first coordinate with seed $-6$ mm and center $2$ mm ends at $2+(-6-2)(1-1/4)^4=-0.53125$ mm. Its synthetic denoiser predicts the known center exactly, so its zero-variance reverse trace reaches that center. This is not a quality comparison: the two hand-defined functions have different finite-time behavior, and real learned predictions have error. The token branch makes quantization error visible instead. Each branch prints the resulting $4\times2$ chunk.
+
 ### Execute a prefix, then observe again
 Predict a horizon $H$, execute only $h\le H$ actions and replan with a new observation. This receding-horizon policy can react more often than executing the entire plan. Smaller $h$ increases inference demand; larger $h$ increases open-loop exposure.
+
+With the figure's $H=4$, $h=2$ and $20$ ms action period, two rows execute over $40$ ms before sensing again; the remaining two are proposals rather than committed commands. Sampling latency is excluded from that physical-time strip and must be added to a real schedule. Environment feedback refreshes **both** the next camera image and the next proprioceptive state, then synchronizes them before the next policy call.
 
 ```python
 while task_active:
@@ -2478,8 +3020,34 @@ Predictive coding can implement parts of inference under particular generative m
 | Expected free energy | Candidate futures/policies | Preferences, transitions and beliefs |
 | PC constraint energy | Consistency of neural activities | Layer functions, clamping and penalties |
 
-### An implementable starting point
-Build a tiny partially observable task with two hidden states, noisy observations and two actions. Specify observation likelihoods, transition matrices and prior preferences numerically. Update beliefs by Bayes' rule before trying a neural approximation. This reveals what the framework assumes rather than attributing decisions to an undefined optimization principle.
+### A two-state, two-action instance
+Here is a synthetic one-step partially observed model. Hidden state $s\in\{\mathrm{good},\mathrm{bad}\}$ is never shown to the agent. Outcomes are $o\in\{\mathrm{bright},\mathrm{dim}\}$. Start from prior $q_0=(0.5,0.5)^\top$. The likelihood and two action transitions are column-stochastic matrices (columns are the previous state):
+
+$$
+A=\begin{bmatrix}a&1-a\\1-a&a\end{bmatrix},\quad
+B_{\mathrm{stay}}=I,\quad
+B_{\mathrm{reset}}=\begin{bmatrix}0.85&0.85\\0.15&0.15\end{bmatrix}.
+$$
+
+$A$ has outcome rows and state columns. Observing bright gives $q(s\mid\mathrm{bright})\propto A_{\mathrm{bright},s}q_0(s)$; with $a=0.7$, the posterior is $(0.7,0.3)$. Each policy is just one action, with predicted state $q_\pi(s')=B_\pi q(s)$ and outcome $q_\pi(o')=Aq_\pi(s')$. Stay predicts bright with probability $0.58$; Reset predicts $0.64$. These are model predictions, not measurements of the actual next state.
+
+Choose preferred outcome distribution $C=(0.8,0.2)$ and natural logarithms. For this finite-state, known-likelihood example, use the risk-plus-ambiguity expected-free-energy convention from the process theory: [2](https://activeinference.github.io/papers/process_theory.pdf)
+
+$$
+G(\pi)=D_{\mathrm{KL}}(q_\pi(o')\|C)
++\mathbb E_{q_\pi(s')}H[A_{\cdot,s'}]
+=\underbrace{-\mathbb E_{q_\pi(o')}\log C(o')}_{\text{preference cost}}
+-\underbrace{I_{q_\pi}(s';o')}_{\text{information gain}}.
+$$
+
+Here $H$ is categorical entropy and $I$ is mutual information under $q_\pi(s')A(o'\mid s')$. The information gain is about the **future state**, after the action; it is not information about the pre-reset state. With a uniform policy prior and fixed precision $\gamma=4$, set $q(\pi)=\operatorname{softmax}(-\gamma G(\pi))$. This reduced rule assumes equal past-observation evidence across policies. Choose the lower-$G$ action or sample from this posterior; the figure shows both scores and posterior probabilities.
+
+| One-step policy | Preference cost | Information gain | $G$ (nats) | Policy probability |
+| --- | --- | --- | --- | --- |
+| Stay | 0.8054 | 0.0694 | 0.7360 | 0.4439 |
+| Reset | 0.7222 | 0.0426 | 0.6797 | 0.5561 |
+
+Reset wins at these settings despite offering less information: its preference cost is lower enough. Change the preferred-outcome probability or likelihood accuracy to inspect the trade-off. At $a=0.5$, observations reveal no state information and both actions predict the same outcomes, so their scores tie. There is no learned transition model, extra action cost, planning horizon or parameter-uncertainty exploration in this toy example. After acting in a real environment, observe again and repeat Bayesian filtering; a predicted outcome must not be substituted for an observation.
 
 ### Evidence and limits
 The cited book and process theory formalize a framework. They do not establish that all biological learning or every effective controller implements one exact algorithm. Compare against Bayesian filtering and conventional control/RL baselines at matched model knowledge and information access.
@@ -2539,17 +3107,43 @@ $$
 
 This additive expression assumes sequential stages; pipelined systems need a timing diagram with overlaps. At speed $v$, a simple constant-velocity displacement over delay is $v\Delta$. This is a dimensional illustration, not a sufficient collision or stability model.
 
+The timing figure specifies two synthetic cycles rather than assuming pipelining always reduces delay. Capture takes $12$ ms, transport $8$ ms, inference $40$ ms and dispatch $5$ ms; capture timestamps mark exposure start. Frame 0's first action uses an observation aged $65$ ms. Two executed actions at $20$ ms each finish at $105$ ms. In the sequential schedule, frame 1 starts then and is used at $170$ ms, again aged $65$ ms. In the pipelined schedule it starts at $25$ ms, waits for the single inference server until $60$ ms, and is used at $105$ ms: age $80$ ms. Thus faster throughput can coexist with older observations. At $v=0.2$ m/s, $80$ ms corresponds to $0.016$ m, or $16$ mm, under the stated constant-velocity assumption.
+
 ### Demonstrations and interventions
 State whether trajectories include failures, recovery, human takeovers and multiple embodiments. Report how often an operator intervenes and how interventions affect the success metric. π₀'s multi-platform setting is a concrete reference for the data and adaptation questions, not a universal benchmark standard. [3](https://arxiv.org/abs/2410.24164)
 
 ```python
 record = {
+    'trial_id': 'T02',
+    'initial_state_id': 'S02',
     'observation_timestamp': sensor_time,
     'action_timestamp': execution_time,
     'intervention': intervention_occurred,
+    'termination': 'goal_after_takeover',
     'success': independently_scored_success,
+    'autonomous_success': False,
+    'p95_observation_to_action_ms': 80,
 }
 ```
+
+### A small, fully specified aggregation
+Here is an **invented protocol**, motivated by the task-dependent success rules and repeated evaluations in OpenVLA, rather than a reproduction of its scores: move a block into a marked tray, release it, and confirm that it remains wholly inside for $2$ seconds. Use a fixed camera, a versioned controller/checkpoint/calibration and three recorded initial poses S01–S03, replayed for each compared policy in randomized order. An episode ends at confirmed completion, a $30$-second timeout or an operator stop. An operator takeover ends autonomous evaluation; a continued assisted completion is recorded separately. A missed completion declaration remains a timeout. No trial is dropped and no partial credit is used. The same rules would need more trials and more initial states for a useful estimate. [1](https://arxiv.org/abs/2406.09246)
+
+| Trial / initial state | Termination and intervention | Autonomous success | Completion including assistance | p95 observation-to-action delay |
+| --- | --- | --- | --- | --- |
+| T01 / S01 | Goal confirmed; no takeover | 1 | 1 | 62 ms |
+| T02 / S02 | Goal after human takeover | 0 | 1 | 80 ms |
+| T03 / S03 | Timeout; no takeover | 0 | 0 | 73 ms |
+
+Autonomous success is $1/3=33.3\%$, assisted-inclusive completion is $2/3=66.7\%$, and takeover rate is $1/3$. The denominator remains all three attempted rollouts. A failed or early termination is not removed; partial completion does not count toward this binary criterion. Latency is a separate per-rollout outcome: averaging the three reported p95 values would **not** recover a pooled p95. Pool timestamp records or state the aggregation you actually use.
+
+For the figure's approximate $95\%$ Wilson interval, $n$ is the attempted-trial count, $\widehat p=k/n$, and $z=1.96$:
+
+$$
+\frac{\widehat p+z^2/(2n)\;\pm\;z\sqrt{\widehat p(1-\widehat p)/n+z^2/(4n^2)}}{1+z^2/n}.
+$$
+
+For one success in three trials this is approximately $[6.1\%,79.2\%]$: the tiny cohort is visibly inconclusive. This binomial calculation assumes independent trials with a common success probability; repeated correlated starts or a heterogeneous task mixture need a reporting/uncertainty scheme that respects that design. The displayed interval is our statistical illustration, not an OpenVLA confidence interval.
 
 ### A reproducible report
 Provide seeds or initial-state identifiers, number of trials, confidence intervals, controller version, model checkpoint, calibration and termination rules. Keep development episodes separate from final evaluation. Treat task success, safety violations and latency as separate outcomes instead of hiding them in one score.
@@ -2598,6 +3192,11 @@ A discrete entity can enter a network as a one-hot vector $e_i\in\{0,1\}^{V}$, w
 
 Hinton's 1986 work on distributed representations of concepts is the relevant historical thread for the family-relations example: learn internal representations from relational facts rather than hand-design one feature per concept. His author bibliography distinguishes this contribution from the related Rumelhart–Hinton–Williams backpropagation papers. These works should not be collapsed into one title. [1](https://www.cs.toronto.edu/~hinton/backprop.html) [2](https://www.cs.toronto.edu/~hinton/absps/naturebp.pdf)
 
+### What makes the code distributed?
+Several coordinates participate in one entity, and a coordinate participates in several entities. A one-hot identity has one dedicated active coordinate; a distributed internal code reuses coordinates. Continuity alone is insufficient: a continuous lookup can still memorize identifiers without useful shared structure.
+
+The figure uses a **synthetic**, deliberately interpretable code, not Hinton's learned weights. Ada has $[1,1,0]$, Ben $[1,0.8,0.2]$, Cora $[0,1,0]$ and Dan $[0,0,1]$. Coordinates stand for older generation, branch A and branch B. Ada and Ben each use multiple coordinates; branch A is shared across Ada, Ben and Cora. Interpretability is imposed here to expose the calculation, whereas real features must be learned.
+
 ### A relational learning problem
 Conceptually, a model learns a mapping
 
@@ -2608,8 +3207,22 @@ $$
 
 The notation is a modern abstraction of the task, not an exact reconstruction of its original circuitry. Similar hidden patterns may capture regularities shared across family members. This is evidence that learned continuous representations can support structured relational tasks; it does not establish a complete symbolic theorem prover.
 
+### A fact changes another prediction
+Hold the codes fixed and ask a two-candidate **has-child** query, with outputs Cora or Dan. Start with rows $w_C=[0,0.2,0]$ and $w_D=[0,0,0.2]$ in $W\in\mathbb R^{2\times3}$; logits are $z=Wv$ and probabilities are $\operatorname{softmax}(z)$. These are illustrative candidate scores, not assertions that the code identifies every actual family relationship.
+
+For Ben, $z=[0.16,0.04]$ gives $p(Cora)=0.530$. Train one fact, Ada has-child Cora. With cross-entropy, step size $\eta=1$ and target $y=[1,0]$,
+
+$$
+\Delta W=\eta(y-p_{Ada})v_{Ada}^{\top},\qquad p_{Ada}=\operatorname{softmax}([0.2,0]).
+$$
+
+The new rows are approximately $[0.450,0.650,0]$ and $[-0.450,-0.450,0.2]$. Ben's new logits are $[0.970,-0.770]$, so $p(Cora)=0.851$ even though Ben was not the training query. The change transfers because $v_{Ada}^{\top}v_{Ben}=1.8$. In a separate classifier whose only inputs are isolated one-hot IDs, that update changes Ada's output column and leaves Ben's unchanged. Shared hidden computation could introduce transfer even with one-hot inputs; it is the learned internal reuse that matters. This one-step demonstration shows a possible transfer route, not evidence that its new prediction is correct.
+
+### What the historical experiment observed
+Hinton's concepts paper used two isomorphic family trees, 24 person IDs and 12 relationship IDs. Separate six-unit internal groups encoded the input person and relation; a query could have several correct relatives. The reported person codes captured generation and family branch, with corresponding English/Italian people represented similarly on many units. These are observed regularities in that small relational task, not universal interpretable coordinates or a broad generalization benchmark. The paper also notes that its relation set did not pressure the person code to represent sex. [3](https://www.cs.toronto.edu/~hinton/absps/families.pdf)
+
 ### From entities to word sequences
-Bengio and collaborators' 2003 neural probabilistic language model jointly learned word representations and a probability function over sequences. Shared continuous features allow one observed sequence to inform predictions for related sequences. This is a direct conceptual ancestor of learned token embeddings and neural next-token modeling, although that model was not a Transformer. [3](https://www.jmlr.org/papers/v3/bengio03a.html)
+Bengio and collaborators' 2003 neural probabilistic language model jointly learned word representations and a probability function over sequences. Shared continuous features allow one observed sequence to inform predictions for related sequences. This is a direct conceptual ancestor of learned token embeddings and neural next-token modeling, although that model was not a Transformer. [4](https://www.jmlr.org/papers/v3/bengio03a.html)
 
 ```python
 context = embedding[token_ids]  # categorical lookup, differentiable parameters
@@ -2630,7 +3243,8 @@ For explicit lookup and unembedding shapes, weight tying, contextual geometry an
 
 1. Geoffrey E. Hinton (1986). [Learning distributed representations of concepts](https://www.cs.toronto.edu/~hinton/backprop.html). Author bibliography.
 2. Rumelhart, Hinton & Williams (1986). [Learning representations by back-propagating errors](https://www.cs.toronto.edu/~hinton/absps/naturebp.pdf). Research paper.
-3. Bengio, Ducharme, Vincent & Jauvin (2003). [A Neural Probabilistic Language Model](https://www.jmlr.org/papers/v3/bengio03a.html). JMLR.
+3. Geoffrey E. Hinton (1986). [Learning distributed representations of concepts](https://www.cs.toronto.edu/~hinton/absps/families.pdf). Research paper.
+4. Bengio, Ducharme, Vincent & Jauvin (2003). [A Neural Probabilistic Language Model](https://www.jmlr.org/papers/v3/bengio03a.html). JMLR.
 
 ### Related topics
 
@@ -2666,15 +3280,33 @@ Early neural sequence-to-sequence systems compressed an input sequence into a st
 An additive attention mechanism can be written
 
 $$
-e_{tj}=v^\top\tanh(W_s s_{t-1}+W_h h_j),\quad
+e_{tj}=v^\top\tanh(W_s s_{t-1}+W_h h_j+b),\quad
 \alpha_{tj}=\frac{\exp(e_{tj})}{\sum_k\exp(e_{tk})},\quad
 c_t=\sum_j\alpha_{tj}h_j.
 $$
 
 $s_{t-1}$ is the decoder state, $h_j$ an encoder state and $c_t$ its context. The projection matrices map their arguments to a common alignment width, and $v$ converts alignment features to a scalar. These weights are differentiable alignments, not hard symbolic links.
 
+Let $j=1,\ldots,S$ index source positions and $t=1,\ldots,U$ target steps. If $h_j\in\mathbb R^{d_h}$ and $s_{t-1}\in\mathbb R^{d_s}$, then $W_h\in\mathbb R^{d_a\times d_h}$, $W_s\in\mathbb R^{d_a\times d_s}$, and $v,b\in\mathbb R^{d_a}$. The bias $b$ is an optional affine-score term. Scores and weights each have $S$ entries; context $c_t\in\mathbb R^{d_h}$ has the encoder-state width, not the alignment width.
+
+The read closes a recurrent decoding step:
+
+$$
+s_t=f(s_{t-1},\operatorname{embed}(y_{t-1}),c_t),\qquad
+p(y_t\mid y_{<t},x)=\operatorname{softmax}(g(s_t,c_t,y_{t-1})).
+$$
+
+Here $f$ is a decoder update and $g$ produces vocabulary logits; their exact implementation varies. Thus context affects both the next decoder state and the output distribution, rather than ending the computation at a weighted sum. [1](https://arxiv.org/abs/1409.0473)
+
+### A worked read over retained values
+The figure fixes scalar source states $[-1,0,1]$ and uses width-two alignment: $W_h=[1,1]^\top$, $W_s=[-1,-1]^\top$, $b=[1,-1]^\top$, $v=[1,-1]^\top$. At query $s=-1$, scores are $[1.523,0.964,0.233]$, weights $[0.541,0.310,0.149]$ and context $c=-0.392$. At $s=1$, the weights reverse and $c=0.392$. The source states have not changed; the target-step query changes which values contribute. All values are synthetic.
+
+To expose the feedback, the toy decoder uses $s'=\tanh(0.5s+c+0.2)$, where $0.2$ stands for a fixed previous-token contribution. A two-symbol output has logits $[s',-s']$. This is a small complete calculation, not the original translation model or a claim that attention weights are symbolic word correspondences.
+
 ### What changed in 2017
 The Transformer combined multi-head attention, position-wise networks, residual connections, normalization and positional information. It removed recurrence from the main encoder–decoder computation. The original decoder had both masked self-attention and cross-attention to an encoder; a decoder-only GPT-style architecture later retained a causal stack without that translation encoder. [2](https://arxiv.org/abs/1706.03762) [3](https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf)
+
+In encoder–decoder cross-attention, queries come from target states while keys/values come from source states. In self-attention, queries and memory come from the same sequence, with any causal mask restricting allowed positions. Residual addition and normalization wrap individual sublayers; the figure's final strip is an ingredient comparison without serial computation arrows. [2](https://arxiv.org/abs/1706.03762)
 
 | Idea | Historical role | What remains distinct |
 | --- | --- | --- |
@@ -2727,6 +3359,14 @@ $$
 $$
 
 $J_F$ is the Jacobian of the learned residual function. The identity term supplies a direct derivative route. It does not make gradients immune to accumulation, poor scaling or unstable normalization.
+
+The displayed derivative is for the **additive junction before any post-add activation**. Original ResNet blocks also applied ReLU after the sum; differentiating the whole block multiplies the junction derivative by the ReLU Jacobian. A closed gate can remove the local direct path. [1](https://arxiv.org/abs/1512.03385)
+
+### Why the original degradation result mattered
+The original paper's CIFAR-10 comparison found a 56-layer plain network harder to optimize than a 20-layer plain network: it had higher **training** error, as well as higher test error. That observation cannot be explained only by overfitting. A deeper model could in principle reproduce a shallower solution using identity-like added layers, yet the optimizer did not simply find that solution. Residual parameterization makes such an added mapping expressible as $F(x)=0$, rather than asking a stack of nonlinear layers to learn identity directly. This is the scoped empirical motivation, not a theorem that all residual networks train successfully. [1](https://arxiv.org/abs/1512.03385)
+
+### A derivative that can cancel
+The figure sets $x=1$, upstream gradient $g_y=1$ and a synthetic scalar branch $F(x)=jx$. A plain block gives $g_x=j$, an identity residual block gives $g_x=1+j$, and a projection skip $P=0.5$ gives $g_x=0.5+j$. At $j=0.25$, these are $0.25$, $1.25$ and $0.75$. At $j=-1$, the identity and branch terms cancel exactly. Large positive $j$ can amplify a gradient; repeated blocks can accumulate that effect. Toggle post-add ReLU to see the further gate, with derivative zero chosen at the kink. These are local derivative calculations, not measured training curves.
 
 ### From convolutional blocks to token states
 The Transformer explicitly wraps attention and feed-forward sublayers in residual connections. Replacing convolutions with attention does not erase this inheritance. Each token still carries its own vector through elementwise addition, even though attention reads from other tokens. [2](https://arxiv.org/abs/1706.03762)
@@ -2789,15 +3429,31 @@ $$
 \mathcal L(N,D)\approx \mathcal L_\infty+aN^{-\alpha}+bD^{-\beta}.
 $$
 
-$N$ is parameter count, $D$ training tokens, $a,b,\alpha,\beta>0$ fitted quantities and $\mathcal L_\infty$ an asymptotic loss term. This expresses a modeling choice, not a universal law with fixed constants. Training compute is often approximated as proportional to $ND$ for a specified dense model family. [2](https://arxiv.org/abs/2001.08361)
+$\mathcal L$ denotes held-out language-model cross-entropy, evaluated for a specified tokenizer, data distribution and training setup; losses across incompatible tokenizations or evaluation mixtures are not directly comparable. $N$ is parameter count, $D$ training tokens, $a,b,\alpha,\beta>0$ fitted quantities and $\mathcal L_\infty$ an asymptotic loss term. This expresses a modeling choice, not a universal law with fixed constants. Training compute is often approximated as proportional to $ND$ for a specified dense model family. [2](https://arxiv.org/abs/2001.08361)
 
-Hoffmann and collaborators revisited compute allocation and found a different balance between model size and tokens under their experiments. A rule learned under fixed training compute need not minimize total serving cost, and neither paper proves that more parameters alone guarantee reasoning ability. [3](https://arxiv.org/abs/2203.15556)
+Kaplan and collaborators' compute-efficient prescription emphasized larger models with relatively fewer training tokens and stopping before convergence. Hoffmann and collaborators instead found that model size and training tokens should scale approximately equally as compute grows within their experiments: roughly doubling model size should be accompanied by doubling training tokens. Their 70B Chinchilla model used four times Gopher's training data at the same training-compute budget. These conclusions concern particular experiments and fits, not invariant coefficients for every future model. [2](https://arxiv.org/abs/2001.08361) [3](https://arxiv.org/abs/2203.15556) A rule learned under fixed training compute need not minimize total serving cost, and neither paper proves that more parameters alone guarantee reasoning ability. [3](https://arxiv.org/abs/2203.15556)
+
+### A fixed-compute calculation
+Write the compute constraint as $ND=C$ after absorbing a model-dependent proportionality constant into $C$. Substitution gives
+
+$$
+\mathcal L(N,C/N)=\mathcal L_\infty+aN^{-\alpha}+bC^{-\beta}N^\beta.
+$$
+
+Increasing $N$ reduces the capacity term while reducing available tokens and increasing the data term. Differentiating with respect to $\log N$ gives the interior balance
+
+$$
+\alpha aN^{-\alpha}=\beta bD^{-\beta},\qquad
+N_* =\left(\frac{\alpha a}{\beta b}C^\beta\right)^{1/(\alpha+\beta)}.
+$$
+
+The interactive figure uses **synthetic normalized units**: $a=b=1$, $\alpha=\beta=0.5$, $\mathcal L_\infty=1$. At $C=64$, $(N,D)=(8,8)$ gives $L=1.707$; allocations $(2,32)$ or $(32,2)$ both give $L=1.884$. The equal optimum follows from these chosen symmetric terms; it is not a reproduction of either paper's fitted frontier. Changing the budget shifts the optimum and the entire curve. This illustration explains the allocation mechanism while keeping published conclusions separate.
 
 ### An architecture becomes a recipe
 LLaMA is an important open research milestone combining a decoder with design choices such as RMSNorm, rotary positions and gated MLPs. It inherited many separate ideas. Instruction tuning and preference optimization then change how a pretrained model behaves, while leaving its high-level attention stack recognizable. [4](https://arxiv.org/abs/2302.13971) [5](https://arxiv.org/abs/2203.02155)
 
 ### An evidence-aware timeline
-The atlas timeline groups by first publication year; conference years can differ. Select a milestone to inspect the primary reference and its specific contribution. It is a curated set of anchors, not an exhaustive history of language modeling.
+The broader atlas timeline groups by first publication year; conference years can differ. The relevant anchors here are GPT (2018), Kaplan scaling (2020), Hoffmann compute allocation and instruction tuning (2022), and LLaMA (2023). Each changed a different part of the recipe. This article’s figure focuses on compute allocation; the broader timeline remains a curated set of anchors, not an exhaustive history of language modeling.
 
 ### Research questions
 Evaluate scaling claims against data mixture, deduplication, contamination control, optimizer, tokenization and inference cost. A model can improve on a benchmark through better data or post-training without an architectural invention. Keep architecture and procedure as separate entries in an experiment table.

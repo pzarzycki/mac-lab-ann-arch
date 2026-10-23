@@ -26,6 +26,8 @@ $$
 v(\alpha)=\alpha e_A+(1-\alpha)e_B=(\alpha,1-\alpha).
 $$
 
+In mixture mode the input is the probability-like coefficient vector $p=(\alpha,1-\alpha,0,0)^{\mathsf T}$, and the operation is $E^{\mathsf T}p$: a weighted row combination. It is a single-row gather only at the endpoints. The table subtitle changes with this operation. Coordinate ticks identify zero and the unit scale; the connecting trace shows one output dot product, $z_A=(1,0)\cdot v=\alpha$.
+
 At $\alpha=1/2$, a tied, identity-normalization readout has logits $(1/2,1/2,-1/2,-1/2)$. A and B tie; the vector has not become a new vocabulary ID. A learned soft prompt can also lie outside the convex hull of the input table. Compare [soft prompts and continuous thought](#/article/soft-latent-reasoning).
 
 ## Geometry needs an explicit metric

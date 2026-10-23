@@ -8,6 +8,14 @@ $$
 
 $J_F$ is the Jacobian of the learned residual function. The identity term supplies a direct derivative route. It does not make gradients immune to accumulation, poor scaling or unstable normalization.
 
+The displayed derivative is for the **additive junction before any post-add activation**. Original ResNet blocks also applied ReLU after the sum; differentiating the whole block multiplies the junction derivative by the ReLU Jacobian. A closed gate can remove the local direct path. [1](#ref-resnet)
+
+## Why the original degradation result mattered
+The original paper's CIFAR-10 comparison found a 56-layer plain network harder to optimize than a 20-layer plain network: it had higher **training** error, as well as higher test error. That observation cannot be explained only by overfitting. A deeper model could in principle reproduce a shallower solution using identity-like added layers, yet the optimizer did not simply find that solution. Residual parameterization makes such an added mapping expressible as $F(x)=0$, rather than asking a stack of nonlinear layers to learn identity directly. This is the scoped empirical motivation, not a theorem that all residual networks train successfully. [1](#ref-resnet)
+
+## A derivative that can cancel
+The figure sets $x=1$, upstream gradient $g_y=1$ and a synthetic scalar branch $F(x)=jx$. A plain block gives $g_x=j$, an identity residual block gives $g_x=1+j$, and a projection skip $P=0.5$ gives $g_x=0.5+j$. At $j=0.25$, these are $0.25$, $1.25$ and $0.75$. At $j=-1$, the identity and branch terms cancel exactly. Large positive $j$ can amplify a gradient; repeated blocks can accumulate that effect. Toggle post-add ReLU to see the further gate, with derivative zero chosen at the kink. These are local derivative calculations, not measured training curves.
+
 ## From convolutional blocks to token states
 The Transformer explicitly wraps attention and feed-forward sublayers in residual connections. Replacing convolutions with attention does not erase this inheritance. Each token still carries its own vector through elementwise addition, even though attention reads from other tokens. [2](#ref-transformer)
 

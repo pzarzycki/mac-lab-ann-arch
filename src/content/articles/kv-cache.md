@@ -1,6 +1,8 @@
 ## Why cache keys and values?
 In a causal decoder, earlier positions cannot read later positions. With fixed weights and the same positional convention, their layerwise keys and values can therefore be reused when a new token arrives. Queries for the new position still read the retained context. A KV cache is intermediate inference state, not new model parameters. [1](#ref-mqa)
 
+After a three-position prefill, each layer holds keys and values separately with shape $[B,H_{\mathrm{KV}},3,d_h]$. Consume one generated token and project its new key/value tensors, each $[B,H_{\mathrm{KV}},1,d_h]$. Append once on the position axis, obtaining $[B,H_{\mathrm{KV}},4,d_h]$. The new query has shape $[B,H_Q,1,d_h]$ and reads the four retained positions; its scores have shape $[B,H_Q,1,4]$. Every query head reads its assigned K/V head. This transition repeats separately at each layer. The new query and attention output are computed for the new position; earlier queries and attention outputs need not be recomputed to extend this ordinary causal cache. [1](#ref-mqa) [2](#ref-gqa)
+
 ## The memory calculation
 For a conventional full-context cache, assume equal key/value dimensions and one stored representation per KV head:
 
@@ -18,6 +20,8 @@ With $B=1,L=32,T=8192,H_{\mathrm{KV}}=8,d_h=128,s=2$, the result is **1 GiB**. I
 - **GQA:** groups of query heads share an intermediate number of KV heads.
 
 GQA changes the architecture's representation, rather than merely changing an allocator. The original work also studied converting multi-head checkpoints through additional training. [2](#ref-gqa)
+
+With equal-sized groups, $H_Q$ must be divisible by $H_{\mathrm{KV}}$ and each K/V head serves $H_Q/H_{\mathrm{KV}}$ query heads. In the calculator's 32-query-head example, 8 KV heads mean 4 queries per group. For zero-based query-head index $a$, its KV-head index is $\lfloor a/(H_Q/H_{\mathrm{KV}})\rfloor$. Change the KV-head selector to trace the same sharing in the schematic: retained tensors scale with KV heads, while the query-head count stays 32. The toy cache timeline below uses only three or four positions to make append/read order visible; the calculator's longer context remains its independent memory estimate. [2](#ref-gqa)
 
 ## Orthogonal improvements
 PagedAttention organizes cached tensors in blocks to reduce fragmentation and permit sharing; it does not replace GQA's mathematical projection. Multi-head latent attention (MLA), used in DeepSeek models, stores a compressed latent representation with an architecture-specific reconstruction and positional treatment. The simple formula above must not be reused as an exact MLA accounting model. [3](#ref-paged) [4](#ref-deepseek)

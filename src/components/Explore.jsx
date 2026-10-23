@@ -2,7 +2,8 @@ import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowRight,ArrowUpRight,Bookmark,Search,X,Orbit,GitBranch} from 'lucide-react';
 import {articles,categories,articleMap,collections} from '../content';
 import ArticleVisual from './ArticleVisual';
-import {hierarchy,articlePaths,descendantSlugs} from '../content/hierarchy';
+import {hierarchy,articlePaths,descendantSlugs,nodeMap} from '../content/hierarchy';
+import {countLabel,legacyDomains} from '../navigation';
 
 export function TopicCard({article:a,onPreview,reason,compact=false}){
  const group=articlePaths[a.slug].at(-1);
@@ -17,8 +18,8 @@ export function TopicCard({article:a,onPreview,reason,compact=false}){
  </article>;
 }
 
-export function TopicGrid({list,onPreview,compact=false}){
- return <div className="topic-grid">{list.map(a=><TopicCard key={a.slug} article={a} onPreview={onPreview} compact={compact}/>)}</div>;
+export function TopicGrid({list,onPreview,compact=false,reasons}){
+ return <div className="topic-grid">{list.map(a=><TopicCard key={a.slug} article={a} onPreview={onPreview} compact={compact} reason={reasons?.[a.slug]}/>)}</div>;
 }
 
 export function GroupPage({category,onPreview}){
@@ -26,9 +27,9 @@ export function GroupPage({category,onPreview}){
  useEffect(()=>setQuery(''),[category.id]);
  const all=articles.filter(a=>a.category===category.id), words=query.toLowerCase().trim();
  const list=all.filter(a=>`${a.title} ${a.abstract} ${a.tags.join(' ')}`.toLowerCase().includes(words));
- return <div className="section-page explore-group"><header className="page-intro"><div className="eyebrow">TOPIC GROUP · {all.length} DEEP DIVES</div><h1>{category.title}</h1><p>{category.description}</p></header>
-  <div className="group-question"><span className="eyebrow">A QUESTION TO EXPLORE</span><p>{category.question}</p></div>
-  <div className="directory-toolbar"><label className="filter-search"><Search size={16}/><input aria-label={`Search ${category.title}`} value={query} onChange={e=>setQuery(e.target.value)} placeholder="Find a mechanism or technique in this group…"/></label><span>{list.length} topics</span></div>
+ return <div className="section-page explore-group"><header className="page-intro"><div className="eyebrow">TOPIC GROUP · {countLabel(all.length,'deep dive').toUpperCase()}</div><h1>{category.title}</h1><p>{category.description}</p></header>
+  <nav className="legacy-bridge" aria-label="Current hierarchy"><span>Current hierarchy</span>{(legacyDomains[category.id]||[]).map(id=><a key={id} href={`#/domain/${id}`}>{nodeMap[id].title}<ArrowUpRight size={12}/></a>)}<small>This legacy view keeps its original topic selection; the current hierarchy includes related additions.</small></nav><div className="group-question"><span className="eyebrow">A QUESTION TO EXPLORE</span><p>{category.question}</p></div>
+  <div className="directory-toolbar"><label className="filter-search"><Search size={16}/><input aria-label={`Search ${category.title}`} value={query} onChange={e=>setQuery(e.target.value)} placeholder="Find a mechanism or technique in this group…"/></label><span>{countLabel(list.length,'topic')}</span></div>
   <TopicGrid list={list} onPreview={onPreview}/>
   {!list.length&&<p className="directory-empty">No topics match. Try a broader mechanism or clear the search.</p>}
   <nav className="related-groups" aria-label="Connected topic groups"><span className="eyebrow">CONNECTED GROUPS</span>{category.related.map(id=>{const c=categories.find(c=>c.id===id);return <a href={`#/section/${id}`} key={id}>{c.title}<ArrowRight size={14}/></a>;})}</nav>
@@ -42,7 +43,7 @@ export function ExplorePage({onPreview}){
  return <div className="explore-page"><header className="page-intro"><div className="eyebrow">CONNECTIONS, MECHANISMS, QUESTIONS</div><h1>Follow an idea.</h1><p>Browse a mechanism, compare approaches, or follow a question across fields. Quick views expose the key distinctions and a live diagram; every topic opens into a source-linked deep dive.</p></header>
   <section className="question-collections" aria-label="Explore by question"><div className="section-top"><span className="eyebrow">EXPLORE BY QUESTION</span><button className="text-link" onClick={()=>{setQuestion('all');setGroup('all');setQuery('');}}>Show all topics <ArrowRight size={13}/></button></div><div className="question-grid">{collections.map(c=><button key={c.id} aria-pressed={question===c.id} className={question===c.id?'selected':''} onClick={()=>{setQuestion(question===c.id?'all':c.id);setGroup('all');}}><h2>{c.title}</h2><p>{c.description}</p><span>Explore connections <ArrowUpRight size={13}/></span></button>)}</div></section>
   <div className="filter-bar directory-filters"><label className="filter-search"><Search size={17}/><input aria-label="Filter topics and techniques" placeholder="Search topics and techniques: JEPA, MoE, backprop…" value={query} onChange={e=>setQuery(e.target.value)}/></label><select aria-label="Filter topics by group" value={group} onChange={e=>setGroup(e.target.value)}><option value="all">All topic groups</option>{hierarchy.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select></div>
-  <div className="results-heading">{list.length} topics<span>{selected?selected.title:'BROWSE IN ANY DIRECTION'}</span></div><TopicGrid list={list} onPreview={onPreview}/>
+  <div className="results-heading">{countLabel(list.length,'topic')}<span>{selected?selected.title:'BROWSE IN ANY DIRECTION'}</span></div><TopicGrid list={list} onPreview={onPreview} reasons={selected?.roles}/>
   {!list.length&&<p className="directory-empty">No matches in this selection. Clear the question or choose another group.</p>}
  </div>;
 }

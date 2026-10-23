@@ -43,3 +43,10 @@ Bright/dark/system themes and bookmarks persist locally. Responsive navigation, 
 ## Luminous Editorial update
 
 The selected UI direction uses porcelain surfaces, iris accents, contemporary serif headings, fine rules and restrained schematic previews. A coordinated dark theme uses ink-violet surfaces. Six domains group all 37 deep dives through meaningful families; `hierarchy.json` is the canonical tree. Legacy categories support old URLs. Active Inference is oriented under control, predictive coding and PC-ALM share a family, and neuroevolution has a distinct home under Learning & adaptation. The complete manuscript renders from the same source Markdown in `#/manuscript`, including scoped citations, KaTeX and code highlighting. Expand/collapse controls keep the complete text accessible without loading every equation on initial navigation.
+
+
+## Page-review revision — October 2026
+
+The 42-page review is implemented in [REVIEW-IMPLEMENTATION.md](REVIEW-IMPLEMENTATION.md). Keep mechanisms grounded in traceable inputs, calculations and outputs. Dense diagrams may have companion panels rather than forcing unrelated operations into one schematic. Retain the good topology views and calculators, but separate explicitly independent control scopes.
+
+Shared navigation now includes manuscript full-text filtering and topic jumps, glossary aliases, explained question roles, legacy hierarchy bridges and contribution-level timeline details. BibTeX serialization is centralized. Numerical invariants and actual registered figure/route rendering form the publication checks. Synthetic examples must continue to be labeled and must not be presented as measured model results.

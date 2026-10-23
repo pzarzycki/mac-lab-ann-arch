@@ -26,12 +26,16 @@ Jain and Wallace give concrete counterexamples to treating attention weights as 
 ## Direct logit attribution and its boundary
 If a pre-normalization state decomposes as $h=\sum_c r_c$, a fixed linear readout gives $Uh=\sum_c Ur_c$. This motivates direct logit attribution to residual contributions. With final normalization included, the normalization scale depends on the combined state; LayerNorm additionally centers features. An exact attribution under a frozen scale is a conditional decomposition, not the effect of deleting a component and recomputing the model.
 
+For a numerical counterexample, use RMS normalization without an epsilon or learned gain, $N(h)=h/\sqrt{(h_1^2+h_2^2)/2}$, and a one-row readout $u=(1,0)$. Let $r_a=(1,0)$ and $r_b=(0,1)$, so $h=(1,1)$ has RMS scale one and $uN(h)=1$. Under that frozen scale, $r_b$ contributes zero to this logit. Actually deleting $r_b$ leaves $(1,0)$, whose RMS scale is $1/\sqrt2$: the recomputed score is $\sqrt2\approx1.414$. Deletion changes the score by about $+0.414$, even though the fixed-scale contribution was zero. This is exact toy algebra; other normalization conventions change the numbers.
+
 Useful analyses can therefore disagree without either being a software bug: one describes an algebraic contribution under fixed conditions; another measures a rerun after perturbing those conditions. State which quantity is being plotted. [3](#ref-tuned-lens)
 
 ## From measurement to a falsifiable account
 Choose a clean prompt, a controlled alternative, and an output metric such as a target-versus-foil logit difference. Inspect readouts to propose a candidate layer, position, or feature. Then test that candidate with patching, matched controls, and additional prompts. Patching methodology can materially change localization conclusions. [4](#ref-patching-best-practices)
 
-The diagram's three token streams make the axes explicit. Its selectable measurement sites route to different analytical operations. It is a workflow schematic, not an automatic explanation generator.
+The diagram keeps three token streams separate and names two **post-block residual** hooks. Its synthetic cache has shape $[1,3,2]$ at each hook. Selecting a layer or position changes the cached vector; selecting a method changes the computation. The lens applies an explicit three-row unembedding. The illustrative binary probe uses $\sigma((1,-1)^{\mathsf T}h)$, with fixed coefficients standing in for a supervised fit. No labeled evaluation set is provided, so this number is a probe output, not accuracy.
+
+For the derivative and patch views, the downstream toy metric is $m(h)=\tanh(h_1)+h_2^2$, with gradient $(\operatorname{sech}^2 h_1,2h_2)$. A patch copies a clean second coordinate increased by $0.4$ and recomputes this nonlinear metric. These are inspectable synthetic evidence types, not measurements of the omitted Transformer computation. Each method links to the article that develops its assumptions.
 
 ## Follow the question
 For vocabulary readouts, compare the [logit and tuned lenses](#/article/logit-tuned-lenses). For an averaged sensitivity-derived transport, inspect the [Jacobian lens](#/article/jacobian-lens). For interventions, sparse features, and computational graphs, continue to [causal tracing and feature circuits](#/article/causal-features-circuits). Each approach exposes a different part of the evidence; a readable label is the beginning of analysis, not its conclusion.

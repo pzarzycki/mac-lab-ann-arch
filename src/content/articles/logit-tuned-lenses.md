@@ -21,14 +21,24 @@ $$
 p_{\ell,i}^{\mathrm{TL}}=\operatorname{softmax}\!\left(U N_f(T_\ell(h_i^{(\ell)}))+b\right).
 $$
 
-The translators are fitted to match the frozen model's final output distribution, commonly using a distribution-matching loss. This differs from training the language model itself. The purpose is a more reliable intermediate prediction readout, not a literal recording of every internal concept. [1](#ref-tuned-lens)
+Here $A_\ell\in\mathbb R^{d\times d}$ and $c_\ell\in\mathbb R^d$. For a declared distribution of training examples $x$ and eligible positions $i$, the distillation objective is
+
+$$
+\min_{A_\ell,c_\ell}\ \mathbb E_{x,i}\!\left[D_{\mathrm{KL}}\!\left(\operatorname{stopgrad}(p_{L,i}(x))\ \Vert\ p_{\ell,i}^{\mathrm{TL}}(x)\right)\right],\qquad
+D_{\mathrm{KL}}(p\Vert q)=\sum_{v=1}^{V}p_v\log\frac{p_v}{q_v}.
+$$
+
+The **final distribution is the target**; the KL direction is final-to-lens. Freeze the backbone, final normalization and unembedding, and update only the translator. Fit on a training slice; use separate examples to report held-out KL, ranks or other prediction metrics. Fitting on the same activations used to evaluate a claim can conceal overfitting. The purpose is a more reliable intermediate prediction readout, not a literal recording of every internal concept. [1](#ref-tuned-lens)
 
 ```python
 # Schematic column-vector convention; adapt to the model's actual hook sites.
 h = cached_residual[layer, position]  # [width]
 p_logit = softmax(U @ final_norm(h) + bias)
 p_tuned = softmax(U @ final_norm(A[layer] @ h + c[layer]) + bias)
-# Train the translator on held-out activations; keep backbone and decoder fixed.
+# Translator training examples are separate from the evaluation examples.
+p_final = stop_gradient(softmax(U @ final_norm(h_final) + bias))
+loss = mean_over_examples_and_positions(KL(p_final, p_tuned))
+# Update only A and c; keep backbone, norm and decoder fixed.
 ```
 
 ## A worked coordinate-mismatch example
@@ -40,7 +50,9 @@ $$
 T=\begin{bmatrix}0&1\\1&0\end{bmatrix}.
 $$
 
-The translated state is $Th=(1,0)$, giving logits $(1,0,-1)$ and favoring A. The same stored activation can produce a different vocabulary readout under a different decoder. The figure does not fit a translator or reproduce the paper's measurements; it exposes these chosen matrices directly.
+The translated state is $Th=(1,0)$, giving logits $(1,0,-1)$ and favoring A. The same stored activation can produce a different vocabulary readout under a different decoder. The fixed-swap mode exposes these chosen matrices directly and does not fit them. A separate **fitted affine lens** mode actually minimizes the stated KL on four synthetic training states, initialized with $A=I,c=0$, using full-batch gradient steps of size $0.25$. The training states have final coordinates $(-1,-.5),(-.4,.9),(.7,-.6),(1,.8)$; layer 1 swaps the final coordinates and layer 2 applies $(2h_1+.2,.5h_2-.1)$. Nothing in this toy is a measurement of the paper's models.
+
+The three evaluation columns instead use final states $(.5,.51),(.51,.5),(-.6,.2)$. They are absent from the fitting set. A layer or input-position selector loads its corresponding intermediate state into the probability bars; the sliders permit an additional hypothetical edit. Solid bars show the selected readout and outlines show its frozen final-distribution target. The final grid row uses the final readout directly. The first two final columns favor different top tokens despite their nearly identical A/B scores: inspect the full distribution before interpreting a changed top-1 label.
 
 A learned translator should earn its interpretation through held-out prediction and control experiments. Merely finding one matrix that gives an appealing word proves little about the model.
 

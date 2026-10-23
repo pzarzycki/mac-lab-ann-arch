@@ -28,3 +28,18 @@ The Mamba paper's task and throughput results belong to its tested models and ha
 
 ## Experiment
 Use a long-range associative-recall task with distractors and variable delays. Test lengths beyond training. Measure state size alongside accuracy. Compare against attention at a matched memory or compute budget, rather than only matching model parameters.
+
+## Choose shapes before interpreting selection
+For one input channel, take $x_t,y_t\in\mathbb R$, $s_t\in\mathbb R^N$, $\overline A_t\in\mathbb R^{N\times N}$, $\overline B_t\in\mathbb R^{N\times1}$ and $C_t\in\mathbb R^{1\times N}$. The state update produces the next carried memory. The readout branches from that state and leaves the recurrence; **$y_t$ is not substituted for $s_t$**. Multi-channel implementations add channel and batch axes and often use diagonal structure rather than dense $N\times N$ matrices.
+
+Mamba's selection makes $\Delta_t,B_t,C_t$ input-dependent while its continuous-time $A$ is a learned structured parameter. Discretization makes the effective transition input-dependent: for example $\overline A_t=\exp(\Delta_t A)$. Thus saying “selective $\overline A_t$” does not mean that a fresh unconstrained continuous matrix is predicted at each token. The learned timestep controls retention; the write and read parameters control what enters state and what is exposed. [1](#ref-mamba)
+
+## A six-token trace
+The synthetic lab reduces the shapes to $N=1$. Start at $s_0=0$. On a write token choose $(a_t,b_t)=(0,1)$; on noise or read tokens choose $(1,0)$. Set $c_t=1$ on read tokens and zero otherwise. This is a hand-written selective rule, not Mamba's learned gate.
+
+For “write 2,” $s_1=0\cdot0+1\cdot2=2$. For the next distractor “noise 9,” $s_2=1\cdot2+0\cdot9=2$. Its readout is zero, yet the next prior remains 2. A second distractor leaves it intact; the read token exposes 2. A later “write −1” overwrites state, so the final read returns −1. The alternative fixed filter uses $a=b=0.5$ at every step: its first two states are 1 and 5, showing how a distractor can enter a nonselective summary. The displayed table computes every retained term, write term, state and readout.
+
+The memory comparison chooses its own exact toy widths: four recurrent FP16 scalars require eight bytes, while K and V of width two each require $2T\cdot2\cdot2=8T$ bytes at length $T$. This describes only those arrays, not full Mamba or Transformer memory; real recurrent blocks may also keep convolution state.
+
+## One concrete hybrid layout
+Jamba's initial released configuration uses four blocks of eight layers, each mixing one attention layer with seven Mamba layers; every layer also has an MLP or expert feed-forward stage. Its attention layers retain token-indexed K/V, while its Mamba layers retain recurrent and convolution states. The placement of only some attention layers reduces the number of growing K/V arrays but preserves explicit attention in the network. This is a documented design point, not a universal best ratio or a claim that an SSM state can reconstruct all prior keys and values. [4](#ref-jamba)

@@ -1,4 +1,5 @@
 import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {bibtex} from '../src/bibliography.js';
 const read=name=>JSON.parse(readFileSync(new URL(`../src/content/${name}.json`,import.meta.url),'utf8'));
 const articles=read('articles'),sources=read('sources'),categories=read('categories'),hierarchy=read('hierarchy'),map=Object.fromEntries(sources.map(s=>[s.id,s]));
 let out=`# Artificial Neural Architectures — Atlas\n\n## An interactive guide to architectures and learning systems\n\nEditorial update: 22 October 2026. Original sources reviewed 21 October; embedding and interpretability additions reviewed 22 October.\n\n${articles.length} articles · ${hierarchy.length} research domains · ${sources.length} primary references.\n\nThis manuscript is the content source for the interactive site. It is a curated conceptual map, not an exhaustive literature review. Formulas define local conventions; theoretical claims, empirical findings and illustrative calculations are distinguished. Refer to docs/CONSPECT.md for the exploration map and coverage, and docs/PLAN.md for implementation decisions.\n\n`;
@@ -11,6 +12,6 @@ for(const c of hierarchy){out+=`# ${c.title}\n\n${c.description}\n\n`;for(const 
 }}
 out+='## Research provenance\n\nThe source registry records each primary URL, bibliographic year, source-review date, retrieved evidence identifier and the level of material inspected. Sources labeled as papers are not automatically being labeled peer-reviewed. Historical attribution follows specific mechanisms rather than one origin story. Interactive examples in the app are original educational implementations, not reproduced accuracy measurements.\n';
 mkdirSync(new URL('../docs/',import.meta.url),{recursive:true});writeFileSync(new URL('../docs/MANUSCRIPT.md',import.meta.url),out);writeFileSync(new URL('../public/manuscript.md',import.meta.url),out);
-const bib=sources.map(s=>`@misc{neuralatlas_${s.id.replace(/-/g,'_')},\n  title = {${s.title}},\n  author = {${s.authors}},\n  year = {${s.year}},\n  url = {${s.url}},\n  note = {Source checked ${s.checked}}\n}`).join('\n\n')+'\n';
+const bib=bibtex(sources)+'\n';
 writeFileSync(new URL('../public/references.bib',import.meta.url),bib);writeFileSync(new URL('../docs/references.bib',import.meta.url),bib);
 console.log(`Exported synchronized manuscript (${out.split(/\s+/).length.toLocaleString()} words including bibliography) and ${sources.length} BibTeX records.`);

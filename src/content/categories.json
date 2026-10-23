@@ -2,7 +2,7 @@
   {
     "id": "architecture",
     "title": "Transformer mechanics",
-    "description": "Token states, attention, normalization and the training\u2013generation interface.",
+    "description": "Token states, attention, normalization, training and the methods used to inspect Transformer computation.",
     "icon": "Layers",
     "color": "blue",
     "question": "What happens inside a Transformer block?",
@@ -106,7 +106,7 @@
   {
     "id": "robotics",
     "title": "Embodied intelligence",
-    "description": "Vision\u2013language\u2013action interfaces, action distributions and closed-loop evaluation.",
+    "description": "Vision–language–action interfaces, action distributions and closed-loop evaluation.",
     "icon": "Bot",
     "color": "purple",
     "question": "How do representations become actions in a changing world?",

@@ -10,7 +10,15 @@
       "kv-cache",
       "efficient-attention",
       "state-space"
-    ]
+    ],
+    "roles": {
+      "attention": "Route a destination query to source keys and combine their value vectors.",
+      "mixture-of-experts": "Spend parameter computation on a routed subset of experts for each token.",
+      "recurrent-depth": "Spend additional sequential steps by reusing the same block parameters.",
+      "kv-cache": "Account for the growing inference state retained for earlier token positions.",
+      "efficient-attention": "Separate fewer permitted reads from a more efficient implementation of the same reads.",
+      "state-space": "Compress past inputs into a recurrent state with input-dependent retention and writes."
+    }
   },
   {
     "id": "prediction",
@@ -23,7 +31,15 @@
       "diffusion-flow",
       "predictive-coding",
       "action-models"
-    ]
+    ],
+    "roles": {
+      "training-decoding": "Score shifted next-token targets, then generate unknown tokens during inference.",
+      "jepa": "Predict selected target representations from visible context rather than reconstruct pixels.",
+      "video-world-models": "Predict future latent states, with an action interface when used for planning.",
+      "diffusion-flow": "Learn to recover or transport structured samples from a specified noisy state.",
+      "predictive-coding": "Compare neighboring activities with local predictions during inference.",
+      "action-models": "Predict a distribution over robot action tokens or continuous action chunks."
+    }
   },
   {
     "id": "change",
@@ -36,7 +52,15 @@
       "hyperneat",
       "continual-learning",
       "memory-adaptation"
-    ]
+    ],
+    "roles": {
+      "backprop-biology": "Propagate a loss derivative to parameter updates and examine the required signals.",
+      "pc-alm": "Change inferred activities and dual multipliers before the parameter update.",
+      "neat": "Change directly encoded connection weights and topology through evolution.",
+      "hyperneat": "Change a coordinate-based generator that expresses task-network connectivity.",
+      "continual-learning": "Update useful behavior while measuring what earlier tasks retain or lose.",
+      "memory-adaptation": "Distinguish context, external stores, adapters and test-time parameters by what survives reset."
+    }
   },
   {
     "id": "control",
@@ -49,7 +73,15 @@
       "vla-foundations",
       "action-models",
       "robot-evaluation"
-    ]
+    ],
+    "roles": {
+      "multimodal-fusion": "Choose how observations and instructions enter the policy representation.",
+      "video-world-models": "Evaluate candidate action-conditioned futures against a planning objective.",
+      "active-inference": "Compare policies through beliefs, preferences and a specified expected-free-energy convention.",
+      "vla-foundations": "Connect visual and language conditioning to an action interface inside a feedback loop.",
+      "action-models": "Choose the action distribution, sample a horizon and execute a prefix.",
+      "robot-evaluation": "Measure the timed perception–action loop and task outcomes under disturbances."
+    }
   },
   {
     "id": "inspect",
@@ -62,6 +94,14 @@
       "logit-tuned-lenses",
       "jacobian-lens",
       "causal-features-circuits"
-    ]
+    ],
+    "roles": {
+      "token-embeddings": "Locate the input vectors and output decoder that frame later readouts.",
+      "residual-streams": "Identify the layer-and-token state where a measurement or intervention is made.",
+      "transformer-observability": "Match each measurement to the kind of evidence it can support.",
+      "logit-tuned-lenses": "Decode intermediate states through an explicit vocabulary readout or fitted translator.",
+      "jacobian-lens": "Transport hidden states using averaged downstream sensitivities and inspect the limits.",
+      "causal-features-circuits": "Replace activations, rerun downstream computation and evaluate candidate causal explanations."
+    }
   }
 ]

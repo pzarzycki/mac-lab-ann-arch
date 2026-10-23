@@ -64,3 +64,9 @@ With dense width $d$, batch size $B$, depth $L$ and inference budget $T$, a simp
 The accumulated multiplier resembles an integral feedback state. This motivates a local-control interpretation, but it does not identify a biological neuron type implementing the exact algorithm. Symmetric feedback, nonlinear convergence, stability at scale and realistic neural timing remain open questions. [3](#ref-pc)
 
 The adjacent lab solves a **two-hidden-layer scalar linear instance** with fixed weights; it shows actual primal–dual updates and BP reference gradients. It is an educational mechanism check, not a reproduction of the published datasets or accuracy curves.
+
+
+## Read the inference history
+The additional local-feedback panel plots the actual residual norm, multiplier norm and relative gradient error for one fixed-weight run. Norm curves show magnitudes; signed $e_i$, residuals, states and parameter gradients remain printed separately. A falling residual alone is not a complete gradient test, so the BP comparison remains visible. For example, a finite-penalty PC equilibrium can retain nonzero residuals and a gradient mismatch even after its activities settle.
+
+In the panel, select zero steps to inspect the forward initialization: both residuals and multipliers are zero, but target pressure $1.2(1.2h_2-y)$ is not. The first activity step changes $h_2$; later neighboring messages and accumulated multipliers carry that pressure through the network. The preview computes one more **primal** step with the displayed multipliers held fixed; it is not an extra parameter update. The original gradient lab and this companion panel have independent controls and share the same numerical helper. [1](#ref-pcalm)

@@ -34,6 +34,15 @@ $\gamma,\beta\in\mathbb R^d$ are learned scale and offset; $\epsilon>0$ is a num
 ## Read the vector figure
 Select a destination token to highlight its causal attention inputs. Switch between pre-LN and post-LN to see where normalization moves. Each colored vertical path is one token's residual state; bypass paths preserve the same token identity. The drawing shows one head for legibility and labels the omitted multi-head projection. It is a structural figure, not measured activation data.
 
+The companion inspector isolates the additions using synthetic width-3 vectors. For token 3, start with $h=[1,-1,0.5]$, an attention write $\Delta a=[0.5,0.25,-0.5]$, and an MLP write $\Delta m=[-0.25,0.5,1]$. Coordinate-wise addition gives
+
+$$
+h+\Delta a=[1.5,-0.75,0],\qquad
+h+\Delta a+\Delta m=[1.25,-0.25,1].
+$$
+
+Changing only the first coordinate of $\Delta a$ changes only the first coordinate of these sums. This is an arithmetic intervention with the other writes held fixed. In a learned network, changing an earlier state can also change later attention and MLP writes; the inspector does not claim those computations remain fixed naturally.
+
 ```python
 # H: [batch, positions, d_model]; normalize the last dimension only
 U = norm_attention(H)
@@ -44,6 +53,15 @@ H = H + mlp(norm_mlp(H))
 
 ## Why the identity path matters
 For $y=x+F(x)$, the Jacobian is $I+J_F$. This introduces a direct gradient route, a key contribution of residual learning popularized by ResNet. It does not guarantee stable optimization for arbitrary depth, initialization or normalization. ResNet is a central architectural predecessor, not an incidental analogy. [2](#ref-resnet)
+
+The normalization toggle changes the scope of that identity route. For one sublayer, the two placements are
+
+$$
+y_{\mathrm{pre}}=x+F(\operatorname{LN}(x)),\qquad
+y_{\mathrm{post}}=\operatorname{LN}(x+F(x)).
+$$
+
+Their input Jacobians are $I+J_FJ_{\mathrm{LN}}$ and $J_{\mathrm{LN}}(I+J_F)$, respectively, with each Jacobian evaluated at its own input. Pre-LN leaves a direct identity summand outside the normalization branch; post-LN passes the whole residual sum through normalization before the next block. This local comparison is not a guarantee about gradients through an entire trained model, which may also include a final normalization. Normalization placement has distinct initialization-gradient behavior under the assumptions studied by Xiong and colleagues. [5](#ref-xiong-layernorm) See [normalization, position and gated MLPs](#/article/normalization-position) for the feature transformations themselves.
 
 ## Questions worth testing
 Remove the residual path while keeping parameter count comparable; inspect gradient norms by layer. Then vary normalization placement and initialization separately. A change in training stability does not by itself explain the semantic content of the residual stream. For an inference optimization with unchanged learned states, continue to [KV-cache memory](#/article/kv-cache).

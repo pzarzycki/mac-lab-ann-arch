@@ -74,7 +74,7 @@
           {
             "id": "predictive-coding-family",
             "title": "Predictive coding",
-            "description": "Infer activities through local prediction errors, then examine a constrained formulation.",
+            "description": "Infer activities through local prediction errors, then examine the multiplier-based PC-ALM extension.",
             "articles": [
               "predictive-coding",
               "pc-alm"

@@ -32,3 +32,13 @@ This example illustrates the constraint and uses a fixed small matrix; it is not
 
 ## Evidence and limits
 The mHC paper combines connectivity constraints with system optimizations. Its empirical gains must be read with the training configuration and overhead. Multiple lanes cost memory traffic; the mathematical constraint alone does not eliminate that cost. Compare against both standard residual and unconstrained HC baselines.
+
+## Follow one feature through all three maps
+The lab specializes the displayed update to one token with $m=3,d=1$: $X=[1,2,-1]^\top$. Every output lane is calculated as $(RX)_i=\sum_jR_{ij}X_j$. After sufficient normalization, these are convex combinations of the three inputs. If both marginal constraints hold exactly, their sum is also preserved: $\mathbf1^\top RX=\mathbf1^\top X=2$. Finite Sinkhorn error makes the latter approximate; raw positive weights at zero iterations have neither guarantee.
+
+The lower pathway completes an illustrative HC update rather than stopping at normalization. It sets $a=[0.5,0.25,0.25]^\top$, so $a^\top X=0.75$; a toy token-local sublayer gives $F=\tanh(0.75)\approx0.635$. Redistribution with $b=[1,0.5,0]^\top$ adds approximately $[0.635,0.318,0]^\top$ to $RX$. Thus conservation of the **mixer** does not imply conservation of the whole residual update. Changing lane 3 updates aggregation, mixing and the final sum together. In a real attention sublayer, aggregation occurs for every token before cross-token attention inside $F$.
+
+The positive seed is $[ [\exp(\mathrm{bias}),0.6,1.2],[0.4,1.8,0.8],[1.5,0.3,1] ]$. At zero iterations it is explicitly labeled raw. Logarithmically bounded wires preserve readability even at bias 5, while numeric cells display the unbounded values.
+
+## A scoped empirical comparison
+The original HC paper motivates learned expanded connectivity; mHC subsequently adds constraints and an optimized implementation. In mHC's own 27B comparison, trained on 262B tokens with four residual lanes and 20 Sinkhorn iterations, Table 4 reports 3-shot BBH exact match of 43.8 for the residual baseline, 48.9 for HC and 51.0 for mHC. This compares the paper's configurations, not every HC design. The paper separately reports 6.7% additional training time with expansion four after its infrastructure optimizations; a stochastic matrix alone does not establish that overhead. [3](#ref-mhc)

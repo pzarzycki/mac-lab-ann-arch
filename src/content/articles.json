@@ -9,12 +9,13 @@
       "transformer",
       "resnet",
       "layernorm",
-      "llama"
+      "llama",
+      "xiong-layernorm"
     ],
     "diagram": "residual",
     "year": 2017,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "One width-d state per token",
       "Attention mixes tokens; MLPs act by position",
@@ -66,7 +67,7 @@
     "diagram": "attention",
     "year": 2017,
     "minutes": 3,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "keyPoints": [
       "Queries select from keys; values carry content",
       "A mask specifies permitted reads",
@@ -112,8 +113,8 @@
     ],
     "diagram": "normalization-position",
     "year": 2023,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "LN and RMSNorm normalize features per token",
       "Position enters through distinct encodings",
@@ -156,7 +157,7 @@
     "diagram": "training-decoding",
     "year": 2018,
     "minutes": 3,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "keyPoints": [
       "Teacher forcing scores many causal targets in parallel",
       "Prefill creates state; decoding extends it",
@@ -194,12 +195,13 @@
     "references": [
       "hinton",
       "backprop",
+      "hinton-concepts",
       "bengio"
     ],
     "diagram": "distributed-representations",
     "year": 1986,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Learned vectors replace isolated symbol identities",
       "Distributed codes share statistical structure",
@@ -243,7 +245,7 @@
     "diagram": "sequence-attention-history",
     "year": 2014,
     "minutes": 3,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "keyPoints": [
       "Recurrence carries state through time",
       "Encoder–decoder models expose a bottleneck",
@@ -285,7 +287,7 @@
     "diagram": "resnet-lineage",
     "year": 2015,
     "minutes": 3,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "keyPoints": [
       "Identity paths separate transport from transformation",
       "Residual learning preceded the Transformer",
@@ -324,10 +326,10 @@
       "llama",
       "instruct"
     ],
-    "diagram": "timeline",
+    "diagram": "gpt-scaling",
     "year": 2022,
     "minutes": 3,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "keyPoints": [
       "Generative pretraining supports transfer",
       "Scaling relationships are empirical fits",
@@ -369,7 +371,7 @@
     "diagram": "kv",
     "year": 2023,
     "minutes": 3,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "keyPoints": [
       "Keys and values persist across decoding steps",
       "KV-head count changes memory scaling",
@@ -408,10 +410,10 @@
       "longformer",
       "transformer"
     ],
-    "diagram": "attention",
+    "diagram": "efficient-attention",
     "year": 2022,
     "minutes": 3,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "keyPoints": [
       "FlashAttention changes IO while preserving exact attention",
       "Sparse masks change the connectivity graph",
@@ -450,8 +452,8 @@
     ],
     "diagram": "moe",
     "year": 2021,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "A router activates a subset of experts",
       "Active compute differs from total parameter count",
@@ -491,8 +493,8 @@
     ],
     "diagram": "mhc",
     "year": 2025,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Multiple residual lanes remain inside each token",
       "Learned mixing changes residual connectivity",
@@ -532,8 +534,8 @@
     ],
     "diagram": "compression-decoding",
     "year": 2022,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Quantization changes numeric representation",
       "Speculative decoding uses a verified proposal",
@@ -571,10 +573,10 @@
       "blip",
       "llava"
     ],
-    "diagram": "multimodal",
+    "diagram": "multimodal-fusion",
     "year": 2023,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "An encoder maps each modality into representations",
       "Prefix, query and cross-attention are different interfaces",
@@ -614,8 +616,8 @@
     ],
     "diagram": "multimodal-objectives",
     "year": 2021,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Contrastive training aligns paired representations",
       "Generative training predicts an output distribution",
@@ -655,8 +657,8 @@
     ],
     "diagram": "temporal-modalities",
     "year": 2022,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Audio and video add temporal structure",
       "Frame sampling trades detail for sequence length",
@@ -692,12 +694,13 @@
     "references": [
       "ddpm",
       "llada",
-      "flow"
+      "flow",
+      "ddim"
     ],
     "diagram": "diffusion",
     "year": 2025,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 5,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Generation iteratively transforms noise or masked states",
       "Diffusion and flow matching define different training constructions",
@@ -738,7 +741,7 @@
     "diagram": "soft-latent-reasoning",
     "year": 2024,
     "minutes": 3,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "keyPoints": [
       "Soft prompts are trainable continuous input vectors",
       "Latent reasoning adds hidden-state computation",
@@ -782,8 +785,8 @@
     ],
     "diagram": "recurrent",
     "year": 2025,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "A shared block can be applied repeatedly",
       "Depth recurrence differs from sequence recurrence",
@@ -818,12 +821,13 @@
     "references": [
       "mamba",
       "transformer",
-      "recurrent"
+      "recurrent",
+      "jamba"
     ],
     "diagram": "state-space",
     "year": 2023,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "A recurrent state compresses the past",
       "Selective dynamics depend on the input",
@@ -861,10 +865,10 @@
       "pcalm",
       "pcalm-project"
     ],
-    "diagram": "credit",
+    "diagram": "credit-pc",
     "year": 2017,
     "minutes": 3,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "keyPoints": [
       "Activities infer latent causes through prediction errors",
       "Local updates depend on the inference dynamics",
@@ -901,10 +905,10 @@
       "pcalm-project",
       "pc"
     ],
-    "diagram": "credit",
+    "diagram": "credit-alm",
     "year": 2026,
-    "minutes": 4,
-    "updated": "2026-10-21",
+    "minutes": 5,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Multipliers accumulate constraint violations",
       "Activities follow augmented-Lagrangian dynamics",
@@ -943,8 +947,8 @@
     ],
     "diagram": "active-inference",
     "year": 2022,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Perception updates beliefs about hidden states",
       "Policies can trade preference fulfilment and information gain",
@@ -983,8 +987,8 @@
     ],
     "diagram": "spiking-networks",
     "year": 2019,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Membrane dynamics integrate events over time",
       "A threshold emits discrete spikes",
@@ -1024,8 +1028,8 @@
     ],
     "diagram": "liquid-networks",
     "year": 2020,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Hidden dynamics depend on inputs and learned parameters",
       "Time constants describe response dynamics",
@@ -1066,8 +1070,8 @@
     ],
     "diagram": "backprop-biology",
     "year": 1986,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Reverse-mode differentiation assigns parameter credit",
       "Weight transport, locality and timing are separate constraints",
@@ -1103,12 +1107,14 @@
     "references": [
       "feedback",
       "pc",
-      "pcalm"
+      "pcalm",
+      "local-errors",
+      "equilibrium-propagation"
     ],
     "diagram": "local-learning",
     "year": 2016,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Feedback alignment changes the backward signal",
       "Local objectives change where errors originate",
@@ -1147,8 +1153,8 @@
     ],
     "diagram": "continual-learning",
     "year": 2017,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "A changing task stream can cause forgetting",
       "Replay, regularization and isolation address different constraints",
@@ -1189,8 +1195,8 @@
     ],
     "diagram": "memory-adaptation",
     "year": 2020,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Context, cache, retrieval and weights store different state",
       "Test-time training changes parameters under a reset policy",
@@ -1231,8 +1237,8 @@
     ],
     "diagram": "self-improvement",
     "year": 2022,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "An improvement loop needs an external criterion",
       "Self-generated data can amplify existing errors",
@@ -1272,8 +1278,8 @@
     ],
     "diagram": "vla",
     "year": 2024,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Visual and language inputs condition an action policy",
       "Action representation is an architectural choice",
@@ -1312,10 +1318,10 @@
       "pi0",
       "flow"
     ],
-    "diagram": "vla",
+    "diagram": "action-sampling",
     "year": 2024,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 4,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Discrete tokens and continuous heads model actions differently",
       "Diffusion and flow can produce action chunks",
@@ -1355,8 +1361,8 @@
     ],
     "diagram": "robot-evaluation",
     "year": 2024,
-    "minutes": 3,
-    "updated": "2026-10-21",
+    "minutes": 5,
+    "updated": "2026-10-22",
     "keyPoints": [
       "Success rate depends on the task and execution protocol",
       "Latency and observation freshness affect the loop",
@@ -1385,7 +1391,7 @@
   {
     "category": "multimodal",
     "minutes": 5,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "slug": "jepa",
     "title": "JEPA: predicting representations",
     "subtitle": "Learn what is missing without reconstructing every pixel.",
@@ -1432,7 +1438,7 @@
   {
     "category": "multimodal",
     "minutes": 5,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "slug": "video-world-models",
     "title": "Video world models & latent planning",
     "subtitle": "Predicting observations and choosing actions are different interfaces.",
@@ -1481,7 +1487,7 @@
   {
     "category": "evolution",
     "minutes": 6,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "slug": "neat",
     "title": "NEAT: evolve weights and topology",
     "subtitle": "Historical alignment, speciation and complexification.",
@@ -1521,7 +1527,7 @@
   {
     "category": "evolution",
     "minutes": 6,
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "slug": "hyperneat",
     "title": "HyperNEAT: geometry generates connectivity",
     "subtitle": "A compact generator can describe a large substrate.",

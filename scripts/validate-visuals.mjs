@@ -8,12 +8,14 @@ import {createServer} from 'vite';
 const articles=JSON.parse(readFileSync(new URL('../src/content/articles.json',import.meta.url),'utf8'));
 const server=await createServer({server:{middlewareMode:true},appType:'custom'});
 try{
- const {default:Visual}=await server.ssrLoadModule('/src/components/ArticleVisual.jsx');
+ const {default:Visual,articleVisualTypes}=await server.ssrLoadModule('/src/components/ArticleVisual.jsx');
  const {conceptDiagrams}=await server.ssrLoadModule('/src/components/ConceptFigures.jsx');
  for(const a of articles){
+  if(!articleVisualTypes.has(a.diagram))throw Error(`No explicit worked-visual renderer: ${a.slug} / ${a.diagram}`);
   const html=renderToStaticMarkup(createElement(Visual,{type:a.diagram}));
+  if(/(?:NaN|Infinity)/.test(html))throw Error(`Non-finite rendered value: ${a.slug}`);
   if(html.length<400)throw Error(`Empty visual: ${a.slug} / ${a.diagram}`);
-  if(!['kv','timeline'].includes(a.diagram)&&!html.includes('<svg viewBox='))throw Error(`Missing vector diagram: ${a.slug}`);
+  if(!['kv','timeline'].includes(a.diagram)&&!/<svg\b[^>]*viewBox=/.test(html))throw Error(`Missing vector diagram: ${a.slug}`);
  }
  for(const [slug,d] of Object.entries(conceptDiagrams)){
   const ids=new Set(d.nodes.map(n=>n.id));
