@@ -51,13 +51,20 @@
 .question-grid p{color:var(--muted);font-size:10px;line-height:1.8;margin-bottom:15px}
 .question-grid button>span{display:flex;align-items:center;gap:7px;color:var(--accent);font-size:9px}
 .directory-filters{margin-top:20px}
-.related-topics{border-top:1px solid var(--border);margin-top:50px;padding-top:27px}
-.related-topics .topic-grid{gap:16px}
-.related-topics .topic-card{padding:18px}
-.related-topics .topic-card h3{font-size:24px}
-.related-topics .topic-card-top{margin-bottom:12px}
-.related-topics .topic-card-top>span{display:none}
-.related-topics .topic-card-top>a{max-width:100%}
+.related-topics{margin-top:42px;padding:18px 22px 6px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2)}
+.related-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:13px}
+.related-heading h2{font-family:var(--serif);font-size:21px;font-weight:400;line-height:1.3;letter-spacing:-.2px;margin:0}
+.related-heading .text-link{font-size:10px;white-space:nowrap}
+.related-list{list-style:none;padding:0;margin:0}
+.related-item{display:flex;align-items:center;gap:16px;border-top:1px solid var(--border)}
+.related-link{flex:1;min-width:0;padding:13px 0;display:flex;flex-direction:column;gap:4px;border-radius:3px}
+.related-title{font-size:13px;font-weight:500;line-height:1.5;display:flex;align-items:baseline;gap:7px}
+.related-title svg{flex-shrink:0;color:var(--accent);align-self:center}
+.related-reason{font-size:11px;line-height:1.5;color:var(--muted)}
+.related-link:hover .related-title{color:var(--accent)}
+.related-preview{display:flex;align-items:center;justify-content:center;gap:5px;flex-shrink:0;min-height:36px;padding:6px;font-size:10px;color:var(--muted);border-radius:4px}
+.related-preview:hover{background:var(--accent-soft);color:var(--accent)}
+@media(max-width:550px){.related-topics{margin-top:32px;padding:16px 16px 4px}.related-heading{gap:10px}.related-heading h2{font-size:20px}.related-heading .text-link{font-size:9px}.related-item{gap:10px}.related-preview{min-width:36px}.related-preview>span{display:none}}
 .abstract .key-points{margin-top:20px;margin-bottom:19px}
 .abstract .key-points li{font-size:11px}
 .abstract>div.topic-tags{border:0;padding:0;display:flex;gap:6px;margin:0}

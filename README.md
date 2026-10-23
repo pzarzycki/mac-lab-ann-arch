@@ -1,6 +1,6 @@
 # Artificial Neural Architectures — Atlas
 
-**Live website:** [Artificial Neural Architectures — Atlas](https://pzarzycki.github.io/mac-lab-artficial-neural-archictectures/)
+**Live website:** [Artificial Neural Architectures — Atlas](https://pzarzycki.github.io/mac-lab-ann-arch/)
 
 An interactive research guide for individual exploration of neural architectures, learning algorithms and embodied intelligence.
 
@@ -66,11 +66,11 @@ Illustrative masks, mutations, coordinate fields and latent rollouts are labeled
 
 ## GitHub
 
-Repository: https://github.com/pzarzycki/mac-lab-artficial-neural-archictectures
+Repository: https://github.com/pzarzycki/mac-lab-ann-arch
 
 ```bash
-git clone git@github.com:pzarzycki/mac-lab-artficial-neural-archictectures.git
-cd mac-lab-artficial-neural-archictectures
+git clone git@github.com:pzarzycki/mac-lab-ann-arch.git
+cd mac-lab-ann-arch
 npm ci
 npm run dev
 ```
@@ -87,7 +87,7 @@ The `Deploy Atlas to GitHub Pages` workflow validates the numerical examples, bu
 
 One-time repository setup: open **Settings → Pages → Build and deployment → Source** and select **GitHub Actions**. If the initial deployment ran before this setting was enabled, rerun `Deploy Atlas to GitHub Pages` from the Actions tab. No personal token or repository secret is needed.
 
-The GitHub Pages target URL is `https://pzarzycki.github.io/mac-lab-artficial-neural-archictectures/`. Vite's relative asset base (`./`) and hash routes support this repository subdirectory without a server fallback. The existing ChatGPT-hosted URL remains a separate deployment.
+The GitHub Pages target URL is `https://pzarzycki.github.io/mac-lab-ann-arch/`. Vite's relative asset base (`./`) and hash routes support this repository subdirectory without a server fallback. The existing ChatGPT-hosted URL remains a separate deployment.
 
 ## Embeddings and Transformer observability
 

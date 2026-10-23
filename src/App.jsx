@@ -49,7 +49,7 @@ export default function App(){
     route.parts[0]==='about'?<AboutPage/>:
     route.parts.length===0?<Home onPreview={setPreview}/>:<NotFound/>}
   </main>
-  <footer className="site-footer"><a className="footer-brand" href="#/"><ArchitectureMark/><span>Artificial Neural Architectures<small>ATLAS</small></span></a><p>An interactive field guide to learning systems.</p><div><a href="https://github.com/pzarzycki/mac-lab-artficial-neural-archictectures" target="_blank" rel="noreferrer">GitHub</a><a href="#/about">Editorial approach</a><a href="#/papers">Primary sources</a><span>October 2026</span></div></footer>
+  <footer className="site-footer"><a className="footer-brand" href="#/"><ArchitectureMark/><span>Artificial Neural Architectures<small>ATLAS</small></span></a><p>An interactive field guide to learning systems.</p><div><a href="https://github.com/pzarzycki/mac-lab-ann-arch" target="_blank" rel="noreferrer">GitHub</a><a href="#/about">Editorial approach</a><a href="#/papers">Primary sources</a><span>October 2026</span></div></footer>
   {searchOpen&&<SearchDialog onClose={()=>setSearchOpen(false)}/>}
   {preview&&<PreviewDialog key={preview} slug={preview} onClose={()=>setPreview(null)} onBookmark={toggleBookmark} saved={bookmarks}/>}
   {toast&&<div className="toast" role="status"><Check size={16}/>{toast}</div>}

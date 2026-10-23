@@ -48,7 +48,13 @@ export function ExplorePage({onPreview}){
 }
 
 export function RelatedTopics({article,onPreview}){
- return <section className="related-topics" id="related-topics"><div className="section-top"><div><span className="eyebrow">CONTINUE THE EXPLORATION</span><h2>Related ideas.</h2></div><a className="text-link" href="#/explore">Browse the atlas <ArrowRight size={14}/></a></div><div className="topic-grid">{article.related.map(r=><TopicCard key={r.slug} article={articleMap[r.slug]} reason={r.reason} onPreview={onPreview} compact/>)}</div></section>;
+ return <section className="related-topics" id="related-topics" aria-labelledby="related-ideas-title">
+  <header className="related-heading"><h2 id="related-ideas-title">Related ideas</h2><a className="text-link" href="#/explore">Browse the atlas <ArrowRight size={13}/></a></header>
+  <ul className="related-list">{article.related.map(r=>{const a=articleMap[r.slug];return <li className="related-item" key={r.slug}>
+   <a className="related-link" href={`#/article/${a.slug}`}><span className="related-title">{a.title}<ArrowUpRight size={13}/></span><span className="related-reason">{r.reason}</span></a>
+   <button className="related-preview" aria-label={`Quick view: ${a.title}`} onClick={()=>onPreview(a.slug)}><Orbit size={13}/><span>Quick view</span></button>
+  </li>;})}</ul>
+ </section>;
 }
 
 export function PreviewDialog({slug,onClose,onBookmark,saved}){

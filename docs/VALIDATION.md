@@ -45,7 +45,7 @@ JEPA representation prediction is separate from reconstruction and local predict
 - Desktop Chrome and a phone-sized CSS viewport were checked; physical mobile devices, other browser engines and print pagination were not independently tested.
 - Expanded SVGs have keyboard controls and Escape dismissal; full modal focus containment for expanded figures remains a refinement. Search and topic-preview dialogs contain focus.
 - Theme and bookmarks remain browser-local and may be unavailable under restrictive storage policies.
-- GitHub source destination: pzarzycki/mac-lab-artficial-neural-archictectures. Existing Site access remains private.
+- GitHub source destination: pzarzycki/mac-lab-ann-arch. Existing Site access remains private.
 
 ## Luminous Editorial and nested hierarchy update
 
@@ -72,3 +72,10 @@ Verified on 22 October 2026.
 - Phone-width embeddings layout and mixture controls work at 375 usable CSS px without document-level horizontal overflow. The temporary QA harness was removed before build.
 - J-Lens formulas and dimensions were checked against the primary 2026 publication and official reference implementation; J-space is described as an overcomplete sparse frame, with explicit limits on averaging and causal interpretation. Other additions cite primary papers and research publications.
 - These checks do not constitute pretrained-model inference, fitted lenses, replicated experiments or empirical interpretability evaluations.
+
+## Compact related ideas panel
+
+- Replaced repeated topic cards with one labeled panel of direct article links, connection reasons and quick-preview buttons. Every related-topic entry remains available; article and directory content is unchanged.
+- The production build and its content/hierarchy validation pass for all 42 topics.
+- Browser checks verified direct navigation and quick previews (including focus return), bright/dark themes, and the phone-width layout. Four links occupy approximately 334 CSS px on desktop and 346 CSS px on mobile.
+- At 375 usable CSS px, no document-level horizontal overflow is present. Mobile icon buttons retain explicit accessible names. The temporary QA harness was removed.
