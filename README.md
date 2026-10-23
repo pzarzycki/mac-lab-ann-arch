@@ -89,6 +89,12 @@ One-time repository setup: open **Settings → Pages → Build and deployment �
 
 The GitHub Pages target URL is `https://pzarzycki.github.io/mac-lab-ann-arch/`. Vite's relative asset base (`./`) and hash routes support this repository subdirectory without a server fallback. The existing ChatGPT-hosted URL remains a separate deployment.
 
+## Link sharing preview
+
+The initial HTML includes Open Graph and large-image card metadata, including the Atlas title, description, canonical public URL and an absolute public image URL. The branded banner is `public/social/atlas-preview-v1.jpg` (1200 × 630, approximately 103 KB), matching the porcelain/iris interface. It is copied to `dist/social/` during build and can be fetched without JavaScript or sign-in.
+
+Share `https://pzarzycki.github.io/mac-lab-ann-arch/` for the public website. All hash-based article URLs currently use the same Atlas preview; individual article previews would require separately served HTML URLs. Preview clients can retain previously fetched cards, so a newly published card may not appear immediately in every client. When replacing the artwork, use a new versioned filename and update the metadata together.
+
 ## Embeddings and Transformer observability
 
 Token embeddings & embedding space is a dedicated Core mechanisms deep dive. The Observability & interpretability family covers instrumentation and evidence, logit/tuned lenses, the Jacobian lens and J-space, plus activation patching, sparse features, transcoders and circuit tracing. The primary-source registry and manuscript include these additions. Interactive figures are labeled synthetic where they compute invented examples. Manuscript is available in the top-right header.
