@@ -19,3 +19,4 @@ svg text[text-anchor="start"]{text-anchor:start}svg text[text-anchor="end"]{text
 /* Keep off-canvas navigation out of keyboard traversal. */
 .sidebar-collapsed>.sidebar{visibility:hidden}
 @media(max-width:850px){.sidebar{visibility:hidden}.sidebar.sidebar-open,.sidebar-collapsed>.sidebar.sidebar-open{visibility:visible}}
+

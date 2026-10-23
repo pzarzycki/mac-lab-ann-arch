@@ -1,8 +1,10 @@
-# Neural Atlas
+# Artificial Neural Architectures — Atlas
+
+**Live website:** [Artificial Neural Architectures — Atlas](https://pzarzycki.github.io/mac-lab-artficial-neural-archictectures/)
 
 An interactive research guide for individual exploration of neural architectures, learning algorithms and embodied intelligence.
 
-**37 deep dives · 10 connected topic groups · 69 primary references.** Source snapshot: 21 October 2026.
+**37 deep dives · 6 domains with nested families · 69 primary references.** Source snapshot: 21 October 2026.
 
 Browse a group, inspect a concise topic preview and its live visual, open the detailed article, then follow explained connections to related ideas. Question collections offer alternative views of the same content. The interface has no lessons, required order, grades or completion tracking.
 
@@ -74,3 +76,15 @@ npm run dev
 ```
 
 The repository contains editable source, the conspect, generated manuscript and bibliography. Build output and dependencies are excluded from Git.
+
+## Luminous Editorial interface
+
+Six domains contain nested families and all 37 original deep dives. The porcelain/iris visual system includes a corresponding dark theme. The Manuscript navigation opens `#/manuscript`, rendering the same article Markdown with KaTeX, highlighted code, scoped citation anchors and expandable sections. No download is triggered. Legacy article and section URLs remain available. `docs/CONSPECT.md` records the complete hierarchy.
+
+## GitHub Pages
+
+The `Deploy Atlas to GitHub Pages` workflow validates the numerical examples, builds with `npm ci` / `npm run build`, uploads `dist/`, and publishes using GitHub's official Pages actions. It runs on pushes to `main` and can be started manually. Third-party action references are pinned to verified GitHub-owned action commits.
+
+One-time repository setup: open **Settings → Pages → Build and deployment → Source** and select **GitHub Actions**. If the initial deployment ran before this setting was enabled, rerun `Deploy Atlas to GitHub Pages` from the Actions tab. No personal token or repository secret is needed.
+
+The GitHub Pages target URL is `https://pzarzycki.github.io/mac-lab-artficial-neural-archictectures/`. Vite's relative asset base (`./`) and hash routes support this repository subdirectory without a server fallback. The existing ChatGPT-hosted URL remains a separate deployment.

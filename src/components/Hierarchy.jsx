@@ -1,0 +1,28 @@
+import React,{useEffect,useState} from 'react';
+import {ChevronDown,ChevronRight,ArrowRight,ArrowUpRight,Layers,Activity,ScanEye,Orbit,Bot,History} from 'lucide-react';
+import {hierarchy,nodePath,articlePaths,descendantSlugs} from '../content/hierarchy';
+import {articleMap} from '../content';
+import {TopicGrid} from './Explore';
+const icons={Layers,Activity,ScanEye,Orbit,Bot,History};
+export function ArchitectureMark(){return <svg className="architecture-mark" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 3 3 34h42L24 3v42L3 34l21-11 21 11M24 3 14 34l10 11 10-11L24 3Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/></svg>;}
+export function HierarchyNav({article,family}){
+ const path=article?articlePaths[article.slug]||[]:family?nodePath(family.id):[];
+ const [open,setOpen]=useState(()=>new Set(['transformers','core-mechanisms',...path.map(n=>n.id)]));
+ const signature=path.map(n=>n.id).join('/');
+ useEffect(()=>setOpen(old=>new Set([...old,...path.map(n=>n.id)])),[signature]);
+ function render(n,depth=0){const expanded=open.has(n.id),active=family?.id===n.id,inPath=path.some(p=>p.id===n.id),C=icons[n.icon]||Layers;
+ return <div className={`tree-node ${active?'tree-current':''} ${inPath?'tree-path':''}`} key={n.id} style={{'--depth':depth}}><div className="tree-row">{depth===0&&<C size={16}/>}<a href={`#/domain/${n.id}`} aria-current={active?'page':undefined}>{n.title}</a><button aria-label={`${expanded?'Collapse':'Expand'} ${n.title}`} aria-expanded={expanded} onClick={()=>setOpen(prev=>{const s=new Set(prev);s.has(n.id)?s.delete(n.id):s.add(n.id);return s;})}>{expanded?<ChevronDown size={13}/>:<ChevronRight size={13}/>}</button></div>{expanded&&<div className="tree-children">{(n.children||[]).map(child=>render(child,depth+1))}{(n.articles||[]).map(slug=><a className={`tree-article ${article?.slug===slug?'current-article':''}`} aria-current={article?.slug===slug?'page':undefined} href={`#/article/${slug}`} key={slug}>{articleMap[slug].title}</a>)}</div>}</div>;
+ }
+ return <div className="hierarchy-tree">{hierarchy.map(n=>render(n))}</div>;
+}
+export function FamilyGlyph({index=0}){
+ const color='var(--accent)';
+ return <svg className="family-glyph" viewBox="0 0 300 110" fill="none" aria-hidden="true"><defs><pattern id={'grid-'+index} width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill={color} opacity=".13"/></pattern></defs><rect width="300" height="110" fill={`url(#grid-${index})`}/>{index%3===0?<><path d="M18 30h38m-38 25h38m-38 25h38m39-25h33m45 0h32m41 0h30M40 88h208V20H40v10" stroke={color} opacity=".55"/><rect x="56" y="22" width="44" height="66" rx="4" stroke={color}/><rect x="133" y="35" width="44" height="40" rx="4" stroke={color}/><rect x="209" y="35" width="40" height="40" rx="4" stroke={color}/><path d="m124 51 5 4-5 4m77-8 5 4-5 4" stroke={color}/></>:index%3===1?<><path d="M37 55h41m0 0 55-31m-55 31 55 0m-55 0 55 31m12-62 70 31m-70 0 70 0m-70 31 70-31m12 0h39" stroke={color} opacity=".7"/>{[[26,55],[81,55],[142,24],[142,55],[142,86],[221,55],[272,55]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r={i===1||i===5?10:6} stroke={color} fill="var(--surface)"/>)}</>:<><path d="M20 55h33m67 0h34m68 0h47" stroke={color}/>{[54,155].map((x,j)=><g key={j}><rect x={x} y="22" width="66" height="66" stroke={color} rx="2"/>{[1,2,3,4,5].map(i=><g key={i} stroke={color} opacity=".45"><path d={`M${x+i*11} 22v66M${x} ${22+i*11}h66`}/></g>)}{j===1&&<path d="m155 22 66 66h-66Z" fill={color} opacity=".14"/>}</g>)}</>}</svg>;
+}
+export function FamilyCard({node:n,index=0}){return <a className="family-card" href={`#/domain/${n.id}`}><div className="family-card-meta"><span>{n.children?'RESEARCH DOMAIN':'TOPIC FAMILY'}</span><ArrowUpRight size={17}/></div><h3>{n.title}</h3><p>{n.description}</p><FamilyGlyph index={index}/><div className="family-card-footer"><span>{descendantSlugs(n).length} deep dives</span><span>{n.children?`${n.children.length} families`:'Explore ideas'}<ArrowRight size={13}/></span></div></a>;}
+export function FamilyPage({node:n,onPreview}){
+ const [query,setQuery]=useState('');useEffect(()=>setQuery(''),[n.id]);
+ const list=descendantSlugs(n).map(slug=>articleMap[slug]),filtered=list.filter(a=>`${a.title} ${a.abstract} ${a.tags.join(' ')}`.toLowerCase().includes(query.toLowerCase()));
+ const path=nodePath(n.id);
+ return <div className="family-page"><nav className="article-ancestry" aria-label="Topic hierarchy"><a href="#/">Atlas<ChevronRight size={11}/></a>{path.slice(0,-1).map(p=><a href={`#/domain/${p.id}`} key={p.id}>{p.title}<ChevronRight size={11}/></a>)}</nav><header className="page-intro"><div className="eyebrow">{n.children?'RESEARCH DOMAIN':'TOPIC FAMILY'} / {list.length} DEEP DIVES</div><h1>{n.title}</h1><p>{n.description}</p></header>{n.children&&<div className="family-grid">{n.children.map((child,i)=><FamilyCard node={child} key={child.id} index={i}/>)}</div>}<div className="directory-toolbar"><label className="filter-search"><Orbit size={16}/><input aria-label={`Search ${n.title}`} placeholder="Find an idea in this family…" value={query} onChange={e=>setQuery(e.target.value)}/></label><span>{filtered.length} topics</span></div>{n.children&&!query?<div className="family-topic-directory">{list.map(a=><div className="family-topic-row" key={a.slug}><div><a href={`#/article/${a.slug}`}>{a.title}<ArrowUpRight size={14}/></a><small>{articlePaths[a.slug].slice(path.length).map(p=>p.title).join(' / ')}</small></div><button onClick={()=>onPreview(a.slug)}>Quick view<ArrowRight size={13}/></button></div>)}</div>:<TopicGrid list={filtered} onPreview={onPreview}/>} {!filtered.length&&<p className="directory-empty">No matching topics. Try a broader search.</p>}</div>;
+}

@@ -1,8 +1,8 @@
-# Neural Atlas — conspect
+# Artificial Neural Architectures — Atlas — conspect
 
 An interactive research guide to artificial neural architectures, learning rules and embodied systems. Readers enter through a topic, inspect its essential distinctions, open a detailed account and follow connections in any direction. Topic order does not imply prerequisites, importance or a required reading sequence.
 
-Source snapshot: **21 October 2026**. This edition contains **37 deep dives in 10 connected groups**, with **69 primary references**. All 33 original articles remain available at their original article URLs. JEPA, video world models, NEAT and HyperNEAT add four articles.
+Source snapshot: **21 October 2026**. This edition contains **37 deep dives in 6 domains with nested topic families**, with **69 primary references**. All 33 original articles remain available at their original article URLs. JEPA, video world models, NEAT and HyperNEAT add four articles.
 
 ## The exploration model
 
@@ -13,22 +13,71 @@ Source snapshot: **21 October 2026**. This edition contains **37 deep dives in 1
 
 The direct deep-dive link is always available. Quick views are optional. Question collections are unordered selections. There are no lessons, completion requirements, grades, prerequisite locks or global next/previous sequence. Bookmarks form a personal collection.
 
-## Topic groups and implemented deep dives
+## Implemented hierarchy
 
-| Group | Organizing question | Deep dives and visual focus |
-| --- | --- | --- |
-| **Transformer mechanics** | What happens inside a Transformer block? | **Residual stream:** separate token states, identity paths, pre/post-LN. **Attention:** queries, keys, values, masks and source reads. **Normalization, position & gated MLPs:** feature statistics, rotary geometry and gated projections. **Training, prefill & decoding:** parallel scoring, cached inference and sequential generation. |
-| **Sequence architectures** | Where can a sequence model spend its computation? | **Mixture of experts:** router logits, top-k activation and expert weights. **Hyper-connections & mHC:** residual lanes within each token and constrained mixing. **Recurrent depth & looped Transformers:** repeated computation and a contraction example. **Selective state spaces & hybrids:** input-dependent recurrent state versus explicit token reads. |
-| **Efficient execution** | What makes a model cheaper to run? | **KV-cache memory & grouped heads:** batch, layers, context, heads, precision and bytes. **Exact kernels, sparse patterns:** IO-efficient exact attention versus changed connectivity. **Compression & speculative decoding:** numeric precision, proposal generation and target-model verification. |
-| **Multimodal & predictive representations** | What should a representation preserve or predict? | **Modality fusion:** prefix tokens, query resampling and cross-attention. **Alignment, generation & instruction:** objective differences. **Audio, video & temporal grounding:** sampling, synchronization and temporal evaluation. **JEPA:** context/target encoders, masks, feature targets, stop-gradient and EMA. **Video world models & latent planning:** action-free representations, action conditioning, candidate rollouts and replanning. |
-| **Generation & latent computation** | What changes when generation leaves the token-by-token loop? | **Diffusion & flow-based generation:** generative construction versus illustrative reveal order. **Soft prompts & continuous thought:** learned input vectors, latent computation and soft-token mixtures as distinct mechanisms. |
-| **Learning dynamics & credit assignment** | How does a learning system assign credit? | **Predictive coding:** activities, prediction errors and local inference. **Augmented Lagrangian predictive coding:** constraints, multipliers, penalty and a linear comparison with BP. **Active inference:** beliefs, generative models and policy selection. **Spiking neural networks:** membrane dynamics, thresholds and surrogate gradients. **Liquid time-constant networks:** continuous hidden dynamics and state-dependent response. **Backpropagation & biological plausibility:** reverse-mode differentiation and separate biological constraints. **Feedback alignment & local objectives:** alternative feedback and update locations. |
-| **Neuroevolution & architecture search** | Can we evolve the network and its connectivity? | **NEAT:** connection genes, structural mutation, historical identifiers and speciation. **HyperNEAT:** an evolved CPPN maps coordinate pairs to a separate substrate network; inspect geometric symmetry and generated weights. |
-| **Memory & adaptation** | What changes between interactions, and what persists? | **Remembering while learning:** replay, consolidation, isolation and forgetting. **Memory, context & test-time adaptation:** distinguish cache, retrieval, context and parameter updates. **Self-improvement needs a verifier:** data generation, selection, held-out feedback and update loops. |
-| **Embodied intelligence** | How do representations become actions in a changing world? | **Vision–language–action models:** observations, instruction, robot state, action head and controller. **Tokens, diffusion & flow for action:** distributions, action chunks and receding-horizon execution. **Evaluate the closed loop:** latency, freshness, success and distribution shifts. |
-| **Intellectual lineage** | Which earlier ideas made these mechanisms possible? | **Distributed representations:** identifiers, embeddings, relational prediction and language models. **Sequence models discover attention:** recurrent summaries, alignment and Transformer construction. **ResNet:** identity paths and learned transformations, with earlier skip/highway work acknowledged. **Transformer to language-model scaling:** generative transfer, empirical scaling fits and recipes combining independent inventions. |
+- **Transformers**
+  - **Core mechanisms**
+    - The residual stream
+    - Attention as content-addressed computation
+    - Normalization, position & gated MLPs
+    - Training, prefill & decoding
+  - **Structural extensions**
+    - Mixture of experts
+    - Hyper-connections & mHC
+    - Recurrent depth & looped Transformers
+    - Selective state spaces & hybrids
+  - **Efficient execution**
+    - KV-cache memory & grouped heads
+    - Exact kernels, sparse patterns
+    - Compression & speculative decoding
+- **Learning & adaptation**
+  - **Credit assignment**
+    - **Gradients & local objectives**
+      - Backpropagation & biological plausibility
+      - Feedback alignment & local objectives
+    - **Predictive coding**
+      - Predictive coding as local inference
+      - Augmented Lagrangian predictive coding
+  - **Neural dynamics**
+    - Spiking neural networks
+    - Liquid time-constant networks
+  - **Neuroevolution**
+    - NEAT: evolve weights and topology
+    - HyperNEAT: geometry generates connectivity
+  - **Memory & continual learning**
+    - Remembering while learning
+    - Memory, context & test-time adaptation
+    - Self-improvement needs a verifier
+- **Multimodal & world models**
+  - **Modality interfaces & objectives**
+    - How modalities enter a Transformer
+    - Alignment, generation & instruction
+    - Audio, video & temporal grounding
+  - **Predictive representations**
+    - JEPA: predicting representations
+    - Video world models & latent planning
+- **Generation & latent computation**
+  - **Generative constructions**
+    - Diffusion & flow-based generation
+  - **Continuous computation**
+    - Soft prompts & continuous thought
+- **Embodied intelligence**
+  - **Policies & action representations**
+    - Vision–language–action models
+    - Tokens, diffusion & flow for action
+  - **Inference & control**
+    - Active inference
+  - **Closed-loop evaluation**
+    - Evaluate the closed loop
+- **Intellectual lineage**
+  - **Representations & sequence models**
+    - From symbols to distributed representations
+    - Sequence models discover attention
+  - **Residual learning & scaling**
+    - ResNet belongs in the main lineage
+    - From Transformer to language-model scaling
 
-These groups are browsing containers. JEPA is a predictive representation-learning arrangement and may use Transformers; diffusion is a generative construction; NEAT is population-based search; KV caching is an execution technique. Shared words such as “prediction,” “memory” and “sparsity” do not establish algorithmic equivalence.
+The hierarchy is the primary browsing structure. Existing article URLs and legacy section links remain valid. Each topic has one primary home; explained crosslinks and question collections connect it to other domains. Active Inference lives under Embodied intelligence → Inference & control; its connections to predictive coding remain visible.
 
 ## Questions across the hierarchy
 
@@ -95,7 +144,7 @@ Every deep dive has a visual. Shared renderers contain distinct graphs and capti
 
 ## Sources and maintenance
 
-Article Markdown is the manuscript source. `articles.json` defines previews, tags, references, visuals and explained connections. `categories.json` and `collections.json` define browsing views. `sources.json` records primary URLs, years, review date and provenance. The generated manuscript reproduces article bodies, key points, relationships and references.
+Article Markdown is the manuscript source. `articles.json` defines previews, tags, references, visuals and explained connections. `hierarchy.json` defines nested domains and families; `categories.json` retains legacy sections and reference filters; `collections.json` defines question-based browsing views. `sources.json` records primary URLs, years, review date and provenance. The generated manuscript reproduces article bodies, key points, relationships and references.
 
 Claims retain their scope: linear versus nonlinear results, complexity versus runtime, action-free data versus interaction signals, theoretical versus empirical findings. Attribute liquid time-constant networks to Hasani and collaborators. Label the original Transformer separately from a modern pre-norm decoder.
 

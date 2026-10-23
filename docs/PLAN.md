@@ -1,6 +1,6 @@
-# Neural Atlas — implementation and editorial plan
+# Artificial Neural Architectures — Atlas — implementation and editorial plan
 
-The authoritative topic map is [CONSPECT.md](CONSPECT.md). Neural Atlas is an exploration guide for advanced readers: topic groups, optional previews, deep dives and explained connections. The data model does not impose lessons, completion tracking or a reading sequence.
+The authoritative topic map is [CONSPECT.md](CONSPECT.md). Artificial Neural Architectures — Atlas is an exploration guide for advanced readers: topic groups, optional previews, deep dives and explained connections. The data model does not impose lessons, completion tracking or a reading sequence.
 
 ## Implemented structure
 
@@ -39,3 +39,7 @@ Bright/dark/system themes and bookmarks persist locally. Responsive navigation, 
 8. Update the supplied GitHub repository and existing private Site.
 
 `VALIDATION.md` records evidence and limits. The conspect remains the coverage map; `MANUSCRIPT.md` is generated from the exact article sources.
+
+## Luminous Editorial update
+
+The selected UI direction uses porcelain surfaces, iris accents, contemporary serif headings, fine rules and restrained schematic previews. A coordinated dark theme uses ink-violet surfaces. Six domains group all 37 deep dives through meaningful families; `hierarchy.json` is the canonical tree. Legacy categories support old URLs. Active Inference is oriented under control, predictive coding and PC-ALM share a family, and neuroevolution has a distinct home under Learning & adaptation. The complete manuscript renders from the same source Markdown in `#/manuscript`, including scoped citations, KaTeX and code highlighting. Expand/collapse controls keep the complete text accessible without loading every equation on initial navigation.

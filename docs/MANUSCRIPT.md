@@ -1,16 +1,18 @@
-# Neural Atlas
+# Artificial Neural Architectures — Atlas
 
 ## An interactive guide to architectures and learning systems
 
 Source snapshot: 21 October 2026.
 
-37 articles · 10 research areas · 69 primary references.
+37 articles · 6 research domains · 69 primary references.
 
 This manuscript is the content source for the interactive site. It is a curated conceptual map, not an exhaustive literature review. Formulas define local conventions; theoretical claims, empirical findings and illustrative calculations are distinguished. Refer to docs/CONSPECT.md for the exploration map and coverage, and docs/PLAN.md for implementation decisions.
 
-# Transformer mechanics
+# Transformers
 
-Token states, attention, normalization and the training–generation interface.
+Follow token representations from core mechanisms to architectural extensions and efficient execution.
+
+**Family:** Transformers → Core mechanisms
 
 <a id="article-residual-streams"></a>
 
@@ -94,6 +96,8 @@ Remove the residual path while keeping parameter count comparable; inspect gradi
 
 ---
 
+**Family:** Transformers → Core mechanisms
+
 <a id="article-attention"></a>
 
 ## Attention as content-addressed computation
@@ -150,6 +154,8 @@ Compare dense and windowed masks on a synthetic task with a dependency outside t
 - [How modalities enter a Transformer](#article-multimodal-fusion) — Attend across modality boundaries.
 
 ---
+
+**Family:** Transformers → Core mechanisms
 
 <a id="article-normalization-position"></a>
 
@@ -223,6 +229,8 @@ RMSNorm does not remove the need for stable initialization. A rotary scheme that
 
 ---
 
+**Family:** Transformers → Core mechanisms
+
 <a id="article-training-decoding"></a>
 
 ## Training, prefill & decoding
@@ -285,9 +293,7 @@ Distinguish training loss, held-out negative log-likelihood, instruction-followi
 
 ---
 
-# Sequence architectures
-
-Routing, residual connectivity, recurrent depth and state-space alternatives.
+**Family:** Transformers → Structural extensions
 
 <a id="article-mixture-of-experts"></a>
 
@@ -344,6 +350,8 @@ Compare training compute, communication volume, inference latency at representat
 - [From Transformer to language-model scaling](#article-gpt-scaling) — Relate active compute to scaling.
 
 ---
+
+**Family:** Transformers → Structural extensions
 
 <a id="article-hyper-connections"></a>
 
@@ -410,6 +418,8 @@ The mHC paper combines connectivity constraints with system optimizations. Its e
 
 ---
 
+**Family:** Transformers → Structural extensions
+
 <a id="article-recurrent-depth"></a>
 
 ## Recurrent depth & looped Transformers
@@ -469,6 +479,8 @@ Plot accuracy versus total FLOPs and latency across loop counts, including count
 - [Hyper-connections & mHC](#article-hyper-connections) — Compare residual topology.
 
 ---
+
+**Family:** Transformers → Structural extensions
 
 <a id="article-state-space"></a>
 
@@ -531,9 +543,7 @@ Use a long-range associative-recall task with distractors and variable delays. T
 
 ---
 
-# Efficient execution
-
-Cache state, attention kernels, sparsity, compression and decoding throughput.
+**Family:** Transformers → Efficient execution
 
 <a id="article-kv-cache"></a>
 
@@ -598,6 +608,8 @@ End-to-end latency also depends on memory bandwidth, kernel layout, scheduling, 
 
 ---
 
+**Family:** Transformers → Efficient execution
+
 <a id="article-efficient-attention"></a>
 
 ## Exact kernels, sparse patterns
@@ -657,6 +669,8 @@ Published speedups are tied to hardware, sequence length, precision and baseline
 
 ---
 
+**Family:** Transformers → Efficient execution
+
 <a id="article-compression-decoding"></a>
 
 ## Compression & speculative decoding
@@ -710,453 +724,140 @@ Measure identical prompts, sampling settings, output lengths and target weights 
 
 ---
 
-# Multimodal & predictive representations
+# Learning & adaptation
 
-Modality interfaces, alignment, JEPA and predictive video representations.
+Explore how credit is assigned, networks evolve, and useful changes persist.
 
-<a id="article-multimodal-fusion"></a>
+**Family:** Learning & adaptation → Credit assignment → Gradients & local objectives
 
-## How modalities enter a Transformer
+<a id="article-backprop-biology"></a>
 
-*Tokenization is an interface; fusion is a design choice.*
+## Backpropagation & biological plausibility
 
-**Abstract.** Compare patch projection, learned resampling, prefix concatenation and cross-attention without conflating their objectives.
+*One exact derivative; several implementation questions.*
 
-**At a glance:**
-
-- An encoder maps each modality into representations
-- Prefix, query and cross-attention are different interfaces
-- Resolution and token count change the compute budget
-
-**Concepts:** Vision encoders; Cross-attention; Query resampling; Modality tokens.
-
-### A common width does not imply a common meaning
-Text IDs become learned lookup vectors. An image can be divided into patches, projected into a sequence and processed by a vision encoder. Audio may become time–frequency features or learned tokens. To enter a language backbone, these representations need a compatible width and a specified ordering/masking convention. [1](https://arxiv.org/abs/2010.11929)
-
-For image features $Z\in\mathbb R^{p\times d_v}$ and a learned projector $P\in\mathbb R^{d_v\times d}$, define $V=ZP$. $p$ is visual-token count, $d_v$ encoder width and $d$ language width. A width match does not guarantee semantic alignment; training establishes how the backbone uses these vectors.
-
-### Three fusion patterns
-| Pattern | Interface | Main design issue |
-| --- | --- | --- |
-| Visual prefix | Concatenate projected visual tokens with text | Sequence cost and masking |
-| Learned query bottleneck | Query a larger feature set to produce fewer tokens | Information lost by compression |
-| Cross-attention | Language states query visual memory in selected layers | Extra projections and insertion points |
-
-LLaVA provides an influential encoder–projector–language-model route. BLIP-2 uses a Q-Former between frozen pretrained components. Flamingo uses a visual resampler and gated cross-attention to connect pretrained vision and language systems. These are specific designs, not interchangeable names for “multimodal attention.” [2](https://arxiv.org/abs/2204.14198) [3](https://arxiv.org/abs/2301.12597) [4](https://arxiv.org/abs/2304.08485)
-
-### Inspect the interface
-Switch the fusion mode in the vector figure. Count which tensors join the language sequence and which remain external memory. The displayed token counts are illustrative; actual models differ in image crops, resolution, resampling and temporal handling.
-
-```python
-visual = vision_encoder(images)
-visual_tokens = projector(visual)
-sequence = concatenate([visual_tokens, text_embeddings], axis='positions')
-answer = decoder(sequence, mask=multimodal_mask)
-```
-
-### Evidence and limits
-A captioning improvement does not establish precise spatial grounding. Frozen backbones reduce trainable parameters but do not remove the cost of their forward passes. Evaluation should vary image content while preserving the question, and include cases where language priors suggest the wrong answer. Continue to [training objectives](#article-multimodal-objectives).
-
-### Primary references
-
-1. Dosovitskiy et al. (2020). [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929). Paper · ICLR 2021.
-2. Alayrac et al. (2022). [Flamingo: a Visual Language Model for Few-Shot Learning](https://arxiv.org/abs/2204.14198). Research paper.
-3. Li et al. (2023). [BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models](https://arxiv.org/abs/2301.12597). Research paper.
-4. Liu, Li, Wu & Lee (2023). [Visual Instruction Tuning](https://arxiv.org/abs/2304.08485). Paper · NeurIPS 2023.
-
-### Related topics
-
-- [Alignment, generation & instruction](#article-multimodal-objectives) — Separate interface from objective.
-- [Audio, video & temporal grounding](#article-temporal-modalities) — Add time and synchronization.
-- [Vision–language–action models](#article-vla-foundations) — Turn perception into action conditioning.
-
----
-
-<a id="article-multimodal-objectives"></a>
-
-## Alignment, generation & instruction
-
-*The loss decides what the representation must preserve.*
-
-**Abstract.** Separate contrastive pairing, conditional generation and visual instruction tuning.
+**Abstract.** Explain reverse-mode credit assignment while treating biological plausibility as a set of testable constraints.
 
 **At a glance:**
 
-- Contrastive training aligns paired representations
-- Generative training predicts an output distribution
-- Instruction tuning specifies interaction behavior
+- Reverse-mode differentiation assigns parameter credit
+- Weight transport, locality and timing are separate constraints
+- Task performance does not establish biological plausibility
 
-**Concepts:** CLIP; Contrastive learning; Generative objectives; Instruction tuning.
+**Concepts:** Backpropagation; Biological plausibility; Credit assignment; Weight transport.
 
-### Contrastive alignment
-CLIP learns image and text encoders whose normalized outputs are compared through similarity. For a batch of $B$ paired examples, one direction of a contrastive loss is
-
-$$
-\mathcal L_{I\to T}=-\frac1B\sum_i\log\frac{\exp(s(v_i,t_i)/\tau)}{\sum_j\exp(s(v_i,t_j)/\tau)}.
-$$
-
-$v_i,t_i$ are normalized image/text embeddings, $s$ their dot product and $\tau>0$ temperature. The symmetric objective also scores text-to-image retrieval. In-batch negatives create the classification problem; false negatives and biased captions can affect learning. [1](https://arxiv.org/abs/2103.00020)
-
-### Conditional language generation
-A generative vision-language objective instead scores text given visual input $v$:
+### The mathematical operation
+For $a_\ell=W_\ell h_{\ell-1}$ and $h_\ell=\sigma(a_\ell)$, define $\delta_\ell=\partial\mathcal L/\partial a_\ell$. Backpropagation applies the chain rule:
 
 $$
-\mathcal L_{\mathrm{gen}}=-\sum_t\log p_\theta(y_t\mid y_{<t},v).
+\delta_\ell=(W_{\ell+1}^\top\delta_{\ell+1})\odot\sigma'(a_\ell),\qquad
+\nabla_{W_\ell}\mathcal L=\delta_\ell h_{\ell-1}^\top.
 $$
 
-This asks for a token distribution, not merely a paired-embedding similarity. A model can use contrastive and generative terms in different phases. BLIP-2 is a useful example of a staged bridge between pretrained vision and language components. [2](https://arxiv.org/abs/2301.12597)
+The first equation transports an error signal; the second combines it with presynaptic activity. With a batch, gradients sum or average over samples. Reverse-mode differentiation efficiently computes a scalar objective's derivatives; the 1986 papers are major milestones, not the entire historical origin of the chain rule. [1](https://www.cs.toronto.edu/~hinton/absps/naturebp.pdf)
 
-### Visual instruction tuning
-Instruction data specify how to answer questions about images. LLaVA studied generating multimodal instruction data and fine-tuning a vision-language assistant. Instruction following adds behavior and task formatting; it does not prove that the model's visual representation captures every answer-relevant detail. [3](https://arxiv.org/abs/2304.08485)
+### What could be biologically difficult?
+Several separate questions are often compressed into “the brain cannot backprop”:
 
-```python
-loss = image_text_contrastive_loss(image_repr, text_repr)
-# A separate generative stage may optimize answer tokens only.
-loss = conditional_answer_loss(images, instructions, answers, answer_mask)
-```
+- **Weight transport:** exact transposed forward weights in a separate feedback path.
+- **Timing:** availability of forward activities when downstream errors arrive.
+- **Signals:** representing signed errors and derivatives in neural circuits.
+- **Locality:** which variables a synapse can access.
+- **Objective:** where a global supervised target or reward originates.
 
-### Keep the axes separate
-An early-fusion model can be trained generatively. A dual encoder can be trained contrastively. A query bottleneck can support several losses. The interface, attention pattern, data mixture and training objective should be separate fields in a model comparison.
+A method can relax one issue while retaining others. Feedback alignment changes feedback weights; predictive coding changes the organization of state inference; surrogate gradients permit training spikes but can retain global backpropagation through time. [2](https://www.nature.com/articles/ncomms13276) [3](https://pubmed.ncbi.nlm.nih.gov/28333583/) [4](https://arxiv.org/abs/1901.09948)
 
-### Research questions
-Test compositional retrieval, fine-grained attribute swaps and image-question counterfactuals. Include resolution and visual-token budgets. Compare a language-only baseline to quantify how much the task rewards visual evidence rather than dataset priors. Report which encoders were frozen during each phase.
+### Avoid a false binary
+Numerically approximating the BP gradient is not the same as implementing textbook forward/backward phases. Conversely, using local updates is not experimental proof of biological realization. Plausibility should specify circuitry, time scales, plasticity and signal representations rather than use one yes/no label.
 
-### Primary references
-
-1. Radford et al. (2021). [Learning Transferable Visual Models From Natural Language Supervision](https://arxiv.org/abs/2103.00020). Research paper.
-2. Li et al. (2023). [BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models](https://arxiv.org/abs/2301.12597). Research paper.
-3. Liu, Li, Wu & Lee (2023). [Visual Instruction Tuning](https://arxiv.org/abs/2304.08485). Paper · NeurIPS 2023.
-
-### Related topics
-
-- [JEPA: predicting representations](#article-jepa) — Compare prediction in representation space.
-- [How modalities enter a Transformer](#article-multimodal-fusion) — Inspect the architectural interface.
-- [Diffusion & flow-based generation](#article-diffusion-flow) — Change the generative objective.
-
----
-
-<a id="article-temporal-modalities"></a>
-
-## Audio, video & temporal grounding
-
-*Sampling is part of the model.*
-
-**Abstract.** Understand why ordering, synchronization and missing information matter as much as modality adapters.
-
-**At a glance:**
-
-- Audio and video add temporal structure
-- Frame sampling trades detail for sequence length
-- Temporal grounding needs evaluation beyond recognition
-
-**Concepts:** Audio; Video; Temporal grounding; Synchronization.
-
-### Time is an information bottleneck
-A video encoder sees sampled frames or clips, not the full continuous world. Audio frontends also discretize time. Frame rate, crop strategy and receptive field determine which events survive. A later language layer cannot recover motion that was never observed.
-
-For a clip duration $T$ seconds sampled at $f$ frames per second with $p$ visual tokens per frame, an uncompressed visual sequence has approximately $n_v=Tfp$ tokens. With an illustrative $T=10,f=2,p=196$, this is 3,920 tokens before text and any compression. This arithmetic is not a claim about a particular released model.
-
-### Temporal position and synchronization
-Spatial patch indices and temporal indices serve different roles. Interleaving frames and text requires masks that preserve intended access. Audio/video synchronization can be represented by timestamps or aligned feature windows, but positional tags do not correct an inaccurate clock or dropped observations.
-
-### Two concrete reference points
-Whisper is an encoder–decoder speech model trained on large-scale weak supervision with task and language conditioning. It is a speech-system reference, not an example of every “native audio” LLM. Flamingo provides a visual-language architecture that can ingest images and videos through its visual interface. [1](https://arxiv.org/abs/2212.04356) [2](https://arxiv.org/abs/2204.14198)
-
-```python
-frames, times = sample_video(video, frames_per_second=2)
-features = vision_encoder(frames)
-tokens = add_temporal_information(features, times)
-```
-
-The pseudocode leaves the temporal representation abstract because the choice is architecture-specific. ViT-style spatial patching alone does not define video dynamics. [3](https://arxiv.org/abs/2010.11929)
-
-### What to evaluate
-Use tasks that distinguish event order, duration, state change and cross-modal correspondence. Shuffle frames or shift audio as controlled ablations. A strong clip caption can coexist with poor temporal localization. Report sampling density, input duration and whether the test answer is recoverable from one static frame.
-
-### Bridge to action
-For robotics, latency makes the observed state older than the current physical state. A language model's plausible description cannot substitute for a timestamped observation and a control loop. Continue to [closed-loop evaluation](#article-robot-evaluation).
-
-### Primary references
-
-1. Radford et al. (2022). [Robust Speech Recognition via Large-Scale Weak Supervision](https://arxiv.org/abs/2212.04356). Research paper.
-2. Alayrac et al. (2022). [Flamingo: a Visual Language Model for Few-Shot Learning](https://arxiv.org/abs/2204.14198). Research paper.
-3. Dosovitskiy et al. (2020). [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929). Paper · ICLR 2021.
-
-### Related topics
-
-- [Video world models & latent planning](#article-video-world-models) — Predict video representations.
-- [How modalities enter a Transformer](#article-multimodal-fusion) — Inspect modality interfaces.
-- [Evaluate the closed loop](#article-robot-evaluation) — Connect time to closed-loop control.
-
----
-
-<a id="article-jepa"></a>
-
-## JEPA: predicting representations
-
-*Learn what is missing without reconstructing every pixel.*
-
-**Abstract.** Compare the context encoder, target encoder and predictor in I-JEPA and V-JEPA, with explicit masks, feature dimensions and collapse prevention.
-
-**At a glance:**
-
-- Predict target features, not necessarily pixels.
-- Separate gradient training from moving-average targets.
-- JEPA is a learning arrangement, not a replacement for attention.
-
-**Concepts:** JEPA; I-JEPA; V-JEPA; Self-supervised learning; Stop-gradient.
-
-### Predict a representation
-A Joint-Embedding Predictive Architecture (JEPA) learns to predict a target's representation from a context representation. The family describes a learning arrangement, not a replacement for attention: its encoders and predictor can themselves be Transformers. I-JEPA instantiates this idea for images, predicting target-block features from an informative context block. Its masking choices encourage prediction beyond immediately adjacent texture. [1](https://arxiv.org/abs/2301.08243)
-
-The distinction from reconstruction is the prediction target. A pixel reconstruction loss asks for an image array; a JEPA loss compares learned features. This permits the representation to discard some visual detail, but does not establish that every retained feature is useful or that all discarded detail is irrelevant. The diagram switches the target space while keeping this distinction visible.
-
-### Context, target and predictor
-Let an image or clip contain $N$ patch positions. A context mask selects $C$ and target positions form $T$, with $C\cap T=\varnothing$. A useful schematic is
-
-$$
-Z_C=f_\theta(x_C),\quad
-Y_T=[f_{\bar\theta}(x)]_T,\quad
-\widehat Y_T=g_\phi(Z_C,p_T).
-$$
-
-$Z_C\in\mathbb R^{|C|\times d}$ contains visible-context features; $Y_T,\widehat Y_T\in\mathbb R^{|T|\times d}$ are target and predicted features. $p_T$ identifies the requested positions. In the loss below, rows retain their original target-position labels even when stored as a compact array. The target encoder can see the full input; target positions are selected from its output. The context branch must not silently receive the hidden target pixels. Multiple target masks and normalization details belong to each implementation. [1](https://arxiv.org/abs/2301.08243) [2](https://arxiv.org/abs/2404.08471)
-
-These are separate token-indexed feature arrays. A diagram that reduces each branch to one box is summarizing its computation, not claiming that the encoder has only one shared residual vector. Inside a Transformer encoder, every visible patch retains its own residual state.
-
-### Why two encoder updates differ
-For illustration, a feature-regression objective is
-
-$$
-\mathcal L=\frac1{|T|d}\sum_{i\in T}\sum_{k=1}^d
-\rho(\widehat Y_{ik}-\operatorname{sg}(Y_{ik})),\qquad
-\bar\theta\leftarrow m\bar\theta+(1-m)\theta.
-$$
-
-$\operatorname{sg}$ stops gradients through the target; $m\in[0,1)$ controls an exponential moving average. Gradient updates train the context encoder and predictor, while the target follows the moving average. The penalty $\rho$ is method-specific: V-JEPA uses absolute error. This is a family-level notation, not a claim that all JEPA variants use identical losses. Naive jointly learned feature matching admits a constant-output collapse; the asymmetric predictor, moving-average target and stop-gradient form a practical prevention strategy, not a universal theorem of successful representation learning. [2](https://arxiv.org/abs/2404.08471)
-
-### From images to video
-I-JEPA uses spatial image context and targets. V-JEPA extends masked feature prediction to video, making positions spatiotemporal and evaluating motion-sensitive representations. A hidden region need not be strictly in the future: masked video modeling and causal forecasting are different prediction tasks. V-JEPA 2 scales video representation learning, while its action-conditioned extension adds a further stage for planning. Follow [video world models](#article-video-world-models) for that distinction. [2](https://arxiv.org/abs/2404.08471) [3](https://arxiv.org/abs/2506.09985)
-
-### Inspect what was learned
-An informative comparison holds backbone size, data and compute approximately fixed and varies the prediction target or mask. Inspect feature variability, frozen-feature probes and full fine-tuning separately. A trained probe introduces supervision even when pretraining used none. Our suggested diagnostic is to vary context size and ask whether improvements transfer across appearance and motion tasks.
-
-The official I-JEPA demonstrations visualize features using a separately trained generative decoder. Such pictures help inspect representations; they do not turn the underlying feature predictor into a pixel generator. Similarly, low feature error alone does not establish causal understanding, physical accuracy or useful planning. [4](https://github.com/facebookresearch/ijepa)
-
-### Primary references
-
-1. Assran, Duval, Misra, Bojanowski, Vincent, Rabbat, LeCun & Ballas (2023). [Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture](https://arxiv.org/abs/2301.08243). Paper · CVPR 2023.
-2. Bardes, Garrido, Ponce, Chen, Rabbat, LeCun, Assran & Ballas (2024). [Revisiting Feature Prediction for Learning Visual Representations from Video](https://arxiv.org/abs/2404.08471). Research paper.
-3. Assran et al. (2025). [V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning](https://arxiv.org/abs/2506.09985). Research paper.
-4. Meta FAIR (2023). [I-JEPA official implementation](https://github.com/facebookresearch/ijepa). Official code.
-
-### Related topics
-
-- [Video world models & latent planning](#article-video-world-models) — Extend feature prediction to action-conditioned planning.
-- [Alignment, generation & instruction](#article-multimodal-objectives) — Contrast alignment and predictive objectives.
-- [How modalities enter a Transformer](#article-multimodal-fusion) — Separate the objective from the encoder interface.
-- [Predictive coding as local inference](#article-predictive-coding) — Compare different prediction-based learning schemes.
-
----
-
-<a id="article-video-world-models"></a>
-
-## Video world models & latent planning
-
-*Predicting observations and choosing actions are different interfaces.*
-
-**Abstract.** Trace action-free video representations to action-conditioned prediction, candidate rollouts and closed-loop planning, using V-JEPA 2 as a concrete example.
-
-**At a glance:**
-
-- Video pretraining does not yet specify control actions.
-- Action-conditioned post-training needs interaction signals.
-- Evaluate latent prediction and closed-loop success separately.
-
-**Concepts:** World models; V-JEPA 2; Latent planning; Model predictive control.
-
-### What does a world model predict?
-A useful operational definition is a learned model that predicts aspects of an environment's evolution. The predicted object may be pixels, latent features or other state variables. A visually convincing video generator and a useful action-conditioned predictor therefore require different evaluations. For control, ask whether changing a proposed action produces a useful prediction of its consequences. A model can represent video well without already providing that interface.
-
-V-JEPA learns masked video features; V-JEPA 2 develops larger-scale visual representations. V-JEPA 2-AC adds action conditioning on top of a frozen V-JEPA 2 encoder. Keep these names separate: action-free pretraining is not itself the robot controller. [1](https://arxiv.org/abs/2404.08471) [2](https://arxiv.org/abs/2506.09985)
-
-### Observation is not intervention
-Action-free video can reveal regularities of movement and appearance. It does not supply an explicit response to a command the observing agent could choose. V-JEPA 2-AC is post-trained with robot interaction data containing visual observations and end-effector state signals. “Unlabeled” here excludes additional task, success and reward annotations; it does not mean that all information about robot movement is absent. [2](https://arxiv.org/abs/2506.09985)
-
-The official repository separates video encoders from the action-conditioned backbone and provides an example for inspecting a learned energy landscape from a robot trajectory. It also exposes probe-based evaluations. The repository also lists V-JEPA 2.1, which revises representation training; the control example here specifically concerns V-JEPA 2-AC. Recognition, prediction and control should not be collapsed into one score. [3](https://github.com/facebookresearch/vjepa2)
-
-### Roll out candidate actions
-The following notation illustrates an action-conditioned latent model; it is not the exact V-JEPA 2-AC tensor layout:
-
-$$
-z_t=f(o_{\leq t}),\quad
-\widehat z_{t+k+1}=F_\psi(\widehat z_{t+k},a_{t+k},q_{t+k}),\quad
-\widehat z_t=z_t.
-$$
-
-$o$ is an observation history, $z\in\mathbb R^d$ a simplified feature vector, $a\in\mathbb R^r$ an action and $q$ robot state. Real predictors can retain token arrays and longer histories. Future $q$ must be supplied by a specified transition convention or predicted; a planner cannot read future measured robot states before executing. The diagram omits this implementation detail to expose the difference between observational prediction and action-conditioned rollouts.
-
-For an illustrative image-goal planner, encode $z_g=f(o_g)$ and solve
-
-$$
-A^*=\arg\min_{A\in\mathcal A^H}
-D(\widehat z_{t+H}(A),z_g)+\lambda C(A).
-$$
-
-$A=(a_t,\ldots,a_{t+H-1})$ is a candidate action sequence, $D$ a feature discrepancy and $C$ an optional constraint/cost term. This is a generic planning objective. The illustrated candidate scores are not learned-model measurements or reproduced paper results.
-
-### Close the loop
-Execute a prefix of the selected sequence, observe again and replan. This allows new evidence to replace a potentially inaccurate imagined rollout. It also costs sensing and planning time. An action horizon, number of sampled candidates, executed prefix and observation delay are separate quantities; reducing one does not automatically improve all the others.
-
-The V-JEPA 2 work demonstrates image-goal robot planning, with limitations including camera sensitivity and long-horizon behavior. These experiments support particular environments and tasks, not arbitrary physical understanding. A feature-space goal can also omit a requirement that matters to a user. [2](https://arxiv.org/abs/2506.09985)
-
-### Evaluate prediction and control separately
-For an exploratory experiment, first compare one-step and multi-step prediction under held-out action sequences. Then evaluate closed-loop success, recovery, latency and interventions. Record camera geometry, action units, robot/controller configuration and goal-image construction. Include a simple control baseline and report candidate-search compute.
-
-Our diagram deliberately shows an abstract candidate comparison rather than a photorealistic generated future: its purpose is to locate the decision boundary. A promising latent rollout still needs an executable action interface and feedback. Connect this topic to [JEPA](#article-jepa), [action models](#article-action-models), and [closed-loop evaluation](#article-robot-evaluation).
-
-### Primary references
-
-1. Bardes, Garrido, Ponce, Chen, Rabbat, LeCun, Assran & Ballas (2024). [Revisiting Feature Prediction for Learning Visual Representations from Video](https://arxiv.org/abs/2404.08471). Research paper.
-2. Assran et al. (2025). [V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning](https://arxiv.org/abs/2506.09985). Research paper.
-3. Meta FAIR (2025). [V-JEPA 2 official implementation](https://github.com/facebookresearch/vjepa2). Official code.
-
-### Related topics
-
-- [JEPA: predicting representations](#article-jepa) — Inspect masked representation prediction.
-- [Audio, video & temporal grounding](#article-temporal-modalities) — Connect video features to temporal structure.
-- [Active inference](#article-active-inference) — Compare predictive control formulations.
-- [Tokens, diffusion & flow for action](#article-action-models) — Contrast latent planning with action generation.
-- [Evaluate the closed loop](#article-robot-evaluation) — Evaluate the executed control loop.
-
----
-
-# Generation & latent computation
-
-Diffusion, flow matching, soft prompts and computation in continuous spaces.
-
-<a id="article-diffusion-flow"></a>
-
-## Diffusion & flow-based generation
-
-*Change the generative process, keep the architecture question open.*
-
-**Abstract.** Contrast Gaussian denoising, masked language diffusion and continuous transport models.
-
-**At a glance:**
-
-- Generation iteratively transforms noise or masked states
-- Diffusion and flow matching define different training constructions
-- A parallel reveal schedule is not a trained sampler
-
-**Concepts:** Diffusion; Flow matching; Denoising; Discrete diffusion.
-
-### Continuous denoising
-A familiar Gaussian corruption is
-
-$$
-x_t=\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon,\qquad\epsilon\sim\mathcal N(0,I).
-$$
-
-$x_0$ is data, $t$ a noise level and $\bar\alpha_t\in[0,1]$ the signal-retention schedule. A network may predict noise, clean data or another equivalent parameterization under stated assumptions. Sampling involves a chosen reverse-time solver. The denoiser architecture need not be a Transformer. [1](https://arxiv.org/abs/2006.11239)
-
-### Discrete language diffusion
-LLaDA instead uses a forward masking process and a Transformer trained to predict masked tokens. Iterative generation can fill positions in an order unlike left-to-right autoregression. Changing the objective and decoding procedure does not mean the attention backbone has disappeared. [2](https://arxiv.org/abs/2502.09992)
-
-The interactive figure shows a **deterministic illustrative reveal schedule**, not samples from a trained diffusion model. Move the step control to compare left-to-right reveal with a mask-based order. A real diffusion sampler must specify confidence, remasking, conditioning and number of network evaluations.
-
-### Continuous flow matching
-For noise $x_0$ and data $x_1$, a linear interpolant is $x_t=(1-t)x_0+tx_1$. A simple flow-matching objective is
-
-$$
-\mathcal L_{\mathrm{FM}}=\mathbb E_{t,x_0,x_1}\left\|v_\theta(x_t,t)-(x_1-x_0)\right\|^2.
-$$
-
-$v_\theta$ predicts a velocity field. Sampling integrates $dx/dt=v_\theta(x,t)$. The conditional straight-line target does not imply that every learned marginal trajectory is exactly straight or that one Euler step is always accurate. [3](https://arxiv.org/abs/2209.03003)
-
-```python
-x_t = (1 - t) * noise + t * data
-loss = mean_squared_error(velocity(x_t, t), data - noise)
-```
-
-### Evidence and limits
-Compare generation quality against **network evaluations, total FLOPs, latency and output length**, not only the number of decoding rounds. A bidirectional denoiser can expose more context per iteration, but repeated full-sequence passes can be costly. Variable lengths and KV reuse require method-specific treatment.
-
-### Primary references
-
-1. Ho, Jain & Abbeel (2020). [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239). Research paper.
-2. Nie et al. (2025). [Large Language Diffusion Models](https://arxiv.org/abs/2502.09992). Research paper.
-3. Liu, Gong & Liu (2022). [Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow](https://arxiv.org/abs/2209.03003). Research paper.
-
-### Related topics
-
-- [Tokens, diffusion & flow for action](#article-action-models) — Generate action trajectories.
-- [Soft prompts & continuous thought](#article-soft-latent-reasoning) — Distinguish generation from latent computation.
-- [JEPA: predicting representations](#article-jepa) — Contrast output prediction spaces.
-
----
-
-<a id="article-soft-latent-reasoning"></a>
-
-## Soft prompts & continuous thought
-
-*Three constructions that should not share one vague name.*
-
-**Abstract.** Distinguish optimized input vectors, distributions over vocabulary embeddings and feedback of hidden reasoning states.
-
-**At a glance:**
-
-- Soft prompts are trainable continuous input vectors
-- Latent reasoning adds hidden-state computation
-- A soft-token mixture is a separate construction
-
-**Concepts:** Soft prompts; Latent reasoning; Continuous thought; Soft tokens.
-
-### Soft prompts
-Prompt tuning optimizes continuous vectors prepended to a frozen language model. If $P\in\mathbb R^{m\times d}$ is a learned prompt and $E(x)$ the embedded input,
-
-$$
-P^*=\arg\min_P\;\mathbb E_{(x,y)}[-\log p_{\theta\ \mathrm{fixed}}(y\mid[P;E(x)])].
-$$
-
-$m$ is prompt length and $d$ model width. These vectors need not correspond to vocabulary entries and are typically task parameters learned during training. This differs from low-rank weight adaptation, where $\Delta W=BA$ modifies a projection through trainable low-rank factors. [1](https://arxiv.org/abs/2104.08691) [3](https://arxiv.org/abs/2106.09685)
-
-### Soft token mixtures
-Another possible construction embeds a probability distribution $p\in\Delta^{V-1}$ as $v=\sum_k p_kE_k$. The simplex $\Delta^{V-1}$ contains nonnegative weights summing to one. Such a convex mixture is mathematically distinct from an arbitrary learned prompt vector; not every vector lies in the convex hull of the embedding table. This formula describes a representation option, not a claim that all latent reasoning systems use it.
-
-### Hidden-state feedback
-Coconut feeds a last hidden state back as a subsequent input embedding during latent reasoning, rather than decoding each step into a word. That state is input-dependent and computed at inference; it is not simply a fixed soft prompt. [2](https://arxiv.org/abs/2412.06769)
-
-```python
-state = model(context).last_hidden_state
-for _ in range(latent_steps):
-    state = model(inputs_embeds=state).last_hidden_state
-# Schematic only: real implementations preserve their context and cache layout.
-```
-
-### What continuous does not imply
-A continuous vector is not automatically an interpretable probability distribution over alternative thoughts. A paper's search analogy must be separated from a verified explicit search algorithm. Latent steps consume compute even if they emit no readable tokens.
+### A useful evaluation table
+For each method, record: derivative target, finite-budget approximation, communication graph, weight symmetry, stored state, temporal coordination, measured compute and biological evidence. A lower training loss cannot settle the neuroscience questions, and a plausible circuit cannot substitute for task performance.
 
 ### Experiment
-Compare visible chain-of-thought and latent reasoning with matched total compute and training supervision. Measure generalization outside the training task family, not only token savings. Inspect failure cases and whether the model learns a meaningful stopping rule. Continue to [recurrent depth](#article-recurrent-depth).
+On a fixed small network, compare update direction to exact BP. Then vary depth and inference budget. Report cosine similarity, norm ratio, loss reduction and runtime. Keep this diagnostic distinct from a full training experiment that changes the weights after each batch.
 
 ### Primary references
 
-1. Lester, Al-Rfou & Constant (2021). [The Power of Scale for Parameter-Efficient Prompt Tuning](https://arxiv.org/abs/2104.08691). Paper · EMNLP 2021.
-2. Hao et al. (2024). [Training Large Language Models to Reason in a Continuous Latent Space](https://arxiv.org/abs/2412.06769). Paper · COLM 2025.
-3. Hu et al. (2021). [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685). Research paper.
+1. Rumelhart, Hinton & Williams (1986). [Learning representations by back-propagating errors](https://www.cs.toronto.edu/~hinton/absps/naturebp.pdf). Research paper.
+2. Lillicrap et al. (2016). [Random synaptic feedback weights support error backpropagation for deep learning](https://www.nature.com/articles/ncomms13276). Nature Communications.
+3. Whittington & Bogacz (2017). [An Approximation of the Error Backpropagation Algorithm in a Predictive Coding Network with Local Hebbian Synaptic Plasticity](https://pubmed.ncbi.nlm.nih.gov/28333583/). Neural Computation.
+4. Neftci, Mostafa & Zenke (2019). [Surrogate Gradient Learning in Spiking Neural Networks](https://arxiv.org/abs/1901.09948). Research paper.
 
 ### Related topics
 
-- [Recurrent depth & looped Transformers](#article-recurrent-depth) — Reuse depth for extra computation.
-- [Diffusion & flow-based generation](#article-diffusion-flow) — Compare continuous computation and generation.
-- [Memory, context & test-time adaptation](#article-memory-adaptation) — Separate prompts from persistent adaptation.
+- [Feedback alignment & local objectives](#article-local-learning) — Inspect alternative feedback rules.
+- [Augmented Lagrangian predictive coding](#article-pc-alm) — Compare inference-based credit.
+- [NEAT: evolve weights and topology](#article-neat) — Contrast derivatives with evolutionary search.
 
 ---
 
-# Learning dynamics & credit assignment
+**Family:** Learning & adaptation → Credit assignment → Gradients & local objectives
 
-Backpropagation, local inference, predictive coding, biological constraints and continuous dynamics.
+<a id="article-local-learning"></a>
+
+## Feedback alignment & local objectives
+
+*What must a layer know to learn?*
+
+**Abstract.** Compare alternative error transport, independent objectives and iterative constraint enforcement.
+
+**At a glance:**
+
+- Feedback alignment changes the backward signal
+- Local objectives change where errors originate
+- Equivalence claims depend on specific assumptions
+
+**Concepts:** Feedback alignment; Local losses; Equilibrium propagation.
+
+### Change the feedback path
+Feedback alignment studies whether fixed random feedback weights can support useful learning instead of exact transposed forward weights. A schematic update replaces $W_{\ell+1}^\top$ by a fixed compatible matrix $B_\ell$:
+
+$$
+\widetilde\delta_\ell=(B_\ell\widetilde\delta_{\ell+1})\odot\sigma'(a_\ell).
+$$
+
+This is an approximate credit signal; it is not generally the gradient of the original loss. Forward weights may learn representations that make the feedback useful in the tested setting. The result relaxes exact weight symmetry, not every biological requirement. [1](https://www.nature.com/articles/ncomms13276)
+
+### Give a layer its own objective
+Another design attaches an auxiliary predictor to intermediate features. A layer can reduce $\mathcal L_\ell(g_\ell(h_\ell),y)$ without waiting for the final network's exact gradient. That local goal may conflict with downstream needs. “Local loss” specifies where a target acts; it does not guarantee globally optimal representations.
+
+### Enforce neighboring consistency
+Predictive coding instead uses hidden-state inference and neighboring prediction errors. PC-ALM adds multipliers to accumulate constraint violations. These methods address the same broad credit-assignment problem through different mathematical constructions. [2](https://pubmed.ncbi.nlm.nih.gov/28333583/) [3](https://arxiv.org/html/2605.31022v1)
+
+| Family | Credit source | Primary caveat |
+| --- | --- | --- |
+| Feedback alignment | Approximate feedback projection | No general exact-gradient guarantee |
+| Layer-local objective | Auxiliary target at each layer | Local goals may conflict |
+| Predictive coding | Inferred neighboring consistency | Finite inference and equilibrium assumptions |
+| PC-ALM | Primal–dual local dynamics | Proven scope narrower than nonlinear use |
+
+### Implementation discipline
+```python
+# Fixed random feedback is a parameter of the learning algorithm.
+feedback.requires_grad_(False)
+local_error = feedback @ downstream_error
+```
+
+State precisely which tensors require gradients and which update in each phase. An implementation that silently computes the full global gradient for the “local” update defeats the intended comparison.
+
+### What remains open
+Scaling local learning to modern language tasks requires evidence about optimization, data efficiency and systems cost, not only shallow classification. A fair study reports success and instability across seeds, depth, width and nonlinearities, with a conventional BP baseline trained comparably.
+
+### Primary references
+
+1. Lillicrap et al. (2016). [Random synaptic feedback weights support error backpropagation for deep learning](https://www.nature.com/articles/ncomms13276). Nature Communications.
+2. Whittington & Bogacz (2017). [An Approximation of the Error Backpropagation Algorithm in a Predictive Coding Network with Local Hebbian Synaptic Plasticity](https://pubmed.ncbi.nlm.nih.gov/28333583/). Neural Computation.
+3. Jeffrey Seely & Julian Gould (2026). [Augmented Lagrangian Predictive Coding](https://arxiv.org/html/2605.31022v1). Preprint · May 2026.
+
+### Related topics
+
+- [Backpropagation & biological plausibility](#article-backprop-biology) — Define the reference and biological constraints.
+- [Predictive coding as local inference](#article-predictive-coding) — Compare local inference updates.
+- [Remembering while learning](#article-continual-learning) — Consider learning under a changing stream.
+
+---
+
+**Family:** Learning & adaptation → Credit assignment → Predictive coding
 
 <a id="article-predictive-coding"></a>
 
@@ -1218,6 +919,8 @@ On a small fixed network, compare local parameter-update vectors with exact back
 - [JEPA: predicting representations](#article-jepa) — Contrast two meanings of prediction.
 
 ---
+
+**Family:** Learning & adaptation → Credit assignment → Predictive coding
 
 <a id="article-pc-alm"></a>
 
@@ -1316,63 +1019,7 @@ The adjacent lab solves a **two-hidden-layer scalar linear instance** with fixed
 
 ---
 
-<a id="article-active-inference"></a>
-
-## Active inference
-
-*Belief updating and action under a generative model.*
-
-**Abstract.** Place variational free energy and policy selection in a probabilistic control framework, and distinguish them from supervised PC training.
-
-**At a glance:**
-
-- Perception updates beliefs about hidden states
-- Policies can trade preference fulfilment and information gain
-- A generative control framework is not one neural architecture
-
-**Concepts:** Active inference; Free energy; Belief updates; Control.
-
-### Infer hidden causes
-Let $o$ be observed data, $s$ hidden states, $p(o,s)$ a generative model and $q(s)$ an approximate posterior. Variational free energy is
-
-$$
-F[q]=\mathbb E_q[\log q(s)-\log p(o,s)]
-=D_{\mathrm{KL}}(q(s)\|p(s\mid o))-\log p(o).
-$$
-
-For a valid model with finite quantities, $F$ bounds negative log evidence. Minimizing it with respect to $q$ improves the approximate posterior; this does not make every numerical quantity called “energy” physical energy in joules. [1](https://mitpress.mit.edu/9780262045353/active-inference/)
-
-### Act to shape future observations
-Active inference extends belief updating to action or policy selection. It uses a generative model of state transitions and observations, with preferences and uncertainty contributing to evaluation of possible futures. Expected free energy is a policy-dependent quantity; its exact form and decomposition depend on the model and conventions. It should not be substituted blindly for the current-observation $F[q]$ above. [2](https://activeinference.github.io/papers/process_theory.pdf)
-
-### Relation to predictive coding
-Predictive coding can implement parts of inference under particular generative models and approximations. Active inference supplies a broader account of inference and action. PC-ALM instead studies an augmented-Lagrangian route to local credit assignment for a constrained supervised network. Shared words such as “prediction error,” “inference” and “free energy” do not make these objectives identical. [3](https://arxiv.org/html/2605.31022v1)
-
-| Quantity | What it evaluates | Essential specification |
-| --- | --- | --- |
-| Variational free energy | Approximate posterior for observations | Generative model and posterior family |
-| Expected free energy | Candidate futures/policies | Preferences, transitions and beliefs |
-| PC constraint energy | Consistency of neural activities | Layer functions, clamping and penalties |
-
-### An implementable starting point
-Build a tiny partially observable task with two hidden states, noisy observations and two actions. Specify observation likelihoods, transition matrices and prior preferences numerically. Update beliefs by Bayes' rule before trying a neural approximation. This reveals what the framework assumes rather than attributing decisions to an undefined optimization principle.
-
-### Evidence and limits
-The cited book and process theory formalize a framework. They do not establish that all biological learning or every effective controller implements one exact algorithm. Compare against Bayesian filtering and conventional control/RL baselines at matched model knowledge and information access.
-
-### Primary references
-
-1. Parr, Pezzulo & Friston (2022). [Active Inference: The Free Energy Principle in Mind, Brain, and Behavior](https://mitpress.mit.edu/9780262045353/active-inference/). MIT Press book.
-2. Friston et al. (2017). [Active Inference: A Process Theory](https://activeinference.github.io/papers/process_theory.pdf). Neural Computation.
-3. Jeffrey Seely & Julian Gould (2026). [Augmented Lagrangian Predictive Coding](https://arxiv.org/html/2605.31022v1). Preprint · May 2026.
-
-### Related topics
-
-- [Predictive coding as local inference](#article-predictive-coding) — Compare inference dynamics.
-- [Video world models & latent planning](#article-video-world-models) — Connect predictive state to planning.
-- [Vision–language–action models](#article-vla-foundations) — Contrast routes to robot control.
-
----
+**Family:** Learning & adaptation → Neural dynamics
 
 <a id="article-spiking-networks"></a>
 
@@ -1433,6 +1080,8 @@ A sparse spike raster does not reveal whether the learning rule is local. Conver
 
 ---
 
+**Family:** Learning & adaptation → Neural dynamics
+
 <a id="article-liquid-networks"></a>
 
 ## Liquid time-constant networks
@@ -1492,134 +1141,7 @@ Evaluate irregularly sampled trajectories and distribution shifts in input timin
 
 ---
 
-<a id="article-backprop-biology"></a>
-
-## Backpropagation & biological plausibility
-
-*One exact derivative; several implementation questions.*
-
-**Abstract.** Explain reverse-mode credit assignment while treating biological plausibility as a set of testable constraints.
-
-**At a glance:**
-
-- Reverse-mode differentiation assigns parameter credit
-- Weight transport, locality and timing are separate constraints
-- Task performance does not establish biological plausibility
-
-**Concepts:** Backpropagation; Biological plausibility; Credit assignment; Weight transport.
-
-### The mathematical operation
-For $a_\ell=W_\ell h_{\ell-1}$ and $h_\ell=\sigma(a_\ell)$, define $\delta_\ell=\partial\mathcal L/\partial a_\ell$. Backpropagation applies the chain rule:
-
-$$
-\delta_\ell=(W_{\ell+1}^\top\delta_{\ell+1})\odot\sigma'(a_\ell),\qquad
-\nabla_{W_\ell}\mathcal L=\delta_\ell h_{\ell-1}^\top.
-$$
-
-The first equation transports an error signal; the second combines it with presynaptic activity. With a batch, gradients sum or average over samples. Reverse-mode differentiation efficiently computes a scalar objective's derivatives; the 1986 papers are major milestones, not the entire historical origin of the chain rule. [1](https://www.cs.toronto.edu/~hinton/absps/naturebp.pdf)
-
-### What could be biologically difficult?
-Several separate questions are often compressed into “the brain cannot backprop”:
-
-- **Weight transport:** exact transposed forward weights in a separate feedback path.
-- **Timing:** availability of forward activities when downstream errors arrive.
-- **Signals:** representing signed errors and derivatives in neural circuits.
-- **Locality:** which variables a synapse can access.
-- **Objective:** where a global supervised target or reward originates.
-
-A method can relax one issue while retaining others. Feedback alignment changes feedback weights; predictive coding changes the organization of state inference; surrogate gradients permit training spikes but can retain global backpropagation through time. [2](https://www.nature.com/articles/ncomms13276) [3](https://pubmed.ncbi.nlm.nih.gov/28333583/) [4](https://arxiv.org/abs/1901.09948)
-
-### Avoid a false binary
-Numerically approximating the BP gradient is not the same as implementing textbook forward/backward phases. Conversely, using local updates is not experimental proof of biological realization. Plausibility should specify circuitry, time scales, plasticity and signal representations rather than use one yes/no label.
-
-### A useful evaluation table
-For each method, record: derivative target, finite-budget approximation, communication graph, weight symmetry, stored state, temporal coordination, measured compute and biological evidence. A lower training loss cannot settle the neuroscience questions, and a plausible circuit cannot substitute for task performance.
-
-### Experiment
-On a fixed small network, compare update direction to exact BP. Then vary depth and inference budget. Report cosine similarity, norm ratio, loss reduction and runtime. Keep this diagnostic distinct from a full training experiment that changes the weights after each batch.
-
-### Primary references
-
-1. Rumelhart, Hinton & Williams (1986). [Learning representations by back-propagating errors](https://www.cs.toronto.edu/~hinton/absps/naturebp.pdf). Research paper.
-2. Lillicrap et al. (2016). [Random synaptic feedback weights support error backpropagation for deep learning](https://www.nature.com/articles/ncomms13276). Nature Communications.
-3. Whittington & Bogacz (2017). [An Approximation of the Error Backpropagation Algorithm in a Predictive Coding Network with Local Hebbian Synaptic Plasticity](https://pubmed.ncbi.nlm.nih.gov/28333583/). Neural Computation.
-4. Neftci, Mostafa & Zenke (2019). [Surrogate Gradient Learning in Spiking Neural Networks](https://arxiv.org/abs/1901.09948). Research paper.
-
-### Related topics
-
-- [Feedback alignment & local objectives](#article-local-learning) — Inspect alternative feedback rules.
-- [Augmented Lagrangian predictive coding](#article-pc-alm) — Compare inference-based credit.
-- [NEAT: evolve weights and topology](#article-neat) — Contrast derivatives with evolutionary search.
-
----
-
-<a id="article-local-learning"></a>
-
-## Feedback alignment & local objectives
-
-*What must a layer know to learn?*
-
-**Abstract.** Compare alternative error transport, independent objectives and iterative constraint enforcement.
-
-**At a glance:**
-
-- Feedback alignment changes the backward signal
-- Local objectives change where errors originate
-- Equivalence claims depend on specific assumptions
-
-**Concepts:** Feedback alignment; Local losses; Equilibrium propagation.
-
-### Change the feedback path
-Feedback alignment studies whether fixed random feedback weights can support useful learning instead of exact transposed forward weights. A schematic update replaces $W_{\ell+1}^\top$ by a fixed compatible matrix $B_\ell$:
-
-$$
-\widetilde\delta_\ell=(B_\ell\widetilde\delta_{\ell+1})\odot\sigma'(a_\ell).
-$$
-
-This is an approximate credit signal; it is not generally the gradient of the original loss. Forward weights may learn representations that make the feedback useful in the tested setting. The result relaxes exact weight symmetry, not every biological requirement. [1](https://www.nature.com/articles/ncomms13276)
-
-### Give a layer its own objective
-Another design attaches an auxiliary predictor to intermediate features. A layer can reduce $\mathcal L_\ell(g_\ell(h_\ell),y)$ without waiting for the final network's exact gradient. That local goal may conflict with downstream needs. “Local loss” specifies where a target acts; it does not guarantee globally optimal representations.
-
-### Enforce neighboring consistency
-Predictive coding instead uses hidden-state inference and neighboring prediction errors. PC-ALM adds multipliers to accumulate constraint violations. These methods address the same broad credit-assignment problem through different mathematical constructions. [2](https://pubmed.ncbi.nlm.nih.gov/28333583/) [3](https://arxiv.org/html/2605.31022v1)
-
-| Family | Credit source | Primary caveat |
-| --- | --- | --- |
-| Feedback alignment | Approximate feedback projection | No general exact-gradient guarantee |
-| Layer-local objective | Auxiliary target at each layer | Local goals may conflict |
-| Predictive coding | Inferred neighboring consistency | Finite inference and equilibrium assumptions |
-| PC-ALM | Primal–dual local dynamics | Proven scope narrower than nonlinear use |
-
-### Implementation discipline
-```python
-# Fixed random feedback is a parameter of the learning algorithm.
-feedback.requires_grad_(False)
-local_error = feedback @ downstream_error
-```
-
-State precisely which tensors require gradients and which update in each phase. An implementation that silently computes the full global gradient for the “local” update defeats the intended comparison.
-
-### What remains open
-Scaling local learning to modern language tasks requires evidence about optimization, data efficiency and systems cost, not only shallow classification. A fair study reports success and instability across seeds, depth, width and nonlinearities, with a conventional BP baseline trained comparably.
-
-### Primary references
-
-1. Lillicrap et al. (2016). [Random synaptic feedback weights support error backpropagation for deep learning](https://www.nature.com/articles/ncomms13276). Nature Communications.
-2. Whittington & Bogacz (2017). [An Approximation of the Error Backpropagation Algorithm in a Predictive Coding Network with Local Hebbian Synaptic Plasticity](https://pubmed.ncbi.nlm.nih.gov/28333583/). Neural Computation.
-3. Jeffrey Seely & Julian Gould (2026). [Augmented Lagrangian Predictive Coding](https://arxiv.org/html/2605.31022v1). Preprint · May 2026.
-
-### Related topics
-
-- [Backpropagation & biological plausibility](#article-backprop-biology) — Define the reference and biological constraints.
-- [Predictive coding as local inference](#article-predictive-coding) — Compare local inference updates.
-- [Remembering while learning](#article-continual-learning) — Consider learning under a changing stream.
-
----
-
-# Neuroevolution & architecture search
-
-NEAT, historical markings, speciation and geometric encodings with HyperNEAT.
+**Family:** Learning & adaptation → Neuroevolution
 
 <a id="article-neat"></a>
 
@@ -1674,6 +1196,8 @@ Continue to [HyperNEAT](#article-hyperneat) for an indirect encoding that genera
 - [Remembering while learning](#article-continual-learning) — Distinguish population search from adaptation.
 
 ---
+
+**Family:** Learning & adaptation → Neuroevolution
 
 <a id="article-hyperneat"></a>
 
@@ -1738,9 +1262,7 @@ Compare direct and indirect encodings at matched environment-evaluation budgets.
 
 ---
 
-# Memory & adaptation
-
-Continual learning, external memory, test-time updates and verified self-improvement.
+**Family:** Learning & adaptation → Memory & continual learning
 
 <a id="article-continual-learning"></a>
 
@@ -1803,6 +1325,8 @@ A growing context window is not persistent parameter learning. A recurrent state
 - [NEAT: evolve weights and topology](#article-neat) — Distinguish adaptation from population search.
 
 ---
+
+**Family:** Learning & adaptation → Memory & continual learning
 
 <a id="article-memory-adaptation"></a>
 
@@ -1872,6 +1396,8 @@ Retrieval can provide useful evidence without guaranteeing faithful use. Test-ti
 
 ---
 
+**Family:** Learning & adaptation → Memory & continual learning
+
 <a id="article-self-improvement"></a>
 
 ## Self-improvement needs a verifier
@@ -1931,9 +1457,469 @@ A narrow system with reliable executable feedback can improve a specific skill. 
 
 ---
 
+# Multimodal & world models
+
+Connect modality interfaces and objectives to predictive representations and latent world models.
+
+**Family:** Multimodal & world models → Modality interfaces & objectives
+
+<a id="article-multimodal-fusion"></a>
+
+## How modalities enter a Transformer
+
+*Tokenization is an interface; fusion is a design choice.*
+
+**Abstract.** Compare patch projection, learned resampling, prefix concatenation and cross-attention without conflating their objectives.
+
+**At a glance:**
+
+- An encoder maps each modality into representations
+- Prefix, query and cross-attention are different interfaces
+- Resolution and token count change the compute budget
+
+**Concepts:** Vision encoders; Cross-attention; Query resampling; Modality tokens.
+
+### A common width does not imply a common meaning
+Text IDs become learned lookup vectors. An image can be divided into patches, projected into a sequence and processed by a vision encoder. Audio may become time–frequency features or learned tokens. To enter a language backbone, these representations need a compatible width and a specified ordering/masking convention. [1](https://arxiv.org/abs/2010.11929)
+
+For image features $Z\in\mathbb R^{p\times d_v}$ and a learned projector $P\in\mathbb R^{d_v\times d}$, define $V=ZP$. $p$ is visual-token count, $d_v$ encoder width and $d$ language width. A width match does not guarantee semantic alignment; training establishes how the backbone uses these vectors.
+
+### Three fusion patterns
+| Pattern | Interface | Main design issue |
+| --- | --- | --- |
+| Visual prefix | Concatenate projected visual tokens with text | Sequence cost and masking |
+| Learned query bottleneck | Query a larger feature set to produce fewer tokens | Information lost by compression |
+| Cross-attention | Language states query visual memory in selected layers | Extra projections and insertion points |
+
+LLaVA provides an influential encoder–projector–language-model route. BLIP-2 uses a Q-Former between frozen pretrained components. Flamingo uses a visual resampler and gated cross-attention to connect pretrained vision and language systems. These are specific designs, not interchangeable names for “multimodal attention.” [2](https://arxiv.org/abs/2204.14198) [3](https://arxiv.org/abs/2301.12597) [4](https://arxiv.org/abs/2304.08485)
+
+### Inspect the interface
+Switch the fusion mode in the vector figure. Count which tensors join the language sequence and which remain external memory. The displayed token counts are illustrative; actual models differ in image crops, resolution, resampling and temporal handling.
+
+```python
+visual = vision_encoder(images)
+visual_tokens = projector(visual)
+sequence = concatenate([visual_tokens, text_embeddings], axis='positions')
+answer = decoder(sequence, mask=multimodal_mask)
+```
+
+### Evidence and limits
+A captioning improvement does not establish precise spatial grounding. Frozen backbones reduce trainable parameters but do not remove the cost of their forward passes. Evaluation should vary image content while preserving the question, and include cases where language priors suggest the wrong answer. Continue to [training objectives](#article-multimodal-objectives).
+
+### Primary references
+
+1. Dosovitskiy et al. (2020). [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929). Paper · ICLR 2021.
+2. Alayrac et al. (2022). [Flamingo: a Visual Language Model for Few-Shot Learning](https://arxiv.org/abs/2204.14198). Research paper.
+3. Li et al. (2023). [BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models](https://arxiv.org/abs/2301.12597). Research paper.
+4. Liu, Li, Wu & Lee (2023). [Visual Instruction Tuning](https://arxiv.org/abs/2304.08485). Paper · NeurIPS 2023.
+
+### Related topics
+
+- [Alignment, generation & instruction](#article-multimodal-objectives) — Separate interface from objective.
+- [Audio, video & temporal grounding](#article-temporal-modalities) — Add time and synchronization.
+- [Vision–language–action models](#article-vla-foundations) — Turn perception into action conditioning.
+
+---
+
+**Family:** Multimodal & world models → Modality interfaces & objectives
+
+<a id="article-multimodal-objectives"></a>
+
+## Alignment, generation & instruction
+
+*The loss decides what the representation must preserve.*
+
+**Abstract.** Separate contrastive pairing, conditional generation and visual instruction tuning.
+
+**At a glance:**
+
+- Contrastive training aligns paired representations
+- Generative training predicts an output distribution
+- Instruction tuning specifies interaction behavior
+
+**Concepts:** CLIP; Contrastive learning; Generative objectives; Instruction tuning.
+
+### Contrastive alignment
+CLIP learns image and text encoders whose normalized outputs are compared through similarity. For a batch of $B$ paired examples, one direction of a contrastive loss is
+
+$$
+\mathcal L_{I\to T}=-\frac1B\sum_i\log\frac{\exp(s(v_i,t_i)/\tau)}{\sum_j\exp(s(v_i,t_j)/\tau)}.
+$$
+
+$v_i,t_i$ are normalized image/text embeddings, $s$ their dot product and $\tau>0$ temperature. The symmetric objective also scores text-to-image retrieval. In-batch negatives create the classification problem; false negatives and biased captions can affect learning. [1](https://arxiv.org/abs/2103.00020)
+
+### Conditional language generation
+A generative vision-language objective instead scores text given visual input $v$:
+
+$$
+\mathcal L_{\mathrm{gen}}=-\sum_t\log p_\theta(y_t\mid y_{<t},v).
+$$
+
+This asks for a token distribution, not merely a paired-embedding similarity. A model can use contrastive and generative terms in different phases. BLIP-2 is a useful example of a staged bridge between pretrained vision and language components. [2](https://arxiv.org/abs/2301.12597)
+
+### Visual instruction tuning
+Instruction data specify how to answer questions about images. LLaVA studied generating multimodal instruction data and fine-tuning a vision-language assistant. Instruction following adds behavior and task formatting; it does not prove that the model's visual representation captures every answer-relevant detail. [3](https://arxiv.org/abs/2304.08485)
+
+```python
+loss = image_text_contrastive_loss(image_repr, text_repr)
+# A separate generative stage may optimize answer tokens only.
+loss = conditional_answer_loss(images, instructions, answers, answer_mask)
+```
+
+### Keep the axes separate
+An early-fusion model can be trained generatively. A dual encoder can be trained contrastively. A query bottleneck can support several losses. The interface, attention pattern, data mixture and training objective should be separate fields in a model comparison.
+
+### Research questions
+Test compositional retrieval, fine-grained attribute swaps and image-question counterfactuals. Include resolution and visual-token budgets. Compare a language-only baseline to quantify how much the task rewards visual evidence rather than dataset priors. Report which encoders were frozen during each phase.
+
+### Primary references
+
+1. Radford et al. (2021). [Learning Transferable Visual Models From Natural Language Supervision](https://arxiv.org/abs/2103.00020). Research paper.
+2. Li et al. (2023). [BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models](https://arxiv.org/abs/2301.12597). Research paper.
+3. Liu, Li, Wu & Lee (2023). [Visual Instruction Tuning](https://arxiv.org/abs/2304.08485). Paper · NeurIPS 2023.
+
+### Related topics
+
+- [JEPA: predicting representations](#article-jepa) — Compare prediction in representation space.
+- [How modalities enter a Transformer](#article-multimodal-fusion) — Inspect the architectural interface.
+- [Diffusion & flow-based generation](#article-diffusion-flow) — Change the generative objective.
+
+---
+
+**Family:** Multimodal & world models → Modality interfaces & objectives
+
+<a id="article-temporal-modalities"></a>
+
+## Audio, video & temporal grounding
+
+*Sampling is part of the model.*
+
+**Abstract.** Understand why ordering, synchronization and missing information matter as much as modality adapters.
+
+**At a glance:**
+
+- Audio and video add temporal structure
+- Frame sampling trades detail for sequence length
+- Temporal grounding needs evaluation beyond recognition
+
+**Concepts:** Audio; Video; Temporal grounding; Synchronization.
+
+### Time is an information bottleneck
+A video encoder sees sampled frames or clips, not the full continuous world. Audio frontends also discretize time. Frame rate, crop strategy and receptive field determine which events survive. A later language layer cannot recover motion that was never observed.
+
+For a clip duration $T$ seconds sampled at $f$ frames per second with $p$ visual tokens per frame, an uncompressed visual sequence has approximately $n_v=Tfp$ tokens. With an illustrative $T=10,f=2,p=196$, this is 3,920 tokens before text and any compression. This arithmetic is not a claim about a particular released model.
+
+### Temporal position and synchronization
+Spatial patch indices and temporal indices serve different roles. Interleaving frames and text requires masks that preserve intended access. Audio/video synchronization can be represented by timestamps or aligned feature windows, but positional tags do not correct an inaccurate clock or dropped observations.
+
+### Two concrete reference points
+Whisper is an encoder–decoder speech model trained on large-scale weak supervision with task and language conditioning. It is a speech-system reference, not an example of every “native audio” LLM. Flamingo provides a visual-language architecture that can ingest images and videos through its visual interface. [1](https://arxiv.org/abs/2212.04356) [2](https://arxiv.org/abs/2204.14198)
+
+```python
+frames, times = sample_video(video, frames_per_second=2)
+features = vision_encoder(frames)
+tokens = add_temporal_information(features, times)
+```
+
+The pseudocode leaves the temporal representation abstract because the choice is architecture-specific. ViT-style spatial patching alone does not define video dynamics. [3](https://arxiv.org/abs/2010.11929)
+
+### What to evaluate
+Use tasks that distinguish event order, duration, state change and cross-modal correspondence. Shuffle frames or shift audio as controlled ablations. A strong clip caption can coexist with poor temporal localization. Report sampling density, input duration and whether the test answer is recoverable from one static frame.
+
+### Bridge to action
+For robotics, latency makes the observed state older than the current physical state. A language model's plausible description cannot substitute for a timestamped observation and a control loop. Continue to [closed-loop evaluation](#article-robot-evaluation).
+
+### Primary references
+
+1. Radford et al. (2022). [Robust Speech Recognition via Large-Scale Weak Supervision](https://arxiv.org/abs/2212.04356). Research paper.
+2. Alayrac et al. (2022). [Flamingo: a Visual Language Model for Few-Shot Learning](https://arxiv.org/abs/2204.14198). Research paper.
+3. Dosovitskiy et al. (2020). [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929). Paper · ICLR 2021.
+
+### Related topics
+
+- [Video world models & latent planning](#article-video-world-models) — Predict video representations.
+- [How modalities enter a Transformer](#article-multimodal-fusion) — Inspect modality interfaces.
+- [Evaluate the closed loop](#article-robot-evaluation) — Connect time to closed-loop control.
+
+---
+
+**Family:** Multimodal & world models → Predictive representations
+
+<a id="article-jepa"></a>
+
+## JEPA: predicting representations
+
+*Learn what is missing without reconstructing every pixel.*
+
+**Abstract.** Compare the context encoder, target encoder and predictor in I-JEPA and V-JEPA, with explicit masks, feature dimensions and collapse prevention.
+
+**At a glance:**
+
+- Predict target features, not necessarily pixels.
+- Separate gradient training from moving-average targets.
+- JEPA is a learning arrangement, not a replacement for attention.
+
+**Concepts:** JEPA; I-JEPA; V-JEPA; Self-supervised learning; Stop-gradient.
+
+### Predict a representation
+A Joint-Embedding Predictive Architecture (JEPA) learns to predict a target's representation from a context representation. The family describes a learning arrangement, not a replacement for attention: its encoders and predictor can themselves be Transformers. I-JEPA instantiates this idea for images, predicting target-block features from an informative context block. Its masking choices encourage prediction beyond immediately adjacent texture. [1](https://arxiv.org/abs/2301.08243)
+
+The distinction from reconstruction is the prediction target. A pixel reconstruction loss asks for an image array; a JEPA loss compares learned features. This permits the representation to discard some visual detail, but does not establish that every retained feature is useful or that all discarded detail is irrelevant. The diagram switches the target space while keeping this distinction visible.
+
+### Context, target and predictor
+Let an image or clip contain $N$ patch positions. A context mask selects $C$ and target positions form $T$, with $C\cap T=\varnothing$. A useful schematic is
+
+$$
+Z_C=f_\theta(x_C),\quad
+Y_T=[f_{\bar\theta}(x)]_T,\quad
+\widehat Y_T=g_\phi(Z_C,p_T).
+$$
+
+$Z_C\in\mathbb R^{|C|\times d}$ contains visible-context features; $Y_T,\widehat Y_T\in\mathbb R^{|T|\times d}$ are target and predicted features. $p_T$ identifies the requested positions. In the loss below, rows retain their original target-position labels even when stored as a compact array. The target encoder can see the full input; target positions are selected from its output. The context branch must not silently receive the hidden target pixels. Multiple target masks and normalization details belong to each implementation. [1](https://arxiv.org/abs/2301.08243) [2](https://arxiv.org/abs/2404.08471)
+
+These are separate token-indexed feature arrays. A diagram that reduces each branch to one box is summarizing its computation, not claiming that the encoder has only one shared residual vector. Inside a Transformer encoder, every visible patch retains its own residual state.
+
+### Why two encoder updates differ
+For illustration, a feature-regression objective is
+
+$$
+\mathcal L=\frac1{|T|d}\sum_{i\in T}\sum_{k=1}^d
+\rho(\widehat Y_{ik}-\operatorname{sg}(Y_{ik})),\qquad
+\bar\theta\leftarrow m\bar\theta+(1-m)\theta.
+$$
+
+$\operatorname{sg}$ stops gradients through the target; $m\in[0,1)$ controls an exponential moving average. Gradient updates train the context encoder and predictor, while the target follows the moving average. The penalty $\rho$ is method-specific: V-JEPA uses absolute error. This is a family-level notation, not a claim that all JEPA variants use identical losses. Naive jointly learned feature matching admits a constant-output collapse; the asymmetric predictor, moving-average target and stop-gradient form a practical prevention strategy, not a universal theorem of successful representation learning. [2](https://arxiv.org/abs/2404.08471)
+
+### From images to video
+I-JEPA uses spatial image context and targets. V-JEPA extends masked feature prediction to video, making positions spatiotemporal and evaluating motion-sensitive representations. A hidden region need not be strictly in the future: masked video modeling and causal forecasting are different prediction tasks. V-JEPA 2 scales video representation learning, while its action-conditioned extension adds a further stage for planning. Follow [video world models](#article-video-world-models) for that distinction. [2](https://arxiv.org/abs/2404.08471) [3](https://arxiv.org/abs/2506.09985)
+
+### Inspect what was learned
+An informative comparison holds backbone size, data and compute approximately fixed and varies the prediction target or mask. Inspect feature variability, frozen-feature probes and full fine-tuning separately. A trained probe introduces supervision even when pretraining used none. Our suggested diagnostic is to vary context size and ask whether improvements transfer across appearance and motion tasks.
+
+The official I-JEPA demonstrations visualize features using a separately trained generative decoder. Such pictures help inspect representations; they do not turn the underlying feature predictor into a pixel generator. Similarly, low feature error alone does not establish causal understanding, physical accuracy or useful planning. [4](https://github.com/facebookresearch/ijepa)
+
+### Primary references
+
+1. Assran, Duval, Misra, Bojanowski, Vincent, Rabbat, LeCun & Ballas (2023). [Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture](https://arxiv.org/abs/2301.08243). Paper · CVPR 2023.
+2. Bardes, Garrido, Ponce, Chen, Rabbat, LeCun, Assran & Ballas (2024). [Revisiting Feature Prediction for Learning Visual Representations from Video](https://arxiv.org/abs/2404.08471). Research paper.
+3. Assran et al. (2025). [V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning](https://arxiv.org/abs/2506.09985). Research paper.
+4. Meta FAIR (2023). [I-JEPA official implementation](https://github.com/facebookresearch/ijepa). Official code.
+
+### Related topics
+
+- [Video world models & latent planning](#article-video-world-models) — Extend feature prediction to action-conditioned planning.
+- [Alignment, generation & instruction](#article-multimodal-objectives) — Contrast alignment and predictive objectives.
+- [How modalities enter a Transformer](#article-multimodal-fusion) — Separate the objective from the encoder interface.
+- [Predictive coding as local inference](#article-predictive-coding) — Compare different prediction-based learning schemes.
+
+---
+
+**Family:** Multimodal & world models → Predictive representations
+
+<a id="article-video-world-models"></a>
+
+## Video world models & latent planning
+
+*Predicting observations and choosing actions are different interfaces.*
+
+**Abstract.** Trace action-free video representations to action-conditioned prediction, candidate rollouts and closed-loop planning, using V-JEPA 2 as a concrete example.
+
+**At a glance:**
+
+- Video pretraining does not yet specify control actions.
+- Action-conditioned post-training needs interaction signals.
+- Evaluate latent prediction and closed-loop success separately.
+
+**Concepts:** World models; V-JEPA 2; Latent planning; Model predictive control.
+
+### What does a world model predict?
+A useful operational definition is a learned model that predicts aspects of an environment's evolution. The predicted object may be pixels, latent features or other state variables. A visually convincing video generator and a useful action-conditioned predictor therefore require different evaluations. For control, ask whether changing a proposed action produces a useful prediction of its consequences. A model can represent video well without already providing that interface.
+
+V-JEPA learns masked video features; V-JEPA 2 develops larger-scale visual representations. V-JEPA 2-AC adds action conditioning on top of a frozen V-JEPA 2 encoder. Keep these names separate: action-free pretraining is not itself the robot controller. [1](https://arxiv.org/abs/2404.08471) [2](https://arxiv.org/abs/2506.09985)
+
+### Observation is not intervention
+Action-free video can reveal regularities of movement and appearance. It does not supply an explicit response to a command the observing agent could choose. V-JEPA 2-AC is post-trained with robot interaction data containing visual observations and end-effector state signals. “Unlabeled” here excludes additional task, success and reward annotations; it does not mean that all information about robot movement is absent. [2](https://arxiv.org/abs/2506.09985)
+
+The official repository separates video encoders from the action-conditioned backbone and provides an example for inspecting a learned energy landscape from a robot trajectory. It also exposes probe-based evaluations. The repository also lists V-JEPA 2.1, which revises representation training; the control example here specifically concerns V-JEPA 2-AC. Recognition, prediction and control should not be collapsed into one score. [3](https://github.com/facebookresearch/vjepa2)
+
+### Roll out candidate actions
+The following notation illustrates an action-conditioned latent model; it is not the exact V-JEPA 2-AC tensor layout:
+
+$$
+z_t=f(o_{\leq t}),\quad
+\widehat z_{t+k+1}=F_\psi(\widehat z_{t+k},a_{t+k},q_{t+k}),\quad
+\widehat z_t=z_t.
+$$
+
+$o$ is an observation history, $z\in\mathbb R^d$ a simplified feature vector, $a\in\mathbb R^r$ an action and $q$ robot state. Real predictors can retain token arrays and longer histories. Future $q$ must be supplied by a specified transition convention or predicted; a planner cannot read future measured robot states before executing. The diagram omits this implementation detail to expose the difference between observational prediction and action-conditioned rollouts.
+
+For an illustrative image-goal planner, encode $z_g=f(o_g)$ and solve
+
+$$
+A^*=\arg\min_{A\in\mathcal A^H}
+D(\widehat z_{t+H}(A),z_g)+\lambda C(A).
+$$
+
+$A=(a_t,\ldots,a_{t+H-1})$ is a candidate action sequence, $D$ a feature discrepancy and $C$ an optional constraint/cost term. This is a generic planning objective. The illustrated candidate scores are not learned-model measurements or reproduced paper results.
+
+### Close the loop
+Execute a prefix of the selected sequence, observe again and replan. This allows new evidence to replace a potentially inaccurate imagined rollout. It also costs sensing and planning time. An action horizon, number of sampled candidates, executed prefix and observation delay are separate quantities; reducing one does not automatically improve all the others.
+
+The V-JEPA 2 work demonstrates image-goal robot planning, with limitations including camera sensitivity and long-horizon behavior. These experiments support particular environments and tasks, not arbitrary physical understanding. A feature-space goal can also omit a requirement that matters to a user. [2](https://arxiv.org/abs/2506.09985)
+
+### Evaluate prediction and control separately
+For an exploratory experiment, first compare one-step and multi-step prediction under held-out action sequences. Then evaluate closed-loop success, recovery, latency and interventions. Record camera geometry, action units, robot/controller configuration and goal-image construction. Include a simple control baseline and report candidate-search compute.
+
+Our diagram deliberately shows an abstract candidate comparison rather than a photorealistic generated future: its purpose is to locate the decision boundary. A promising latent rollout still needs an executable action interface and feedback. Connect this topic to [JEPA](#article-jepa), [action models](#article-action-models), and [closed-loop evaluation](#article-robot-evaluation).
+
+### Primary references
+
+1. Bardes, Garrido, Ponce, Chen, Rabbat, LeCun, Assran & Ballas (2024). [Revisiting Feature Prediction for Learning Visual Representations from Video](https://arxiv.org/abs/2404.08471). Research paper.
+2. Assran et al. (2025). [V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning](https://arxiv.org/abs/2506.09985). Research paper.
+3. Meta FAIR (2025). [V-JEPA 2 official implementation](https://github.com/facebookresearch/vjepa2). Official code.
+
+### Related topics
+
+- [JEPA: predicting representations](#article-jepa) — Inspect masked representation prediction.
+- [Audio, video & temporal grounding](#article-temporal-modalities) — Connect video features to temporal structure.
+- [Active inference](#article-active-inference) — Compare predictive control formulations.
+- [Tokens, diffusion & flow for action](#article-action-models) — Contrast latent planning with action generation.
+- [Evaluate the closed loop](#article-robot-evaluation) — Evaluate the executed control loop.
+
+---
+
+# Generation & latent computation
+
+Explore generative constructions and computation in continuous representation spaces.
+
+**Family:** Generation & latent computation → Generative constructions
+
+<a id="article-diffusion-flow"></a>
+
+## Diffusion & flow-based generation
+
+*Change the generative process, keep the architecture question open.*
+
+**Abstract.** Contrast Gaussian denoising, masked language diffusion and continuous transport models.
+
+**At a glance:**
+
+- Generation iteratively transforms noise or masked states
+- Diffusion and flow matching define different training constructions
+- A parallel reveal schedule is not a trained sampler
+
+**Concepts:** Diffusion; Flow matching; Denoising; Discrete diffusion.
+
+### Continuous denoising
+A familiar Gaussian corruption is
+
+$$
+x_t=\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon,\qquad\epsilon\sim\mathcal N(0,I).
+$$
+
+$x_0$ is data, $t$ a noise level and $\bar\alpha_t\in[0,1]$ the signal-retention schedule. A network may predict noise, clean data or another equivalent parameterization under stated assumptions. Sampling involves a chosen reverse-time solver. The denoiser architecture need not be a Transformer. [1](https://arxiv.org/abs/2006.11239)
+
+### Discrete language diffusion
+LLaDA instead uses a forward masking process and a Transformer trained to predict masked tokens. Iterative generation can fill positions in an order unlike left-to-right autoregression. Changing the objective and decoding procedure does not mean the attention backbone has disappeared. [2](https://arxiv.org/abs/2502.09992)
+
+The interactive figure shows a **deterministic illustrative reveal schedule**, not samples from a trained diffusion model. Move the step control to compare left-to-right reveal with a mask-based order. A real diffusion sampler must specify confidence, remasking, conditioning and number of network evaluations.
+
+### Continuous flow matching
+For noise $x_0$ and data $x_1$, a linear interpolant is $x_t=(1-t)x_0+tx_1$. A simple flow-matching objective is
+
+$$
+\mathcal L_{\mathrm{FM}}=\mathbb E_{t,x_0,x_1}\left\|v_\theta(x_t,t)-(x_1-x_0)\right\|^2.
+$$
+
+$v_\theta$ predicts a velocity field. Sampling integrates $dx/dt=v_\theta(x,t)$. The conditional straight-line target does not imply that every learned marginal trajectory is exactly straight or that one Euler step is always accurate. [3](https://arxiv.org/abs/2209.03003)
+
+```python
+x_t = (1 - t) * noise + t * data
+loss = mean_squared_error(velocity(x_t, t), data - noise)
+```
+
+### Evidence and limits
+Compare generation quality against **network evaluations, total FLOPs, latency and output length**, not only the number of decoding rounds. A bidirectional denoiser can expose more context per iteration, but repeated full-sequence passes can be costly. Variable lengths and KV reuse require method-specific treatment.
+
+### Primary references
+
+1. Ho, Jain & Abbeel (2020). [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239). Research paper.
+2. Nie et al. (2025). [Large Language Diffusion Models](https://arxiv.org/abs/2502.09992). Research paper.
+3. Liu, Gong & Liu (2022). [Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow](https://arxiv.org/abs/2209.03003). Research paper.
+
+### Related topics
+
+- [Tokens, diffusion & flow for action](#article-action-models) — Generate action trajectories.
+- [Soft prompts & continuous thought](#article-soft-latent-reasoning) — Distinguish generation from latent computation.
+- [JEPA: predicting representations](#article-jepa) — Contrast output prediction spaces.
+
+---
+
+**Family:** Generation & latent computation → Continuous computation
+
+<a id="article-soft-latent-reasoning"></a>
+
+## Soft prompts & continuous thought
+
+*Three constructions that should not share one vague name.*
+
+**Abstract.** Distinguish optimized input vectors, distributions over vocabulary embeddings and feedback of hidden reasoning states.
+
+**At a glance:**
+
+- Soft prompts are trainable continuous input vectors
+- Latent reasoning adds hidden-state computation
+- A soft-token mixture is a separate construction
+
+**Concepts:** Soft prompts; Latent reasoning; Continuous thought; Soft tokens.
+
+### Soft prompts
+Prompt tuning optimizes continuous vectors prepended to a frozen language model. If $P\in\mathbb R^{m\times d}$ is a learned prompt and $E(x)$ the embedded input,
+
+$$
+P^*=\arg\min_P\;\mathbb E_{(x,y)}[-\log p_{\theta\ \mathrm{fixed}}(y\mid[P;E(x)])].
+$$
+
+$m$ is prompt length and $d$ model width. These vectors need not correspond to vocabulary entries and are typically task parameters learned during training. This differs from low-rank weight adaptation, where $\Delta W=BA$ modifies a projection through trainable low-rank factors. [1](https://arxiv.org/abs/2104.08691) [3](https://arxiv.org/abs/2106.09685)
+
+### Soft token mixtures
+Another possible construction embeds a probability distribution $p\in\Delta^{V-1}$ as $v=\sum_k p_kE_k$. The simplex $\Delta^{V-1}$ contains nonnegative weights summing to one. Such a convex mixture is mathematically distinct from an arbitrary learned prompt vector; not every vector lies in the convex hull of the embedding table. This formula describes a representation option, not a claim that all latent reasoning systems use it.
+
+### Hidden-state feedback
+Coconut feeds a last hidden state back as a subsequent input embedding during latent reasoning, rather than decoding each step into a word. That state is input-dependent and computed at inference; it is not simply a fixed soft prompt. [2](https://arxiv.org/abs/2412.06769)
+
+```python
+state = model(context).last_hidden_state
+for _ in range(latent_steps):
+    state = model(inputs_embeds=state).last_hidden_state
+# Schematic only: real implementations preserve their context and cache layout.
+```
+
+### What continuous does not imply
+A continuous vector is not automatically an interpretable probability distribution over alternative thoughts. A paper's search analogy must be separated from a verified explicit search algorithm. Latent steps consume compute even if they emit no readable tokens.
+
+### Experiment
+Compare visible chain-of-thought and latent reasoning with matched total compute and training supervision. Measure generalization outside the training task family, not only token savings. Inspect failure cases and whether the model learns a meaningful stopping rule. Continue to [recurrent depth](#article-recurrent-depth).
+
+### Primary references
+
+1. Lester, Al-Rfou & Constant (2021). [The Power of Scale for Parameter-Efficient Prompt Tuning](https://arxiv.org/abs/2104.08691). Paper · EMNLP 2021.
+2. Hao et al. (2024). [Training Large Language Models to Reason in a Continuous Latent Space](https://arxiv.org/abs/2412.06769). Paper · COLM 2025.
+3. Hu et al. (2021). [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685). Research paper.
+
+### Related topics
+
+- [Recurrent depth & looped Transformers](#article-recurrent-depth) — Reuse depth for extra computation.
+- [Diffusion & flow-based generation](#article-diffusion-flow) — Compare continuous computation and generation.
+- [Memory, context & test-time adaptation](#article-memory-adaptation) — Separate prompts from persistent adaptation.
+
+---
+
 # Embodied intelligence
 
-Vision–language–action interfaces, action distributions and closed-loop evaluation.
+Connect perception, beliefs, action distributions, and closed-loop evaluation.
+
+**Family:** Embodied intelligence → Policies & action representations
 
 <a id="article-vla-foundations"></a>
 
@@ -1993,6 +1979,8 @@ Generalization across objects, language, scenes and embodiments are different ax
 - [Video world models & latent planning](#article-video-world-models) — Compare prediction and planning.
 
 ---
+
+**Family:** Embodied intelligence → Policies & action representations
 
 <a id="article-action-models"></a>
 
@@ -2055,6 +2043,68 @@ A generative model can represent several plausible action sequences yet still sa
 - [Evaluate the closed loop](#article-robot-evaluation) — Measure the complete control loop.
 
 ---
+
+**Family:** Embodied intelligence → Inference & control
+
+<a id="article-active-inference"></a>
+
+## Active inference
+
+*Belief updating and action under a generative model.*
+
+**Abstract.** Place variational free energy and policy selection in a probabilistic control framework, and distinguish them from supervised PC training.
+
+**At a glance:**
+
+- Perception updates beliefs about hidden states
+- Policies can trade preference fulfilment and information gain
+- A generative control framework is not one neural architecture
+
+**Concepts:** Active inference; Free energy; Belief updates; Control.
+
+### Infer hidden causes
+Let $o$ be observed data, $s$ hidden states, $p(o,s)$ a generative model and $q(s)$ an approximate posterior. Variational free energy is
+
+$$
+F[q]=\mathbb E_q[\log q(s)-\log p(o,s)]
+=D_{\mathrm{KL}}(q(s)\|p(s\mid o))-\log p(o).
+$$
+
+For a valid model with finite quantities, $F$ bounds negative log evidence. Minimizing it with respect to $q$ improves the approximate posterior; this does not make every numerical quantity called “energy” physical energy in joules. [1](https://mitpress.mit.edu/9780262045353/active-inference/)
+
+### Act to shape future observations
+Active inference extends belief updating to action or policy selection. It uses a generative model of state transitions and observations, with preferences and uncertainty contributing to evaluation of possible futures. Expected free energy is a policy-dependent quantity; its exact form and decomposition depend on the model and conventions. It should not be substituted blindly for the current-observation $F[q]$ above. [2](https://activeinference.github.io/papers/process_theory.pdf)
+
+### Relation to predictive coding
+Predictive coding can implement parts of inference under particular generative models and approximations. Active inference supplies a broader account of inference and action. PC-ALM instead studies an augmented-Lagrangian route to local credit assignment for a constrained supervised network. Shared words such as “prediction error,” “inference” and “free energy” do not make these objectives identical. [3](https://arxiv.org/html/2605.31022v1)
+
+| Quantity | What it evaluates | Essential specification |
+| --- | --- | --- |
+| Variational free energy | Approximate posterior for observations | Generative model and posterior family |
+| Expected free energy | Candidate futures/policies | Preferences, transitions and beliefs |
+| PC constraint energy | Consistency of neural activities | Layer functions, clamping and penalties |
+
+### An implementable starting point
+Build a tiny partially observable task with two hidden states, noisy observations and two actions. Specify observation likelihoods, transition matrices and prior preferences numerically. Update beliefs by Bayes' rule before trying a neural approximation. This reveals what the framework assumes rather than attributing decisions to an undefined optimization principle.
+
+### Evidence and limits
+The cited book and process theory formalize a framework. They do not establish that all biological learning or every effective controller implements one exact algorithm. Compare against Bayesian filtering and conventional control/RL baselines at matched model knowledge and information access.
+
+### Primary references
+
+1. Parr, Pezzulo & Friston (2022). [Active Inference: The Free Energy Principle in Mind, Brain, and Behavior](https://mitpress.mit.edu/9780262045353/active-inference/). MIT Press book.
+2. Friston et al. (2017). [Active Inference: A Process Theory](https://activeinference.github.io/papers/process_theory.pdf). Neural Computation.
+3. Jeffrey Seely & Julian Gould (2026). [Augmented Lagrangian Predictive Coding](https://arxiv.org/html/2605.31022v1). Preprint · May 2026.
+
+### Related topics
+
+- [Predictive coding as local inference](#article-predictive-coding) — Compare inference dynamics.
+- [Video world models & latent planning](#article-video-world-models) — Connect predictive state to planning.
+- [Vision–language–action models](#article-vla-foundations) — Contrast routes to robot control.
+
+---
+
+**Family:** Embodied intelligence → Closed-loop evaluation
 
 <a id="article-robot-evaluation"></a>
 
@@ -2129,7 +2179,9 @@ This atlas provides architecture and experiment guidance. Its diagrams do not ru
 
 # Intellectual lineage
 
-Distributed representations, recurrence, attention, residual learning and language-model scaling.
+Trace the ideas that shaped modern neural architectures without imposing one reading order.
+
+**Family:** Intellectual lineage → Representations & sequence models
 
 <a id="article-distributed-representations"></a>
 
@@ -2191,6 +2243,8 @@ Rebuild a small relation-completion task with a held-out set of facts. Compare t
 
 ---
 
+**Family:** Intellectual lineage → Representations & sequence models
+
 <a id="article-sequence-attention-history"></a>
 
 ## Sequence models discover attention
@@ -2247,6 +2301,8 @@ The diagram in this atlas is an explanatory map of relationships. Arrows denote 
 - [Recurrent depth & looped Transformers](#article-recurrent-depth) — Move recurrence into model depth.
 
 ---
+
+**Family:** Intellectual lineage → Residual learning & scaling
 
 <a id="article-resnet-lineage"></a>
 
@@ -2306,6 +2362,8 @@ Compare a deep plain MLP with an equal-depth residual MLP. Record loss, layerwis
 - [Backpropagation & biological plausibility](#article-backprop-biology) — Consider credit through deep graphs.
 
 ---
+
+**Family:** Intellectual lineage → Residual learning & scaling
 
 <a id="article-gpt-scaling"></a>
 

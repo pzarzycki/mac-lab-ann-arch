@@ -1,0 +1,213 @@
+[
+  {
+    "id": "transformers",
+    "title": "Transformers",
+    "description": "Follow token representations from core mechanisms to architectural extensions and efficient execution.",
+    "icon": "Layers",
+    "children": [
+      {
+        "id": "core-mechanisms",
+        "title": "Core mechanisms",
+        "description": "Token states, attention, normalization, and the interface between training and generation.",
+        "articles": [
+          "residual-streams",
+          "attention",
+          "normalization-position",
+          "training-decoding"
+        ]
+      },
+      {
+        "id": "structural-extensions",
+        "title": "Structural extensions",
+        "description": "Expert routing, residual connectivity, recurrent depth, and state-space hybrids.",
+        "articles": [
+          "mixture-of-experts",
+          "hyper-connections",
+          "recurrent-depth",
+          "state-space"
+        ]
+      },
+      {
+        "id": "efficient-execution",
+        "title": "Efficient execution",
+        "description": "Caches, attention kernels, sparsity, compression, and decoding throughput.",
+        "articles": [
+          "kv-cache",
+          "efficient-attention",
+          "compression-decoding"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "learning-adaptation",
+    "title": "Learning & adaptation",
+    "description": "Explore how credit is assigned, networks evolve, and useful changes persist.",
+    "icon": "Activity",
+    "children": [
+      {
+        "id": "credit-assignment",
+        "title": "Credit assignment",
+        "description": "Compare gradient-based updates and local learning dynamics.",
+        "children": [
+          {
+            "id": "gradient-local",
+            "title": "Gradients & local objectives",
+            "description": "Backpropagation, biological constraints, feedback alignment, and local losses.",
+            "articles": [
+              "backprop-biology",
+              "local-learning"
+            ]
+          },
+          {
+            "id": "predictive-coding-family",
+            "title": "Predictive coding",
+            "description": "Infer activities through local prediction errors, then examine a constrained formulation.",
+            "articles": [
+              "predictive-coding",
+              "pc-alm"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "neural-dynamics",
+        "title": "Neural dynamics",
+        "description": "Spiking events and continuous-time state evolution are distinct from the choice of learning rule.",
+        "articles": [
+          "spiking-networks",
+          "liquid-networks"
+        ]
+      },
+      {
+        "id": "neuroevolution",
+        "title": "Neuroevolution",
+        "description": "Evolve weights and topology directly, or generate connectivity from geometry.",
+        "articles": [
+          "neat",
+          "hyperneat"
+        ]
+      },
+      {
+        "id": "persistent-adaptation",
+        "title": "Memory & continual learning",
+        "description": "Context, external memory, weight updates, retention, and verified self-improvement.",
+        "articles": [
+          "continual-learning",
+          "memory-adaptation",
+          "self-improvement"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "multimodal-world-models",
+    "title": "Multimodal & world models",
+    "description": "Connect modality interfaces and objectives to predictive representations and latent world models.",
+    "icon": "ScanEye",
+    "children": [
+      {
+        "id": "modality-interfaces",
+        "title": "Modality interfaces & objectives",
+        "description": "Fusion, alignment, generation, and grounding across image, audio, and video.",
+        "articles": [
+          "multimodal-fusion",
+          "multimodal-objectives",
+          "temporal-modalities"
+        ]
+      },
+      {
+        "id": "predictive-representations",
+        "title": "Predictive representations",
+        "description": "JEPA predicts representations; action-conditioned world models connect prediction to planning.",
+        "articles": [
+          "jepa",
+          "video-world-models"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "generation-computation",
+    "title": "Generation & latent computation",
+    "description": "Explore generative constructions and computation in continuous representation spaces.",
+    "icon": "Orbit",
+    "children": [
+      {
+        "id": "generative-constructions",
+        "title": "Generative constructions",
+        "description": "Diffusion and flow matching define different ways to construct and sample a distribution.",
+        "articles": [
+          "diffusion-flow"
+        ]
+      },
+      {
+        "id": "continuous-computation",
+        "title": "Continuous computation",
+        "description": "Distinguish learned input vectors, soft-token mixtures, and latent reasoning.",
+        "articles": [
+          "soft-latent-reasoning"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "embodied-intelligence",
+    "title": "Embodied intelligence",
+    "description": "Connect perception, beliefs, action distributions, and closed-loop evaluation.",
+    "icon": "Bot",
+    "children": [
+      {
+        "id": "policies-actions",
+        "title": "Policies & action representations",
+        "description": "Vision\u2013language\u2013action interfaces and discrete, diffusion, or flow-based action heads.",
+        "articles": [
+          "vla-foundations",
+          "action-models"
+        ]
+      },
+      {
+        "id": "inference-control",
+        "title": "Inference & control",
+        "description": "Belief updates, preferences, and policy selection in Active Inference.",
+        "articles": [
+          "active-inference"
+        ]
+      },
+      {
+        "id": "closed-loop-evidence",
+        "title": "Closed-loop evaluation",
+        "description": "Measure the deployed perception\u2013action loop and identify its failure modes.",
+        "articles": [
+          "robot-evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lineage",
+    "title": "Intellectual lineage",
+    "description": "Trace the ideas that shaped modern neural architectures without imposing one reading order.",
+    "icon": "History",
+    "children": [
+      {
+        "id": "representations-sequences",
+        "title": "Representations & sequence models",
+        "description": "Distributed representations, recurrence, and the emergence of attention.",
+        "articles": [
+          "distributed-representations",
+          "sequence-attention-history"
+        ]
+      },
+      {
+        "id": "residuals-scaling",
+        "title": "Residual learning & scaling",
+        "description": "Residual connections and the path from Transformers to language-model scaling.",
+        "articles": [
+          "resnet-lineage",
+          "gpt-scaling"
+        ]
+      }
+    ]
+  }
+]

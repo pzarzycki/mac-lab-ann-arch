@@ -46,3 +46,14 @@ JEPA representation prediction is separate from reconstruction and local predict
 - Expanded SVGs have keyboard controls and Escape dismissal; full modal focus containment for expanded figures remains a refinement. Search and topic-preview dialogs contain focus.
 - Theme and bookmarks remain browser-local and may be unavailable under restrictive storage policies.
 - GitHub source destination: pzarzycki/mac-lab-artficial-neural-archictectures. Existing Site access remains private.
+
+## Luminous Editorial and nested hierarchy update
+
+- All 37 article bodies, article metadata, citations and primary-source registry remain unchanged from the previous release.
+- Six domains and 24 total domain/family pages place each article exactly once. Ten legacy section routes remain available.
+- Initial rendering succeeds for 78 routes, including every deep dive, every family, manuscript and reference pages.
+- Content checks pass for 69 primary references and 307 TeX expressions; six numerical tests pass.
+- The production build succeeds. Its existing large-bundle advisory remains; no runtime backend is required.
+- Browser checks verified the Luminous Editorial bright/dark palettes, nested navigation and the in-site Manuscript link. Expanding all manuscript topics rendered 307 KaTeX expressions and 28 highlighted code blocks without errors or duplicate IDs.
+- A phone-width iframe (375 CSS px usable width) verified navigation and family cards. The expanded complete manuscript has no page-wide horizontal overflow; oversized equations and code scroll within their containers.
+- A temporary responsive QA harness was removed before the production build.

@@ -1,14 +1,14 @@
 {
-  "name": "neural-atlas",
-  "version": "1.1.0",
+  "name": "artificial-neural-architectures-atlas",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "description": "An interactive, source-grounded research atlas of Transformers, learning algorithms and embodied intelligence.",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4173",
-    "build": "node scripts/validate-content.mjs && vite build",
+    "build": "node scripts/export-manuscript.mjs && node scripts/validate-content.mjs && node scripts/validate-hierarchy.mjs && vite build",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
-    "check": "node scripts/validate-content.mjs",
+    "check": "node scripts/validate-content.mjs && node scripts/validate-hierarchy.mjs",
     "test": "node --test tests/*.test.mjs",
     "manuscript": "node scripts/export-manuscript.mjs",
     "check:visuals": "node scripts/validate-visuals.mjs"
