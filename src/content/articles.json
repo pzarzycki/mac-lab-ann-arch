@@ -42,6 +42,14 @@
       {
         "slug": "resnet-lineage",
         "reason": "Trace the architectural influence"
+      },
+      {
+        "slug": "token-embeddings",
+        "reason": "Inspect token lookup, embedding geometry and the output decoder explicitly"
+      },
+      {
+        "slug": "transformer-observability",
+        "reason": "Inspect these computations and distinguish readouts from causal tests"
       }
     ]
   },
@@ -49,7 +57,7 @@
     "slug": "attention",
     "category": "architecture",
     "title": "Attention as content-addressed computation",
-    "subtitle": "Queries, keys, values\u2014and the mask.",
+    "subtitle": "Queries, keys, values—and the mask.",
     "abstract": "Derive one attention head, inspect exactly which token can read which other token, and distinguish weights from explanations.",
     "references": [
       "transformer",
@@ -82,6 +90,10 @@
       {
         "slug": "multimodal-fusion",
         "reason": "Attend across modality boundaries"
+      },
+      {
+        "slug": "transformer-observability",
+        "reason": "Inspect these computations and distinguish readouts from causal tests"
       }
     ]
   },
@@ -177,7 +189,7 @@
     "slug": "distributed-representations",
     "category": "history",
     "title": "From symbols to distributed representations",
-    "subtitle": "Hinton\u2019s family relations, then neural language models.",
+    "subtitle": "Hinton’s family relations, then neural language models.",
     "abstract": "Trace the move from discrete identifiers to learned continuous features without claiming that vector geometry is symbolic logic.",
     "references": [
       "hinton",
@@ -210,6 +222,10 @@
       {
         "slug": "hyperneat",
         "reason": "Compare an encoding of connectivity"
+      },
+      {
+        "slug": "token-embeddings",
+        "reason": "Inspect token lookup, embedding geometry and the output decoder explicitly"
       }
     ]
   },
@@ -230,7 +246,7 @@
     "updated": "2026-10-21",
     "keyPoints": [
       "Recurrence carries state through time",
-      "Encoder\u2013decoder models expose a bottleneck",
+      "Encoder–decoder models expose a bottleneck",
       "Attention gives a decoder access to source states"
     ],
     "tags": [
@@ -507,7 +523,7 @@
     "slug": "compression-decoding",
     "category": "systems",
     "title": "Compression & speculative decoding",
-    "subtitle": "Spend fewer bytes\u2014or verify more tokens at once.",
+    "subtitle": "Spend fewer bytes—or verify more tokens at once.",
     "abstract": "Two complementary inference techniques, with different effects on numerical behavior and sampling correctness.",
     "references": [
       "gptq",
@@ -746,6 +762,10 @@
       {
         "slug": "memory-adaptation",
         "reason": "Separate prompts from persistent adaptation"
+      },
+      {
+        "slug": "token-embeddings",
+        "reason": "Inspect token lookup, embedding geometry and the output decoder explicitly"
       }
     ]
   },
@@ -793,7 +813,7 @@
     "slug": "state-space",
     "category": "sequence",
     "title": "Selective state spaces & hybrids",
-    "subtitle": "Compress history into a state\u2014or retain explicit token memory.",
+    "subtitle": "Compress history into a state—or retain explicit token memory.",
     "abstract": "Understand the recurrence underlying selective state-space models and the trade-off with attention.",
     "references": [
       "mamba",
@@ -874,7 +894,7 @@
     "slug": "pc-alm",
     "category": "learning",
     "title": "Augmented Lagrangian predictive coding",
-    "subtitle": "Credit assignment as a primal\u2013dual dynamical system.",
+    "subtitle": "Credit assignment as a primal–dual dynamical system.",
     "abstract": "A paper-style walkthrough of PC-ALM: constraint residuals, multipliers, batched inference, theoretical scope and computational cost.",
     "references": [
       "pcalm",
@@ -893,7 +913,7 @@
     "tags": [
       "PC-ALM",
       "Augmented Lagrangian",
-      "Primal\u2013dual dynamics"
+      "Primal–dual dynamics"
     ],
     "related": [
       {
@@ -1118,7 +1138,7 @@
     "slug": "continual-learning",
     "category": "continual",
     "title": "Remembering while learning",
-    "subtitle": "Replay, consolidation and the stability\u2013plasticity tension.",
+    "subtitle": "Replay, consolidation and the stability–plasticity tension.",
     "abstract": "Define forgetting operationally and compare mechanisms that protect old behavior during new learning.",
     "references": [
       "ewc",
@@ -1242,7 +1262,7 @@
   {
     "slug": "vla-foundations",
     "category": "robotics",
-    "title": "Vision\u2013language\u2013action models",
+    "title": "Vision–language–action models",
     "subtitle": "A language interface reaches the control loop.",
     "abstract": "Trace RT-2 and OpenVLA, then locate the boundary between semantic transfer and physical competence.",
     "references": [
@@ -1257,7 +1277,7 @@
     "keyPoints": [
       "Visual and language inputs condition an action policy",
       "Action representation is an architectural choice",
-      "A policy acts inside an observation\u2013action feedback loop"
+      "A policy acts inside an observation–action feedback loop"
     ],
     "tags": [
       "VLA",
@@ -1537,6 +1557,233 @@
       "CPPN",
       "Indirect encoding",
       "Geometric bias"
+    ]
+  },
+  {
+    "slug": "token-embeddings",
+    "category": "architecture",
+    "title": "Token embeddings & embedding space",
+    "subtitle": "Discrete identities, continuous coordinates, contextual states.",
+    "abstract": "Follow token IDs into learned vectors, distinguish input and output embeddings, and inspect a small geometric example.",
+    "references": [
+      "transformer",
+      "weight-tying",
+      "bengio"
+    ],
+    "diagram": "embedding-space",
+    "year": 2017,
+    "minutes": 6,
+    "updated": "2026-10-22",
+    "keyPoints": [
+      "Token lookup is not a numeric encoding of IDs",
+      "Contextual states share a width, not one fixed meaning",
+      "Weight tying is a choice; unembedding is not an inverse"
+    ],
+    "tags": [
+      "Token embeddings",
+      "Embedding space",
+      "Unembedding",
+      "Weight tying",
+      "Soft tokens"
+    ],
+    "related": [
+      {
+        "slug": "distributed-representations",
+        "reason": "Trace the historical origin of distributed features"
+      },
+      {
+        "slug": "residual-streams",
+        "reason": "Follow an embedding into one token’s contextual state"
+      },
+      {
+        "slug": "logit-tuned-lenses",
+        "reason": "Read contextual states through the output decoder"
+      },
+      {
+        "slug": "soft-latent-reasoning",
+        "reason": "Compare vocabulary mixtures with learned continuous inputs"
+      }
+    ]
+  },
+  {
+    "slug": "transformer-observability",
+    "category": "architecture",
+    "title": "Transformer observability & interpretability",
+    "subtitle": "Inspect a tensor. Specify a claim. Test a mechanism.",
+    "abstract": "A map of hooks, activation views, attention, readouts, attribution and interventions, with the evidence each can support.",
+    "references": [
+      "probe-controls",
+      "attention-explanation",
+      "tuned-lens",
+      "patching-best-practices"
+    ],
+    "diagram": "observability-map",
+    "year": 2026,
+    "minutes": 6,
+    "updated": "2026-10-22",
+    "keyPoints": [
+      "Layer, position, head and feature axes stay distinct",
+      "Readable readouts are different from causal evidence",
+      "A useful explanation specifies a falsifiable intervention"
+    ],
+    "tags": [
+      "Observability",
+      "Interpretability",
+      "Hooks",
+      "Probes",
+      "Direct logit attribution",
+      "Attention visualization"
+    ],
+    "related": [
+      {
+        "slug": "residual-streams",
+        "reason": "Locate the token-indexed states being inspected"
+      },
+      {
+        "slug": "logit-tuned-lenses",
+        "reason": "Compare raw and learned vocabulary readouts"
+      },
+      {
+        "slug": "jacobian-lens",
+        "reason": "Inspect averaged downstream sensitivity"
+      },
+      {
+        "slug": "causal-features-circuits",
+        "reason": "Move from a candidate signal to a controlled intervention"
+      }
+    ]
+  },
+  {
+    "slug": "logit-tuned-lenses",
+    "category": "architecture",
+    "title": "Logit lens & tuned lens",
+    "subtitle": "One hidden state. Different readout assumptions.",
+    "abstract": "Compare final-head decoding and learned affine translators, with explicit dimensions, token alignment and a toy coordinate mismatch.",
+    "references": [
+      "tuned-lens",
+      "patching-best-practices"
+    ],
+    "diagram": "lens-readouts",
+    "year": 2023,
+    "minutes": 6,
+    "updated": "2026-10-22",
+    "keyPoints": [
+      "Logit lens reuses the final decoder without a fitted translator",
+      "Tuned lens fits per-layer prediction translators",
+      "A next-token readout is not a complete causal explanation"
+    ],
+    "tags": [
+      "Logit lens",
+      "Tuned lens",
+      "Layer readouts",
+      "Unembedding",
+      "Prediction trajectories"
+    ],
+    "related": [
+      {
+        "slug": "token-embeddings",
+        "reason": "Define the input lookup and output vocabulary directions"
+      },
+      {
+        "slug": "jacobian-lens",
+        "reason": "Compare fitted prediction maps with averaged derivatives"
+      },
+      {
+        "slug": "causal-features-circuits",
+        "reason": "Test whether decoded directions affect behavior"
+      }
+    ]
+  },
+  {
+    "slug": "jacobian-lens",
+    "category": "architecture",
+    "title": "Jacobian lens & J-space",
+    "subtitle": "Average a derivative; keep its assumptions visible.",
+    "abstract": "Derive the J-Lens transport and its matrix dimensions, inspect cancellation across contexts, and distinguish sparse J-space from a low-rank projection.",
+    "references": [
+      "jacobian-lens",
+      "jacobian-lens-code"
+    ],
+    "diagram": "jacobian-transport",
+    "year": 2026,
+    "minutes": 6,
+    "updated": "2026-10-22",
+    "keyPoints": [
+      "The transport is d × d; vocabulary directions are V × d",
+      "Averaging can cancel strong context-specific sensitivities",
+      "J-space is an overcomplete sparse-frame construction"
+    ],
+    "tags": [
+      "J-Lens",
+      "Jacobian lens",
+      "J-space",
+      "Global workspace",
+      "Jacobians",
+      "Sparse frames"
+    ],
+    "related": [
+      {
+        "slug": "logit-tuned-lenses",
+        "reason": "Compare the meaning and construction of each layer decoder"
+      },
+      {
+        "slug": "transformer-observability",
+        "reason": "Place sensitivity readouts in a broader evidence map"
+      },
+      {
+        "slug": "causal-features-circuits",
+        "reason": "Separate a readout from an intervention test"
+      },
+      {
+        "slug": "token-embeddings",
+        "reason": "Track hidden width and vocabulary dimensions"
+      }
+    ]
+  },
+  {
+    "slug": "causal-features-circuits",
+    "category": "architecture",
+    "title": "Causal tracing, features & circuits",
+    "subtitle": "Replace a signal, rerun the model, measure the difference.",
+    "abstract": "Connect activation patching, ablation, sparse dictionaries, transcoders and attribution graphs while retaining their methodological limits.",
+    "references": [
+      "patching-interpretation",
+      "patching-best-practices",
+      "circuit-tracing"
+    ],
+    "diagram": "causal-patching",
+    "year": 2025,
+    "minutes": 6,
+    "updated": "2026-10-22",
+    "keyPoints": [
+      "Patching is specific to a site, control and behavioral metric",
+      "Feature dictionaries and replacement models are approximations",
+      "Recovery scores and graph edges need explicit definitions"
+    ],
+    "tags": [
+      "Activation patching",
+      "Causal tracing",
+      "Path patching",
+      "Attribution patching",
+      "SAE",
+      "Sparse autoencoders",
+      "Transcoders",
+      "Circuit tracing",
+      "Steering"
+    ],
+    "related": [
+      {
+        "slug": "transformer-observability",
+        "reason": "Distinguish observational, derivative and intervention evidence"
+      },
+      {
+        "slug": "jacobian-lens",
+        "reason": "Compare average sensitivity and actual reruns"
+      },
+      {
+        "slug": "logit-tuned-lenses",
+        "reason": "Turn a readable candidate into a causal hypothesis"
+      }
     ]
   }
 ]

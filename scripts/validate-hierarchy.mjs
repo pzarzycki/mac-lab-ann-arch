@@ -7,5 +7,6 @@ roots.forEach(visit);
 assert.equal(actual.length,new Set(actual).size,'An article appears in multiple primary families');
 assert.deepEqual([...actual].sort(),articles.map(a=>a.slug).sort(),'Hierarchy must contain every article exactly once');
 const app=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
+assert(!/\['manuscript','Manuscript',FileText\]/.test(app),'Manuscript must not appear in the sidebar navigation');
 assert(!/href="\.\/manuscript.md"/.test(app),'Manuscript links must open the reading page');
 console.log(`Hierarchy validated: ${roots.length} domains, ${ids.size} domain/family pages; all ${actual.length} article URLs retained exactly once. Manuscript links render in the site.`);

@@ -2,7 +2,7 @@
   {
     "id": "transformers",
     "title": "Transformers",
-    "description": "Follow token representations from core mechanisms to architectural extensions and efficient execution.",
+    "description": "Follow token representations from embeddings and core mechanisms to extensions, efficient execution, and interpretability.",
     "icon": "Layers",
     "children": [
       {
@@ -10,6 +10,7 @@
         "title": "Core mechanisms",
         "description": "Token states, attention, normalization, and the interface between training and generation.",
         "articles": [
+          "token-embeddings",
           "residual-streams",
           "attention",
           "normalization-position",
@@ -35,6 +36,17 @@
           "kv-cache",
           "efficient-attention",
           "compression-decoding"
+        ]
+      },
+      {
+        "id": "observability-interpretability",
+        "title": "Observability & interpretability",
+        "description": "Inspect internal states with lenses, probes, Jacobians, causal interventions and feature circuits.",
+        "articles": [
+          "transformer-observability",
+          "logit-tuned-lenses",
+          "jacobian-lens",
+          "causal-features-circuits"
         ]
       }
     ]
@@ -160,7 +172,7 @@
       {
         "id": "policies-actions",
         "title": "Policies & action representations",
-        "description": "Vision\u2013language\u2013action interfaces and discrete, diffusion, or flow-based action heads.",
+        "description": "Vision–language–action interfaces and discrete, diffusion, or flow-based action heads.",
         "articles": [
           "vla-foundations",
           "action-models"
@@ -177,7 +189,7 @@
       {
         "id": "closed-loop-evidence",
         "title": "Closed-loop evaluation",
-        "description": "Measure the deployed perception\u2013action loop and identify its failure modes.",
+        "description": "Measure the deployed perception–action loop and identify its failure modes.",
         "articles": [
           "robot-evaluation"
         ]

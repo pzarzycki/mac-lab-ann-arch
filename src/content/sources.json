@@ -38,7 +38,7 @@
     "authors": "Bahdanau, Cho & Bengio",
     "year": 2014,
     "url": "https://arxiv.org/abs/1409.0473",
-    "kind": "Paper \u00b7 ICLR 2015",
+    "kind": "Paper · ICLR 2015",
     "checked": "2026-10-21",
     "evidence": "turn2view5",
     "review": "primary abstract, bibliographic record or author page"
@@ -93,7 +93,7 @@
     "authors": "Zhang & Sennrich",
     "year": 2019,
     "url": "https://arxiv.org/abs/1910.07467",
-    "kind": "Paper \u00b7 NeurIPS 2019",
+    "kind": "Paper · NeurIPS 2019",
     "checked": "2026-10-21",
     "evidence": "turn2view2",
     "review": "primary abstract, bibliographic record or author page"
@@ -137,7 +137,7 @@
     "authors": "Ainslie et al.",
     "year": 2023,
     "url": "https://arxiv.org/abs/2305.13245",
-    "kind": "Paper \u00b7 EMNLP 2023",
+    "kind": "Paper · EMNLP 2023",
     "checked": "2026-10-21",
     "evidence": "turn3view1",
     "review": "primary abstract, bibliographic record or author page"
@@ -148,7 +148,7 @@
     "authors": "Kwon et al.",
     "year": 2023,
     "url": "https://arxiv.org/abs/2309.06180",
-    "kind": "Paper \u00b7 SOSP 2023",
+    "kind": "Paper · SOSP 2023",
     "checked": "2026-10-21",
     "evidence": "turn3view2",
     "review": "primary abstract, bibliographic record or author page"
@@ -181,7 +181,7 @@
     "authors": "Fedus, Zoph & Shazeer",
     "year": 2021,
     "url": "https://arxiv.org/abs/2101.03961",
-    "kind": "Paper \u00b7 JMLR",
+    "kind": "Paper · JMLR",
     "checked": "2026-10-21",
     "evidence": "turn3view5",
     "review": "primary abstract, bibliographic record or author page"
@@ -214,7 +214,7 @@
     "authors": "Xie et al.",
     "year": 2025,
     "url": "https://arxiv.org/html/2512.24880v2",
-    "kind": "Research paper \u00b7 v2 Jan 2026",
+    "kind": "Research paper · v2 Jan 2026",
     "checked": "2026-10-21",
     "evidence": "turn7view1",
     "review": "full-text sections"
@@ -236,7 +236,7 @@
     "authors": "Dosovitskiy et al.",
     "year": 2020,
     "url": "https://arxiv.org/abs/2010.11929",
-    "kind": "Paper \u00b7 ICLR 2021",
+    "kind": "Paper · ICLR 2021",
     "checked": "2026-10-21",
     "evidence": "turn4view1",
     "review": "primary abstract, bibliographic record or author page"
@@ -269,7 +269,7 @@
     "authors": "Liu, Li, Wu & Lee",
     "year": 2023,
     "url": "https://arxiv.org/abs/2304.08485",
-    "kind": "Paper \u00b7 NeurIPS 2023",
+    "kind": "Paper · NeurIPS 2023",
     "checked": "2026-10-21",
     "evidence": "turn4view4",
     "review": "primary abstract, bibliographic record or author page"
@@ -302,7 +302,7 @@
     "authors": "Hao et al.",
     "year": 2024,
     "url": "https://arxiv.org/abs/2412.06769",
-    "kind": "Paper \u00b7 COLM 2025",
+    "kind": "Paper · COLM 2025",
     "checked": "2026-10-21",
     "evidence": "turn5view1",
     "review": "primary abstract, bibliographic record or author page"
@@ -346,7 +346,7 @@
     "authors": "Lester, Al-Rfou & Constant",
     "year": 2021,
     "url": "https://arxiv.org/abs/2104.08691",
-    "kind": "Paper \u00b7 EMNLP 2021",
+    "kind": "Paper · EMNLP 2021",
     "checked": "2026-10-21",
     "evidence": "turn5view6",
     "review": "primary abstract, bibliographic record or author page"
@@ -368,7 +368,7 @@
     "authors": "Dehghani et al.",
     "year": 2018,
     "url": "https://arxiv.org/abs/1807.03819",
-    "kind": "Paper \u00b7 ICLR 2019",
+    "kind": "Paper · ICLR 2019",
     "checked": "2026-10-21",
     "evidence": "turn7view2",
     "review": "primary abstract, bibliographic record or author page"
@@ -390,7 +390,7 @@
     "authors": "Jeffrey Seely & Julian Gould",
     "year": 2026,
     "url": "https://arxiv.org/html/2605.31022v1",
-    "kind": "Preprint \u00b7 May 2026",
+    "kind": "Preprint · May 2026",
     "checked": "2026-10-21",
     "evidence": "turn7view0",
     "review": "full-text sections"
@@ -398,10 +398,10 @@
   {
     "id": "pcalm-project",
     "title": "Augmented Lagrangian Predictive Coding: training 1000-layer networks without backpropagation",
-    "authors": "Seely & Gould \u00b7 Sakana AI",
+    "authors": "Seely & Gould · Sakana AI",
     "year": 2026,
     "url": "https://pub.sakana.ai/pc-alm/",
-    "kind": "Author project page \u00b7 Sep 2026",
+    "kind": "Author project page · Sep 2026",
     "checked": "2026-10-21",
     "evidence": "turn1view0",
     "review": "full-text sections"
@@ -456,7 +456,7 @@
     "authors": "Hasani, Lechner, Amini, Rus & Grosu",
     "year": 2020,
     "url": "https://arxiv.org/abs/2006.04439",
-    "kind": "Paper \u00b7 AAAI 2021",
+    "kind": "Paper · AAAI 2021",
     "checked": "2026-10-21",
     "evidence": "turn1view4",
     "review": "primary abstract, bibliographic record or author page"
@@ -467,7 +467,7 @@
     "authors": "Kirkpatrick et al.",
     "year": 2016,
     "url": "https://arxiv.org/abs/1612.00796",
-    "kind": "Paper \u00b7 PNAS 2017",
+    "kind": "Paper · PNAS 2017",
     "checked": "2026-10-21",
     "evidence": "turn6view6",
     "review": "primary abstract, bibliographic record or author page"
@@ -507,7 +507,7 @@
   },
   {
     "id": "pi0",
-    "title": "\u03c0\u2080: A Vision-Language-Action Flow Model for General Robot Control",
+    "title": "π₀: A Vision-Language-Action Flow Model for General Robot Control",
     "authors": "Black et al.",
     "year": 2024,
     "url": "https://arxiv.org/abs/2410.24164",
@@ -522,7 +522,7 @@
     "authors": "Chi et al.",
     "year": 2023,
     "url": "https://arxiv.org/abs/2303.04137",
-    "kind": "Paper \u00b7 RSS 2023, extended 2024",
+    "kind": "Paper · RSS 2023, extended 2024",
     "checked": "2026-10-21",
     "evidence": "turn9view3",
     "review": "primary abstract, bibliographic record or author page"
@@ -533,7 +533,7 @@
     "authors": "Leviathan, Kalman & Matias",
     "year": 2022,
     "url": "https://arxiv.org/abs/2211.17192",
-    "kind": "Paper \u00b7 ICML 2023",
+    "kind": "Paper · ICML 2023",
     "checked": "2026-10-21",
     "evidence": "turn9view4",
     "review": "primary abstract, bibliographic record or author page"
@@ -643,7 +643,7 @@
     "authors": "Sun et al.",
     "year": 2020,
     "url": "https://proceedings.mlr.press/v119/sun20b.html",
-    "kind": "Paper \u00b7 ICML 2020",
+    "kind": "Paper · ICML 2020",
     "checked": "2026-10-21",
     "evidence": "turn11view4",
     "review": "primary abstract, bibliographic record or author page"
@@ -665,7 +665,7 @@
     "authors": "Assran, Duval, Misra, Bojanowski, Vincent, Rabbat, LeCun & Ballas",
     "year": 2023,
     "url": "https://arxiv.org/abs/2301.08243",
-    "kind": "Paper \u00b7 CVPR 2023",
+    "kind": "Paper · CVPR 2023",
     "evidence": "turn19view0",
     "review": "primary abstract and official implementation overview",
     "checked": "2026-10-21"
@@ -720,7 +720,7 @@
     "authors": "Kenneth O. Stanley & Risto Miikkulainen",
     "year": 2002,
     "url": "https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf",
-    "kind": "Evolutionary Computation 10(2): 99\u2013127",
+    "kind": "Evolutionary Computation 10(2): 99–127",
     "checked": "2026-10-21",
     "evidence": "turn21view0",
     "review": "Primary paper or university bibliographic record; mechanism checked against original NEAT text and primary HyperNEAT/CPPN abstracts."
@@ -731,7 +731,7 @@
     "authors": "Kenneth O. Stanley & Risto Miikkulainen",
     "year": 2004,
     "url": "https://www.cs.cmu.edu/afs/cs/project/jair/pub/volume21/stanley04a-html/node3.html",
-    "kind": "JAIR 21: 63\u2013100 \u00b7 section 3",
+    "kind": "JAIR 21: 63–100 · section 3",
     "checked": "2026-10-21",
     "evidence": "turn23view0",
     "review": "Primary paper or university bibliographic record; mechanism checked against original NEAT text and primary HyperNEAT/CPPN abstracts."
@@ -739,10 +739,10 @@
   {
     "id": "hyperneat",
     "title": "A Hypercube-Based Encoding for Evolving Large-Scale Neural Networks",
-    "authors": "Kenneth O. Stanley, David B. D\u2019Ambrosio & Jason Gauci",
+    "authors": "Kenneth O. Stanley, David B. D’Ambrosio & Jason Gauci",
     "year": 2009,
     "url": "https://stars.library.ucf.edu/facultybib2000/2178/",
-    "kind": "Artificial Life 15(2): 185\u2013212",
+    "kind": "Artificial Life 15(2): 185–212",
     "checked": "2026-10-21",
     "evidence": "turn21view1",
     "review": "Primary paper or university bibliographic record; mechanism checked against original NEAT text and primary HyperNEAT/CPPN abstracts."
@@ -753,9 +753,108 @@
     "authors": "Kenneth O. Stanley",
     "year": 2007,
     "url": "https://stars.library.ucf.edu/facultybib2000/7682/",
-    "kind": "Genetic Programming and Evolvable Machines 8: 131\u2013162",
+    "kind": "Genetic Programming and Evolvable Machines 8: 131–162",
     "checked": "2026-10-21",
     "evidence": "turn23view1",
     "review": "Primary paper or university bibliographic record; mechanism checked against original NEAT text and primary HyperNEAT/CPPN abstracts."
+  },
+  {
+    "id": "weight-tying",
+    "title": "Using the Output Embedding to Improve Language Models",
+    "authors": "Ofir Press & Lior Wolf",
+    "year": 2016,
+    "url": "https://arxiv.org/abs/1608.05859",
+    "kind": "EACL 2017; preprint 2016",
+    "evidence": "turn10view3",
+    "review": "primary abstract and bibliographic record",
+    "checked": "2026-10-22"
+  },
+  {
+    "id": "tuned-lens",
+    "title": "Eliciting Latent Predictions from Transformers with the Tuned Lens",
+    "authors": "Nora Belrose et al.",
+    "year": 2023,
+    "url": "https://arxiv.org/abs/2303.08112",
+    "kind": "Research paper; updated 2025",
+    "evidence": "turn9view0",
+    "review": "primary paper, lens definitions and fitting objective",
+    "checked": "2026-10-22"
+  },
+  {
+    "id": "jacobian-lens",
+    "title": "Verbalizable Representations Form a Global Workspace in Language Models",
+    "authors": "Wes Gurnee et al.",
+    "year": 2026,
+    "url": "https://transformer-circuits.pub/2026/workspace/index.html",
+    "kind": "Transformer Circuits research publication",
+    "evidence": "turn6view0",
+    "review": "primary methods, matrix dimensions, normalization and limitations",
+    "checked": "2026-10-22"
+  },
+  {
+    "id": "jacobian-lens-code",
+    "title": "Jacobian lens reference implementation",
+    "authors": "Anthropic",
+    "year": 2026,
+    "url": "https://github.com/anthropics/jacobian-lens",
+    "kind": "Official reference implementation",
+    "evidence": "turn9view3",
+    "review": "official README, estimator convention and model adaptation",
+    "checked": "2026-10-22"
+  },
+  {
+    "id": "patching-best-practices",
+    "title": "Towards Best Practices of Activation Patching in Language Models: Metrics and Methods",
+    "authors": "Fred Zhang & Neel Nanda",
+    "year": 2023,
+    "url": "https://arxiv.org/abs/2309.16042",
+    "kind": "ICLR 2024; preprint 2023",
+    "evidence": "turn6view2",
+    "review": "primary abstract and methodological study",
+    "checked": "2026-10-22"
+  },
+  {
+    "id": "patching-interpretation",
+    "title": "How to use and interpret activation patching",
+    "authors": "Stefan Heimersheim & Neel Nanda",
+    "year": 2024,
+    "url": "https://arxiv.org/abs/2404.15255",
+    "kind": "Research preprint",
+    "evidence": "turn9view1",
+    "review": "primary full text on interventions, controls and metrics",
+    "checked": "2026-10-22"
+  },
+  {
+    "id": "probe-controls",
+    "title": "Designing and Interpreting Probes with Control Tasks",
+    "authors": "John Hewitt & Percy Liang",
+    "year": 2019,
+    "url": "https://aclanthology.org/D19-1275/",
+    "kind": "EMNLP-IJCNLP 2019",
+    "evidence": "turn10view2",
+    "review": "primary abstract, authors and publication record",
+    "checked": "2026-10-22"
+  },
+  {
+    "id": "attention-explanation",
+    "title": "Attention is not Explanation",
+    "authors": "Sarthak Jain & Byron C. Wallace",
+    "year": 2019,
+    "url": "https://aclanthology.org/N19-1357/",
+    "kind": "NAACL 2019",
+    "evidence": "turn8search0",
+    "review": "primary abstract; experiments on the studied NLP architectures",
+    "checked": "2026-10-22"
+  },
+  {
+    "id": "circuit-tracing",
+    "title": "Circuit Tracing: Revealing Computational Graphs in Language Models",
+    "authors": "Emmanuel Ameisen, Jack Lindsey, Adam Pearce et al.",
+    "year": 2025,
+    "url": "https://transformer-circuits.pub/2025/attribution-graphs/methods.html",
+    "kind": "Transformer Circuits research publication",
+    "evidence": "turn9view2",
+    "review": "primary replacement-model method and validation requirements",
+    "checked": "2026-10-22"
   }
 ]

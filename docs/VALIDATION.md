@@ -57,3 +57,18 @@ JEPA representation prediction is separate from reconstruction and local predict
 - Browser checks verified the Luminous Editorial bright/dark palettes, nested navigation and the in-site Manuscript link. Expanding all manuscript topics rendered 307 KaTeX expressions and 28 highlighted code blocks without errors or duplicate IDs.
 - A phone-width iframe (375 CSS px usable width) verified navigation and family cards. The expanded complete manuscript has no page-wide horizontal overflow; oversized equations and code scroll within their containers.
 - A temporary responsive QA harness was removed before the production build.
+
+## Embeddings and Transformer observability update
+
+Verified on 22 October 2026.
+
+- Preserved all 37 existing article IDs and bodies except for an additive link section in distributed representations; added five substantive deep dives for a total of 42.
+- Added a dedicated token embeddings article in Transformer core mechanisms and a four-article Observability & interpretability family. Six domains and 25 total domain/family pages place every article exactly once.
+- Removed Manuscript from the sidebar navigation; retained the top-right in-site page link. An automated assertion guards the sidebar change.
+- Content validation resolves 78 source records, citations, local links, all visual assignments and 403 strict KaTeX expressions. All 42 visual components and 84 initial routes render successfully.
+- Nine numerical tests pass, including independently specified lookup/mixture geometry, lens decoding and probabilities, Jacobian averaging and patch recovery. The production build passes.
+- Browser checks opened all five new articles without KaTeX errors. Tested soft mixtures (alpha = 1 produces vector (1, 0)), fixed-swap lens scores (1, 0, -1) and probabilities, Jacobian context weight zero (mean diag(1, -1)), patching overshoot (recovery 1.25), and observation method selection.
+- Visually reviewed the new SVGs and expanded observability schematic. Moved the evidence question away from its connector. All examples explicitly identify schematic or invented calculations.
+- Phone-width embeddings layout and mixture controls work at 375 usable CSS px without document-level horizontal overflow. The temporary QA harness was removed before build.
+- J-Lens formulas and dimensions were checked against the primary 2026 publication and official reference implementation; J-space is described as an overcomplete sparse frame, with explicit limits on averaging and causal interpretation. Other additions cite primary papers and research publications.
+- These checks do not constitute pretrained-model inference, fitted lenses, replicated experiments or empirical interpretability evaluations.

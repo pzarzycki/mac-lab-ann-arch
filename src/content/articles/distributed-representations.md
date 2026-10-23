@@ -27,3 +27,6 @@ Distributed representation is a representational idea. Backpropagation is a cred
 
 ## Reading exercise
 Rebuild a small relation-completion task with a held-out set of facts. Compare training-fact memorization with generalization to unseen combinations. Control the split carefully: symmetry and inverse relations can leak answers across partitions. Then compare a learned lookup with fixed random embeddings at matched network size.
+
+## Inspect the modern interface
+For explicit lookup and unembedding shapes, weight tying, contextual geometry and a small interactive example, open [Token embeddings & embedding space](#/article/token-embeddings). For reading internal states rather than input vectors, explore [Transformer observability & interpretability](#/article/transformer-observability).

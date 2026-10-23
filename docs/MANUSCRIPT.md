@@ -2,15 +2,93 @@
 
 ## An interactive guide to architectures and learning systems
 
-Source snapshot: 21 October 2026.
+Editorial update: 22 October 2026. Original sources reviewed 21 October; embedding and interpretability additions reviewed 22 October.
 
-37 articles · 6 research domains · 69 primary references.
+42 articles · 6 research domains · 78 primary references.
 
 This manuscript is the content source for the interactive site. It is a curated conceptual map, not an exhaustive literature review. Formulas define local conventions; theoretical claims, empirical findings and illustrative calculations are distinguished. Refer to docs/CONSPECT.md for the exploration map and coverage, and docs/PLAN.md for implementation decisions.
 
 # Transformers
 
-Follow token representations from core mechanisms to architectural extensions and efficient execution.
+Follow token representations from embeddings and core mechanisms to extensions, efficient execution, and interpretability.
+
+**Family:** Transformers → Core mechanisms
+
+<a id="article-token-embeddings"></a>
+
+## Token embeddings & embedding space
+
+*Discrete identities, continuous coordinates, contextual states.*
+
+**Abstract.** Follow token IDs into learned vectors, distinguish input and output embeddings, and inspect a small geometric example.
+
+**At a glance:**
+
+- Token lookup is not a numeric encoding of IDs
+- Contextual states share a width, not one fixed meaning
+- Weight tying is a choice; unembedding is not an inverse
+
+**Concepts:** Token embeddings; Embedding space; Unembedding; Weight tying; Soft tokens.
+
+### From a token ID to a vector
+A tokenizer first maps text to discrete vocabulary IDs. An ID identifies a vocabulary entry, which may represent a word, subword, byte, punctuation mark, or special symbol. It is not a scalar measurement: ID 400 does not mean twice as much as ID 200. Tokenization determines the discrete interface; the embedding table determines how that interface enters the neural computation.
+
+Choose column-vector notation. Let $V$ be vocabulary size and $d$ the residual width. The learned table is $E\in\mathbb R^{V\times d}$. Token ID $x_i$ selects a row, transposed to give $e_i=E_{x_i,:}^{\mathsf T}\in\mathbb R^d$. Equivalently, with a one-hot column $o_i\in\{0,1\}^V$, $e_i=E^{\mathsf T}o_i$. Frameworks implement a gather rather than constructing the one-hot tensor. The Transformer combines learned token representations with positional information; the exact position mechanism depends on the architecture. [1](https://arxiv.org/abs/1706.03762)
+
+### Embedding space and the residual stream
+The input lookup vectors occupy $\mathbb R^d$, often called the token embedding space. Later token states $h_i^{(\ell)}$ commonly retain width $d$, but become contextual: the same token ID can have different hidden states in different prompts and positions. Equal dimension does not mean that distances, directions, or semantic interpretations are constant across layers.
+
+For learned absolute positions, an initial state might be $h_i^{(0)}=e_i+p_i$, with $p_i\in\mathbb R^d$. In a RoPE-based decoder, rotations are applied to queries and keys inside attention instead; the token lookup need not receive an additive position vector. Position, lookup identity, and contextual computation should therefore be drawn separately. The atlas's [residual-stream figure](#article-residual-streams) retains one state per token; its [normalization and position article](#article-normalization-position) develops those operations.
+
+### Output embeddings, unembedding, and tying
+Let $U\in\mathbb R^{V\times d}$ be an output projection, $b\in\mathbb R^V$ an optional bias, and $N_f$ the model's final normalization. Next-token scores are
+
+$$
+z_i=U N_f(h_i^{(L)})+b,\qquad p_i=\operatorname{softmax}(z_i).
+$$
+
+Each row of $U$ is an output direction associated with a vocabulary entry. **Weight tying** sets $U=E$ in this convention; untied models learn separate input and output matrices. Tying is an architectural/training choice, not a property of every language model. Press and Wolf analyze this sharing and its effects on language modeling. [2](https://arxiv.org/abs/1608.05859)
+
+The unembedding is not generally an inverse of lookup. Multiple vectors can yield the same top token, softmax discards a common additive logit offset, and a contextual state contains more than the identity of its input token. Calling $U$ a decoder does not establish a one-to-one semantic coordinate system.
+
+### A small geometric example
+The figure uses four invented two-dimensional rows: $e_A=(1,0)$, $e_B=(0,1)$, $e_C=(-1,0)$ and $e_D=(0,-1)$. These are explanatory coordinates, not extracted model embeddings. Selecting A gives one table row. A soft mixture with coefficient $\alpha\in[0,1]$ instead gives
+
+$$
+v(\alpha)=\alpha e_A+(1-\alpha)e_B=(\alpha,1-\alpha).
+$$
+
+At $\alpha=1/2$, a tied, identity-normalization readout has logits $(1/2,1/2,-1/2,-1/2)$. A and B tie; the vector has not become a new vocabulary ID. A learned soft prompt can also lie outside the convex hull of the input table. Compare [soft prompts and continuous thought](#article-soft-latent-reasoning).
+
+### Geometry needs an explicit metric
+Cosine similarity measures angle; Euclidean distance also responds to norm. Neither metric guarantees synonymy, truth, or a human-readable feature axis. Shared learned features were already central to neural probabilistic language modeling before Transformers. [3](https://www.jmlr.org/papers/v3/bengio03a.html)
+
+A two-dimensional projection can hide important differences in the remaining coordinates. State the source layer, normalization, centering, projection method, and reference distribution before interpreting a scatterplot. The **logit lens** asks what the output decoder reads from a hidden state, rather than finding its nearest input embedding; [layer readouts](#article-logit-tuned-lenses) explain the distinction.
+
+### Implementation and gradients
+```python
+# E: [vocabulary, width]; ids: [batch, positions]
+h0 = embedding(ids)              # [batch, positions, width]
+h = transformer(h0)              # separate contextual state per token
+logits = lm_head(final_norm(h))  # [batch, positions, vocabulary]
+```
+
+Integer IDs do not receive gradients. Lookup parameters do, and a frozen backbone can still propagate derivatives to trainable continuous inputs. Freezing parameters is different from disabling autograd. Check the actual model's embedding scale, position scheme, normalization, weight tying, and output bias before adapting this schematic to code.
+
+### Primary references
+
+1. Vaswani et al. (2017). [Attention Is All You Need](https://arxiv.org/abs/1706.03762). Research paper.
+2. Ofir Press & Lior Wolf (2016). [Using the Output Embedding to Improve Language Models](https://arxiv.org/abs/1608.05859). EACL 2017; preprint 2016.
+3. Bengio, Ducharme, Vincent & Jauvin (2003). [A Neural Probabilistic Language Model](https://www.jmlr.org/papers/v3/bengio03a.html). JMLR.
+
+### Related topics
+
+- [From symbols to distributed representations](#article-distributed-representations) — Trace the historical origin of distributed features.
+- [The residual stream](#article-residual-streams) — Follow an embedding into one token’s contextual state.
+- [Logit lens & tuned lens](#article-logit-tuned-lenses) — Read contextual states through the output decoder.
+- [Soft prompts & continuous thought](#article-soft-latent-reasoning) — Compare vocabulary mixtures with learned continuous inputs.
+
+---
 
 **Family:** Transformers → Core mechanisms
 
@@ -93,6 +171,8 @@ Remove the residual path while keeping parameter count comparable; inspect gradi
 - [Normalization, position & gated MLPs](#article-normalization-position) — Normalization inside the block.
 - [Hyper-connections & mHC](#article-hyper-connections) — Extend the residual topology.
 - [ResNet belongs in the main lineage](#article-resnet-lineage) — Trace the architectural influence.
+- [Token embeddings & embedding space](#article-token-embeddings) — Inspect token lookup, embedding geometry and the output decoder explicitly.
+- [Transformer observability & interpretability](#article-transformer-observability) — Inspect these computations and distinguish readouts from causal tests.
 
 ---
 
@@ -152,6 +232,7 @@ Compare dense and windowed masks on a synthetic task with a dependency outside t
 - [The residual stream](#article-residual-streams) — Place attention inside the block.
 - [Exact kernels, sparse patterns](#article-efficient-attention) — Compute the same or a sparser graph.
 - [How modalities enter a Transformer](#article-multimodal-fusion) — Attend across modality boundaries.
+- [Transformer observability & interpretability](#article-transformer-observability) — Inspect these computations and distinguish readouts from causal tests.
 
 ---
 
@@ -721,6 +802,318 @@ Measure identical prompts, sampling settings, output lengths and target weights 
 - [KV-cache memory & grouped heads](#article-kv-cache) — Account for state precision.
 - [Training, prefill & decoding](#article-training-decoding) — Locate proposal verification in decoding.
 - [Self-improvement needs a verifier](#article-self-improvement) — Compare distinct uses of verification.
+
+---
+
+**Family:** Transformers → Observability & interpretability
+
+<a id="article-transformer-observability"></a>
+
+## Transformer observability & interpretability
+
+*Inspect a tensor. Specify a claim. Test a mechanism.*
+
+**Abstract.** A map of hooks, activation views, attention, readouts, attribution and interventions, with the evidence each can support.
+
+**At a glance:**
+
+- Layer, position, head and feature axes stay distinct
+- Readable readouts are different from causal evidence
+- A useful explanation specifies a falsifiable intervention
+
+**Concepts:** Observability; Interpretability; Hooks; Probes; Direct logit attribution; Attention visualization.
+
+### What does observability mean here?
+In this atlas, **Transformer observability** means making internal activations, computations, and interventions inspectable. It includes representation analysis and mechanistic interpretability. It is not a claim that a model satisfies the formal state-reconstruction observability criterion of control theory, nor is it the logging, metrics, and tracing layer of a production serving system.
+
+An analysis starts by specifying a model checkpoint, tokenizer, prompt distribution, and behavior of interest. A question such as “where is the candidate answer available?” differs from “which component is causally necessary for this answer?” The appropriate measurement changes with the question.
+
+### First identify the tensor and its axes
+A residual activation cache may have shape $[B,T,d]$ at each layer, where $B$ is batch size, $T$ sequence positions, and $d$ hidden width. Head activations add a head axis; attention patterns use destination and source positions. A layer-by-position heatmap is not a head-by-feature map.
+
+Record whether a hook captures a state before normalization, before attention, after attention, or after the MLP. Saving all layers, tokens, heads, and gradients can be costly. Select positions and hook sites deliberately, and keep the model in a reproducible evaluation configuration. A hook exposes a tensor; its name does not explain that tensor's role.
+
+### Four different kinds of evidence
+| View | Operation | Useful question | Main limitation |
+| --- | --- | --- | --- |
+| Activations and attention | Inspect cached values and routing weights | What is large or attended to? | Magnitude is not causal importance |
+| Lenses and probes | Map states to vocabulary scores or supervised labels | What can this readout recover? | Decoder assumptions and probe capacity matter |
+| Jacobians and attribution | Differentiate a specified downstream quantity | What changes under an infinitesimal perturbation? | Local derivative need not predict a large intervention |
+| Patching and ablation | Replace or remove an internal signal, then rerun | What happens under this intervention? | Controls, interactions, and distribution shifts matter |
+
+High probe accuracy can reflect information accessible to the probe rather than computation used by the model. Control tasks and held-out generalization help separate these possibilities. [1](https://aclanthology.org/D19-1275/)
+
+### Attention patterns are a starting point
+For one head, the output at destination $i$ is $a_i=\sum_j A_{ij}v_j$. A large routing weight $A_{ij}$ does not determine the output effect without the corresponding value vector, output projection, other heads, and downstream computation. Two terms with large weights can cancel; a small-weight value can still matter.
+
+Jain and Wallace give concrete counterexamples to treating attention weights as explanations in their studied NLP models. That result should not be stretched into a theorem that no attention-based analysis can ever be informative. The engineering conclusion is narrower: pair an attention pattern with a behavioral metric and an intervention before treating it as a mechanism. [2](https://aclanthology.org/N19-1357/)
+
+### Direct logit attribution and its boundary
+If a pre-normalization state decomposes as $h=\sum_c r_c$, a fixed linear readout gives $Uh=\sum_c Ur_c$. This motivates direct logit attribution to residual contributions. With final normalization included, the normalization scale depends on the combined state; LayerNorm additionally centers features. An exact attribution under a frozen scale is a conditional decomposition, not the effect of deleting a component and recomputing the model.
+
+Useful analyses can therefore disagree without either being a software bug: one describes an algebraic contribution under fixed conditions; another measures a rerun after perturbing those conditions. State which quantity is being plotted. [3](https://arxiv.org/abs/2303.08112)
+
+### From measurement to a falsifiable account
+Choose a clean prompt, a controlled alternative, and an output metric such as a target-versus-foil logit difference. Inspect readouts to propose a candidate layer, position, or feature. Then test that candidate with patching, matched controls, and additional prompts. Patching methodology can materially change localization conclusions. [4](https://arxiv.org/abs/2309.16042)
+
+The diagram's three token streams make the axes explicit. Its selectable measurement sites route to different analytical operations. It is a workflow schematic, not an automatic explanation generator.
+
+### Follow the question
+For vocabulary readouts, compare the [logit and tuned lenses](#article-logit-tuned-lenses). For an averaged sensitivity-derived transport, inspect the [Jacobian lens](#article-jacobian-lens). For interventions, sparse features, and computational graphs, continue to [causal tracing and feature circuits](#article-causal-features-circuits). Each approach exposes a different part of the evidence; a readable label is the beginning of analysis, not its conclusion.
+
+### Primary references
+
+1. John Hewitt & Percy Liang (2019). [Designing and Interpreting Probes with Control Tasks](https://aclanthology.org/D19-1275/). EMNLP-IJCNLP 2019.
+2. Sarthak Jain & Byron C. Wallace (2019). [Attention is not Explanation](https://aclanthology.org/N19-1357/). NAACL 2019.
+3. Nora Belrose et al. (2023). [Eliciting Latent Predictions from Transformers with the Tuned Lens](https://arxiv.org/abs/2303.08112). Research paper; updated 2025.
+4. Fred Zhang & Neel Nanda (2023). [Towards Best Practices of Activation Patching in Language Models: Metrics and Methods](https://arxiv.org/abs/2309.16042). ICLR 2024; preprint 2023.
+
+### Related topics
+
+- [The residual stream](#article-residual-streams) — Locate the token-indexed states being inspected.
+- [Logit lens & tuned lens](#article-logit-tuned-lenses) — Compare raw and learned vocabulary readouts.
+- [Jacobian lens & J-space](#article-jacobian-lens) — Inspect averaged downstream sensitivity.
+- [Causal tracing, features & circuits](#article-causal-features-circuits) — Move from a candidate signal to a controlled intervention.
+
+---
+
+**Family:** Transformers → Observability & interpretability
+
+<a id="article-logit-tuned-lenses"></a>
+
+## Logit lens & tuned lens
+
+*One hidden state. Different readout assumptions.*
+
+**Abstract.** Compare final-head decoding and learned affine translators, with explicit dimensions, token alignment and a toy coordinate mismatch.
+
+**At a glance:**
+
+- Logit lens reuses the final decoder without a fitted translator
+- Tuned lens fits per-layer prediction translators
+- A next-token readout is not a complete causal explanation
+
+**Concepts:** Logit lens; Tuned lens; Layer readouts; Unembedding; Prediction trajectories.
+
+### Reading a hidden state through the output head
+A decoder produces one hidden vector $h_i^{(\ell)}\in\mathbb R^d$ for each position $i$ and layer $\ell$. Let $N_f$ be its final LayerNorm or RMSNorm, $U\in\mathbb R^{V\times d}$ its unembedding, and $b\in\mathbb R^V$ an optional output bias. The actual final prediction uses $U N_f(h_i^{(L)})+b$.
+
+The **logit lens**, introduced by nostalgebraist in 2020 and developed in the tuned-lens literature, applies that final readout prematurely:
+
+$$
+p_{\ell,i}^{\mathrm{LL}}=\operatorname{softmax}\!\left(U N_f(h_i^{(\ell)})+b\right).
+$$
+
+It requires no separately trained translator. Its interpretation depends on intermediate states being compatible with the final decoder's coordinates and normalization. [1](https://arxiv.org/abs/2303.08112)
+
+### What a layer-by-position grid says
+Rows can index layers and columns token positions. A cell may display the top decoded token, a chosen token's rank, probability, or a logit difference. These are different views: a top-1 token can change after an arbitrarily small score change when two candidates are close. A rank can improve even while absolute probability falls.
+
+In an autoregressive model, the actual output at input position $i$ predicts position $i+1$. A readout attached to the token “is” is not automatically a reconstruction of “is.” Middle-layer lens distributions are auxiliary measurements, not additional tokens that the model actually generated. Always label the input position and prediction alignment.
+
+### The tuned lens learns a translator
+A **tuned lens** adds a learned affine transformation per layer, $T_\ell(h)=A_\ell h+c_\ell$, before the frozen final readout:
+
+$$
+p_{\ell,i}^{\mathrm{TL}}=\operatorname{softmax}\!\left(U N_f(T_\ell(h_i^{(\ell)}))+b\right).
+$$
+
+The translators are fitted to match the frozen model's final output distribution, commonly using a distribution-matching loss. This differs from training the language model itself. The purpose is a more reliable intermediate prediction readout, not a literal recording of every internal concept. [1](https://arxiv.org/abs/2303.08112)
+
+```python
+# Schematic column-vector convention; adapt to the model's actual hook sites.
+h = cached_residual[layer, position]  # [width]
+p_logit = softmax(U @ final_norm(h) + bias)
+p_tuned = softmax(U @ final_norm(A[layer] @ h + c[layer]) + bias)
+# Train the translator on held-out activations; keep backbone and decoder fixed.
+```
+
+### A worked coordinate-mismatch example
+The interactive figure uses a synthetic two-dimensional model, with identity normalization and no bias. Its vocabulary directions are $u_A=(1,0)$, $u_B=(0,1)$ and $u_C=(-1,-1)$. Take the intermediate state $h=(0,1)$. Raw decoding gives logits $(0,1,-1)$, favoring B.
+
+Now define a coordinate translator
+
+$$
+T=\begin{bmatrix}0&1\\1&0\end{bmatrix}.
+$$
+
+The translated state is $Th=(1,0)$, giving logits $(1,0,-1)$ and favoring A. The same stored activation can produce a different vocabulary readout under a different decoder. The figure does not fit a translator or reproduce the paper's measurements; it exposes these chosen matrices directly.
+
+A learned translator should earn its interpretation through held-out prediction and control experiments. Merely finding one matrix that gives an appealing word proves little about the model.
+
+### Prediction quality and causal fidelity
+A translator can predict the eventual output while overlooking a transient representation used to compute it. Conversely, a raw logit lens can fail to decode meaningful information because the geometry is mismatched. Neither failure demonstrates that the underlying state contains no relevant information.
+
+Compare readouts on unseen prompts; inspect more than the winning token; test multiple normalizations and hook sites only when justified. Use interventions to examine whether a decoded direction affects the behavior of interest. Patching evidence depends on its corruption, metric, and granularity. [2](https://arxiv.org/abs/2309.16042)
+
+### Relation to the Jacobian lens
+The tuned lens estimates translators through a prediction objective. The Jacobian lens constructs layer maps from averaged derivatives, including a specified distribution of source and downstream positions. These choices answer related but distinct questions. The [Jacobian-lens article](#article-jacobian-lens) gives its exact dimensions and a toy example of cancellation during averaging. Avoid interpreting any lens's softmax as a calibrated probability that a model “has a thought”; it is a vocabulary distribution produced by the selected readout.
+
+### Primary references
+
+1. Nora Belrose et al. (2023). [Eliciting Latent Predictions from Transformers with the Tuned Lens](https://arxiv.org/abs/2303.08112). Research paper; updated 2025.
+2. Fred Zhang & Neel Nanda (2023). [Towards Best Practices of Activation Patching in Language Models: Metrics and Methods](https://arxiv.org/abs/2309.16042). ICLR 2024; preprint 2023.
+
+### Related topics
+
+- [Token embeddings & embedding space](#article-token-embeddings) — Define the input lookup and output vocabulary directions.
+- [Jacobian lens & J-space](#article-jacobian-lens) — Compare fitted prediction maps with averaged derivatives.
+- [Causal tracing, features & circuits](#article-causal-features-circuits) — Test whether decoded directions affect behavior.
+
+---
+
+**Family:** Transformers → Observability & interpretability
+
+<a id="article-jacobian-lens"></a>
+
+## Jacobian lens & J-space
+
+*Average a derivative; keep its assumptions visible.*
+
+**Abstract.** Derive the J-Lens transport and its matrix dimensions, inspect cancellation across contexts, and distinguish sparse J-space from a low-rank projection.
+
+**At a glance:**
+
+- The transport is d × d; vocabulary directions are V × d
+- Averaging can cancel strong context-specific sensitivities
+- J-space is an overcomplete sparse-frame construction
+
+**Concepts:** J-Lens; Jacobian lens; J-space; Global workspace; Jacobians; Sparse frames.
+
+### A lens derived from downstream sensitivity
+The **Jacobian lens (J-Lens)** uses averaged downstream derivatives to transport an intermediate residual vector toward the final-layer representation. It then applies the model's output readout. It is distinct from the training-free raw logit lens and from a translator fitted to predict the final distribution. Gurnee and collaborators introduce the method in their 2026 global-workspace study. [1](https://transformer-circuits.pub/2026/workspace/index.html)
+
+Use column vectors. Let $h_{\ell,t}\in\mathbb R^d$ denote a source state at layer $\ell$ and position $t$. Let $h_{L,t'}\in\mathbb R^d$ denote a final-layer state at a downstream position $t'\ge t$. A local Jacobian is
+
+$$
+J_{\ell,t,t'}(x)=\frac{\partial h_{L,t'}}{\partial h_{\ell,t}}\in\mathbb R^{d\times d}.
+$$
+
+For a small perturbation $\delta h$, the first-order change is $\delta h_{L,t'}\approx J_{\ell,t,t'}(x)\delta h$. This is a derivative at a particular context, not a globally exact reconstruction of a nonlinear network.
+
+### What gets averaged, and why dimensions matter
+The paper's schematic definition averages over prompts $x$, source positions, and current-and-future target positions:
+
+$$
+\bar J_\ell=\mathbb E_{x,t,t'\ge t}\left[J_{\ell,t,t'}(x)\right],\qquad
+p_\ell(h)=\operatorname{softmax}\!\left(U N_f(\bar J_\ell h)+b\right).
+$$
+
+Here $U\in\mathbb R^{V\times d}$ is the unembedding, $N_f$ final normalization, and $b$ an optional model-specific bias. The published formula omits a bias term; include one only when the model's actual readout has it. $\bar J_\ell$ is $d\times d$, whereas the composed direction matrix $U\bar J_\ell$ is $V\times d$. Neither is a vocabulary-by-vocabulary matrix. Normalization remains part of the actual readout, so the composed rows alone are not a universal exact linear decoder. [1](https://transformer-circuits.pub/2026/workspace/index.html)
+
+The reference implementation sums cotangents over eligible target positions and averages over source positions. Sampling, aggregation, padding, and target-position weighting must be recorded to reproduce an estimator; a symbolic expectation does not settle every implementation convention. [2](https://github.com/anthropics/jacobian-lens)
+
+### A worked example of information lost by averaging
+Consider the explicitly invented contexts
+
+$$
+J_A=\begin{bmatrix}1&0\\0&1\end{bmatrix},\qquad
+J_B=\begin{bmatrix}1&0\\0&-1\end{bmatrix}.
+$$
+
+With equal weight, $\bar J=(J_A+J_B)/2=\operatorname{diag}(1,0)$. Each individual Jacobian has rank two, but their average has rank one. A perturbation along $(0,1)$ has a strong context-specific effect that cancels in the mean. A weak average direction therefore does not establish causal irrelevance in every prompt.
+
+The interactive figure varies the fraction $q$ of context A. Then $\bar J=\operatorname{diag}(1,2q-1)$. At $q=1/2$ the second direction vanishes; at $q=1$ it survives fully. These are exact calculations for the toy matrices, not extracted LLM measurements.
+
+### Reading is different from writing
+Ranking vocabulary directions is a readout. Editing an activation along a direction, ablating it, or swapping coordinates is an intervention requiring a new forward pass. A direction can be useful for both without making a high readout score sufficient evidence of a causal mechanism. Compare a local intervention with a matched random direction, several perturbation sizes, and held-out contexts.
+
+### J-space is not simply a low-rank matrix
+The paper treats token-associated directions as a correlated, overcomplete frame and uses sparse decompositions to study active contents. This is different from declaring that the rank or leading singular vectors of $\bar J$ alone define the active workspace. A sparse representation can involve few directions even when their full matrix spans a much larger space.
+
+The named token inventory, context distribution, estimator, and decomposition procedure all affect what becomes visible. Single-token vocabulary labels can also miss multi-token concepts. Global-workspace interpretations are empirical hypotheses about studied models, not a proof of consciousness or a theorem about every Transformer.
+
+### Practical replication boundary
+The authors provide [reference code](https://github.com/anthropics/jacobian-lens). Fit or load a lens for the exact checkpoint and hook convention, preserve its tokenizer and normalization, and compare against simple readout baselines. Computing an average transport can be expensive; applying an already computed map is a different workload. The atlas runs only the small matrix example locally, not the reference model-fitting procedure.
+
+### Primary references
+
+1. Wes Gurnee et al. (2026). [Verbalizable Representations Form a Global Workspace in Language Models](https://transformer-circuits.pub/2026/workspace/index.html). Transformer Circuits research publication.
+2. Anthropic (2026). [Jacobian lens reference implementation](https://github.com/anthropics/jacobian-lens). Official reference implementation.
+
+### Related topics
+
+- [Logit lens & tuned lens](#article-logit-tuned-lenses) — Compare the meaning and construction of each layer decoder.
+- [Transformer observability & interpretability](#article-transformer-observability) — Place sensitivity readouts in a broader evidence map.
+- [Causal tracing, features & circuits](#article-causal-features-circuits) — Separate a readout from an intervention test.
+- [Token embeddings & embedding space](#article-token-embeddings) — Track hidden width and vocabulary dimensions.
+
+---
+
+**Family:** Transformers → Observability & interpretability
+
+<a id="article-causal-features-circuits"></a>
+
+## Causal tracing, features & circuits
+
+*Replace a signal, rerun the model, measure the difference.*
+
+**Abstract.** Connect activation patching, ablation, sparse dictionaries, transcoders and attribution graphs while retaining their methodological limits.
+
+**At a glance:**
+
+- Patching is specific to a site, control and behavioral metric
+- Feature dictionaries and replacement models are approximations
+- Recovery scores and graph edges need explicit definitions
+
+**Concepts:** Activation patching; Causal tracing; Path patching; Attribution patching; SAE; Sparse autoencoders; Transcoders; Circuit tracing; Steering.
+
+### Intervene on an explicit computational site
+Activation patching replaces an internal signal in one run with a cached signal from another, then measures the downstream output. Suppose clean prompt $x_c$ supports answer A and a controlled alternative $x_a$ changes the relevant information. At a specified layer, position, and component, replace
+
+$$
+h_{\ell,t}(x_a)\leftarrow h_{\ell,t}(x_c).
+$$
+
+The rest of the alternative run then continues. This can test a localization hypothesis under the chosen intervention. It does not automatically identify a unique or minimal circuit. Noising, denoising, ablation baselines, redundancy, and nonlinear interactions require separate interpretation. [1](https://arxiv.org/abs/2404.15255)
+
+### A metric with a visible denominator
+A useful behavioral quantity is the answer-versus-foil logit difference $m=z_A-z_B$. For illustration, define
+
+$$
+R=\frac{m_{\mathrm{patched}}-m_{\mathrm{alternative}}}{m_{\mathrm{clean}}-m_{\mathrm{alternative}}}.
+$$
+
+The figure uses invented clean and alternative margins 4 and 0. Its selectable patches produce 1, 3, or 5, giving $R=0.25$, $0.75$, or $1.25$. The last case illustrates that normalized recovery can exceed one; it is not intrinsically a percentage of “the explanation.” If clean and alternative margins nearly coincide, this ratio is unstable or undefined. Always report the raw margins too.
+
+Changes to corruption methods and metrics can lead to different localization results. Repeat the analysis over multiple controlled examples and include uncertainty, rather than presenting a single successful patch as a complete account. [2](https://arxiv.org/abs/2309.16042)
+
+### From activations to candidate features
+A neuron index is a coordinate, not necessarily one concept. A representation can distribute a feature across coordinates and can superpose multiple features. A sparse-autoencoder-style dictionary describes a state approximately as
+
+$$
+f=\operatorname{ReLU}(W_e(h-b_d)+b_e),\qquad
+\hat h=W_d f+b_d.
+$$
+
+Here $f\in\mathbb R^m$ contains feature coefficients, $m$ can exceed residual width $d$, and $W_d\in\mathbb R^{d\times m}$ contains decoder directions. A generic reconstruction-plus-sparsity objective is $\|h-\hat h\|_2^2+\lambda\|f\|_1$. This is one illustrative objective, not a specification of every SAE training recipe.
+
+When patching feature coefficients, preserve the reconstruction error where the intervention protocol calls for it: $h'=W_d f'+b_d+(h-\hat h)$. Otherwise, differences can reflect deleting unexplained activation content rather than changing the chosen feature alone. Decoder directions can be correlated; a label attached to one feature is an empirical summary, not its exact mathematical meaning.
+
+### Transcoders and attribution graphs
+An SAE reconstructs an activation. A transcoder instead approximates a component's input-to-output transformation using sparse features. Cross-layer variants can connect these approximations across depth. The 2025 circuit-tracing work builds prompt-specific attribution graphs using a replacement model and validates proposed mechanisms with interventions. Its graph is an approximate analytical object, with a faithfulness boundary to the original network. [3](https://transformer-circuits.pub/2025/attribution-graphs/methods.html)
+
+A graph edge should therefore identify the quantity being approximated: a local derivative, an attributed contribution under frozen attention/normalization conditions, or a measured effect from rerunning a patch. These are not interchangeable merely because all can be drawn as arrows.
+
+### Useful neighboring techniques
+**Path patching** constrains which source-to-destination route is tested. **Attribution patching** uses a gradient-based approximation to rank possible interventions before expensive reruns. **Causal tracing** is a family of corruption-and-restoration experiments. **Steering** adds a chosen activation direction and tests a behavior change. Each requires a precise intervention site and an evaluation distribution; none removes the need to validate the hypothesis on the original model.
+
+The diagram deliberately keeps clean and alternative token streams separate and draws the replacement as a distinct cross-run connection. The displayed recovery values come from the toy margins above; no model is loaded in the browser.
+
+### A reproducible investigation
+Specify the checkpoint, prompts, token alignment, hook site, raw metric, replacement rule, and any frozen components. Use exploratory prompts to find candidates and separate prompts to test them. Compare the original model with any replacement or reconstructed model. Retain failures and alternative explanations: a mechanism that works only for one hand-selected sentence is a narrower result than a circuit that generalizes across a controlled prompt family.
+
+### Primary references
+
+1. Stefan Heimersheim & Neel Nanda (2024). [How to use and interpret activation patching](https://arxiv.org/abs/2404.15255). Research preprint.
+2. Fred Zhang & Neel Nanda (2023). [Towards Best Practices of Activation Patching in Language Models: Metrics and Methods](https://arxiv.org/abs/2309.16042). ICLR 2024; preprint 2023.
+3. Emmanuel Ameisen, Jack Lindsey, Adam Pearce et al. (2025). [Circuit Tracing: Revealing Computational Graphs in Language Models](https://transformer-circuits.pub/2025/attribution-graphs/methods.html). Transformer Circuits research publication.
+
+### Related topics
+
+- [Transformer observability & interpretability](#article-transformer-observability) — Distinguish observational, derivative and intervention evidence.
+- [Jacobian lens & J-space](#article-jacobian-lens) — Compare average sensitivity and actual reruns.
+- [Logit lens & tuned lens](#article-logit-tuned-lenses) — Turn a readable candidate into a causal hypothesis.
 
 ---
 
@@ -1912,6 +2305,7 @@ Compare visible chain-of-thought and latent reasoning with matched total compute
 - [Recurrent depth & looped Transformers](#article-recurrent-depth) — Reuse depth for extra computation.
 - [Diffusion & flow-based generation](#article-diffusion-flow) — Compare continuous computation and generation.
 - [Memory, context & test-time adaptation](#article-memory-adaptation) — Separate prompts from persistent adaptation.
+- [Token embeddings & embedding space](#article-token-embeddings) — Inspect token lookup, embedding geometry and the output decoder explicitly.
 
 ---
 
@@ -2229,6 +2623,9 @@ Distributed representation is a representational idea. Backpropagation is a cred
 ### Reading exercise
 Rebuild a small relation-completion task with a held-out set of facts. Compare training-fact memorization with generalization to unseen combinations. Control the split carefully: symmetry and inverse relations can leak answers across partitions. Then compare a learned lookup with fixed random embeddings at matched network size.
 
+### Inspect the modern interface
+For explicit lookup and unembedding shapes, weight tying, contextual geometry and a small interactive example, open [Token embeddings & embedding space](#article-token-embeddings). For reading internal states rather than input vectors, explore [Transformer observability & interpretability](#article-transformer-observability).
+
 ### Primary references
 
 1. Geoffrey E. Hinton (1986). [Learning distributed representations of concepts](https://www.cs.toronto.edu/~hinton/backprop.html). Author bibliography.
@@ -2240,6 +2637,7 @@ Rebuild a small relation-completion task with a held-out set of facts. Compare t
 - [The residual stream](#article-residual-streams) — Follow embeddings into token states.
 - [JEPA: predicting representations](#article-jepa) — Predict learned representations.
 - [HyperNEAT: geometry generates connectivity](#article-hyperneat) — Compare an encoding of connectivity.
+- [Token embeddings & embedding space](#article-token-embeddings) — Inspect token lookup, embedding geometry and the output decoder explicitly.
 
 ---
 

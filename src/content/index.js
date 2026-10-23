@@ -11,6 +11,13 @@ export function headings(body){return [...body.matchAll(/^## (.+)$/gm)].map(m=>(
 export {default as collections} from './collections.json';
 export const categoryAliases={advanced:'systems',paradigms:'generation',dynamics:'learning'};
 export const glossary=[
+ ['Token embedding','A learned continuous vector selected by a discrete vocabulary ID; distinct from a contextual hidden state.','token-embeddings'],
+ ['Unembedding','The output projection from hidden width to vocabulary logits, usually after final normalization. It is not generally an inverse of input lookup.','token-embeddings'],
+ ['Logit lens','Applying the model’s final normalization and output head to an intermediate state, without a fitted layer translator.','logit-tuned-lenses'],
+ ['Tuned lens','A per-layer learned affine translator followed by the frozen final vocabulary decoder.','logit-tuned-lenses'],
+ ['J-Lens / Jacobian lens','A vocabulary readout using a layer-specific transport constructed from averaged downstream Jacobians.','jacobian-lens'],
+ ['Activation patching','Replacing an internal activation with a controlled cached alternative and rerunning the downstream model.','causal-features-circuits'],
+ ['Transcoder','A sparse feature model approximating a component’s input-to-output mapping; distinct from reconstructing one activation with an SAE.','causal-features-circuits'],
  ['Residual stream','The token-indexed hidden state carried along residual paths. A standard Transformer retains one width-d vector per token.','residual-streams'],
  ['Hidden state','A vector h in a specified space such as Rᵈ. H often stacks many such token states into a matrix.','residual-streams'],
  ['Layer Normalization (LN)','Normalization across the features of each token independently, with learned feature-wise scale and offset.','normalization-position'],

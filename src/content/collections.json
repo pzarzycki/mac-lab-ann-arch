@@ -50,5 +50,18 @@
       "action-models",
       "robot-evaluation"
     ]
+  },
+  {
+    "id": "inspect",
+    "title": "How can we inspect what a Transformer computes?",
+    "description": "Follow representations into vocabulary readouts, local sensitivities and causal intervention tests.",
+    "articles": [
+      "token-embeddings",
+      "residual-streams",
+      "transformer-observability",
+      "logit-tuned-lenses",
+      "jacobian-lens",
+      "causal-features-circuits"
+    ]
   }
 ]

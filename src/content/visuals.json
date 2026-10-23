@@ -32,5 +32,10 @@
   "jepa": "jepa",
   "world-models": "world-models",
   "neat": "neat",
-  "hyperneat": "hyperneat"
+  "hyperneat": "hyperneat",
+  "embedding-space": "observability",
+  "observability-map": "observability",
+  "lens-readouts": "observability",
+  "jacobian-transport": "observability",
+  "causal-patching": "observability"
 }

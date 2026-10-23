@@ -2,7 +2,7 @@
 
 An interactive research guide to artificial neural architectures, learning rules and embodied systems. Readers enter through a topic, inspect its essential distinctions, open a detailed account and follow connections in any direction. Topic order does not imply prerequisites, importance or a required reading sequence.
 
-Source snapshot: **21 October 2026**. This edition contains **37 deep dives in 6 domains with nested topic families**, with **69 primary references**. All 33 original articles remain available at their original article URLs. JEPA, video world models, NEAT and HyperNEAT add four articles.
+Source snapshot: **21 October 2026**. This edition contains **42 deep dives in 6 domains with nested topic families**, with **78 primary references**. All 33 original articles remain available at their original article URLs. JEPA, video world models, NEAT and HyperNEAT added four articles. Token embeddings and four interpretability deep dives add five more. New primary sources for these additions were reviewed on 22 October 2026.
 
 ## The exploration model
 
@@ -17,6 +17,7 @@ The direct deep-dive link is always available. Quick views are optional. Questio
 
 - **Transformers**
   - **Core mechanisms**
+    - Token embeddings & embedding space
     - The residual stream
     - Attention as content-addressed computation
     - Normalization, position & gated MLPs
@@ -30,6 +31,11 @@ The direct deep-dive link is always available. Quick views are optional. Questio
     - KV-cache memory & grouped heads
     - Exact kernels, sparse patterns
     - Compression & speculative decoding
+  - **Observability & interpretability**
+    - Transformer observability & interpretability
+    - Logit lens & tuned lens
+    - Jacobian lens & J-space
+    - Causal tracing, features & circuits
 - **Learning & adaptation**
   - **Credit assignment**
     - **Gradients & local objectives**
@@ -77,7 +83,7 @@ The direct deep-dive link is always available. Quick views are optional. Questio
     - ResNet belongs in the main lineage
     - From Transformer to language-model scaling
 
-The hierarchy is the primary browsing structure. Existing article URLs and legacy section links remain valid. Each topic has one primary home; explained crosslinks and question collections connect it to other domains. Active Inference lives under Embodied intelligence → Inference & control; its connections to predictive coding remain visible.
+All 37 previously published topic IDs and article URLs remain valid. Each article has one primary home and explained crosslinks. Observability & interpretability is a Transformer family; token embeddings have a dedicated entry under Core mechanisms.
 
 ## Questions across the hierarchy
 
@@ -112,7 +118,7 @@ The current articles contain multiple techniques; a tagged mention is not automa
 
 | Area | Present treatment | Further deep dives to research |
 | --- | --- | --- |
-| Representations and language interfaces | Embeddings, token states, position, probabilistic language models | BPE, WordPiece, SentencePiece, tokenizer-free and byte-level models; vocabulary/output heads; tied embeddings; pooling and sentence representations. |
+| Representations and language interfaces | Dedicated token embeddings, input/output matrices, weight tying, hidden-state geometry, token states and position | BPE, WordPiece, SentencePiece, tokenizer-free and byte-level models; vocabulary/output heads; tied embeddings; pooling and sentence representations. |
 | Transformer families | Decoder mechanics; encoder–decoder ancestry; cross-attention | BERT/masked language modeling; T5/span corruption; encoder-only versus decoder-only versus encoder–decoder; bidirectional inference and sequence-to-sequence objectives. |
 | Training and adaptation | Next-token loss, SFT, RLHF, DPO, scaling; adaptation overview | Data curation/deduplication; AdamW/optimizer dynamics; stability, precision and initialization; LoRA/QLoRA and adapters; distillation; preference optimization and post-training evaluation. |
 | Efficient architectures and systems | MQA/GQA, MLA caveat, FlashAttention, sparse/windows, MoE, mHC, quantization, speculative decoding | MLA derivation; context extrapolation; distributed experts; parallelism and ZeRO; prefix sharing, cache eviction/quantization, prefill/decode disaggregation; pruning and adaptive compute. |
@@ -124,7 +130,7 @@ The current articles contain multiple techniques; a tagged mention is not automa
 | Evolution and architecture discovery | NEAT, HyperNEAT, CPPNs; encoding and speciation | Evolution strategies, quality diversity/MAP-Elites, novelty search, gradient/RL architecture search; evolved plasticity, Baldwinian/Lamarckian variants and ES-HyperNEAT. |
 | Memory and improvement | Replay/consolidation/isolation, retrieval/context/cache distinction, test-time updates, verifier loops | Task-free/online streams; episodic versus semantic memory; retrieval training; meta-learning; reset policies; model editing and self-modification under independent evaluation. |
 | Embodied models and control | VLA, discrete/diffusion/flow action heads, action chunks, closed-loop evaluation and latent planning | World-model-based control, inverse dynamics, offline/online RL, imitation learning, morphology transfer, hierarchical policies, tactile/proprioceptive inputs, geometric representations, simulation-to-real. |
-| Shared evaluation and interpretability | Per-article evidence, assumptions, latency and resource accounting | Contamination, calibration, mechanistic interpretability and causal intervention; learned representations versus faithful explanation; robust/causal generalization and reproducibility. |
+| Shared evaluation and interpretability | Dedicated observability, logit/tuned lenses, Jacobian lens/J-space, activation patching, SAE/transcoder bridges and attribution graphs; per-article evidence | Contamination, calibration, deeper interpretability case studies; learned representations versus faithful explanation; robust/causal generalization and reproducibility. |
 
 The register is broader than the current implementation. It avoids claiming that 37 articles cover every important technique and prevents topics from disappearing during regrouping.
 
@@ -149,3 +155,7 @@ Article Markdown is the manuscript source. `articles.json` defines previews, tag
 Claims retain their scope: linear versus nonlinear results, complexity versus runtime, action-free data versus interaction signals, theoretical versus empirical findings. Attribute liquid time-constant networks to Hasani and collaborators. Label the original Transformer separately from a modern pre-norm decoder.
 
 Validate citation numbering, TeX, local links, visual assignments and the relationship graph. Check meaningful numerical invariants, render all visuals, inspect bright/dark and narrow layouts, and preserve shareable article URLs. See `PLAN.md` for implementation and `VALIDATION.md` for checks.
+
+## Embeddings and interpretability update
+
+Manuscript remains in the top-right navigation and has been removed from the main sidebar. The new Transformer family separates readouts, local/averaged derivatives and intervention evidence. J-Lens uses the primary 2026 methods and reference-code estimator conventions; its sparse-frame J-space is not reduced to an unexplained SVD projection. All new figures are original vector schematics or explicitly synthetic calculations.
